@@ -1,65 +1,128 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { AppShell } from "../components/layout/AppShell";
+import { Panel } from "../components/ui/Panel";
+import { useLocalData } from "../hooks/useLocalData";
+import { formatCurrency } from "../lib/format";
+import { Quote } from "../lib/types";
+
+function calculateDashboardStats(quotes: Quote[]) {
+  const totalQuotes = quotes.length;
+  const wonQuotes = quotes.filter((q) => q.status === "won");
+
+  const totalWonRevenue = wonQuotes.reduce(
+    (sum, q) => sum + q.recommended,
+    0,
+  );
+
+  const averageQuoteValue =
+    totalQuotes === 0
+      ? 0
+      : quotes.reduce((sum, q) => sum + q.recommended, 0) / totalQuotes;
+
+  const winRate =
+    totalQuotes === 0 ? 0 : (wonQuotes.length / totalQuotes) * 100;
+
+  const latestQuote = quotes[0];
+  const liveRevenuePerHour = latestQuote?.revenuePerHour ?? 0;
+
+  return {
+    totalWonRevenue,
+    averageQuoteValue,
+    winRate,
+    liveRevenuePerHour,
+  };
+}
+
+export default function DashboardPage() {
+  const { quotes, loaded } = useLocalData();
+
+  const { totalWonRevenue, averageQuoteValue, winRate, liveRevenuePerHour } =
+    calculateDashboardStats(quotes);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <AppShell>
+      <section className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">
+            Dashboard
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-1 text-sm text-zinc-400">
+            Glance at revenue, momentum, and quoting performance.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-yellow-500/25 bg-gradient-to-br from-yellow-500/10 via-amber-500/5 to-fuchsia-700/20 p-4 shadow-[0_0_40px_rgba(250,204,21,0.25)]">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-yellow-300/80">
+              Total Won Revenue
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-yellow-200">
+              {formatCurrency(totalWonRevenue)}
+            </p>
+            <p className="mt-1 text-[11px] text-zinc-400">
+              Closed work based on saved quotes.
+            </p>
+          </div>
+
+          <Panel className="border-zinc-800/80 bg-zinc-900/60">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-400">
+              Average Quote
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-zinc-50">
+              {formatCurrency(averageQuoteValue)}
+            </p>
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Across every quote you&apos;ve saved.
+            </p>
+          </Panel>
+
+          <Panel className="border-zinc-800/80 bg-zinc-900/60">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-400">
+              Win Rate
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-emerald-400">
+              {winRate.toFixed(0)}%
+            </p>
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Won vs total saved quotes.
+            </p>
+          </Panel>
+
+          <div className="rounded-2xl border border-purple-500/40 bg-gradient-to-br from-purple-900/60 via-fuchsia-900/50 to-black p-4 shadow-[0_0_45px_rgba(147,51,234,0.5)]">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-purple-200/80">
+              Live Revenue / Hour
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-purple-100">
+              {liveRevenuePerHour > 0
+                ? formatCurrency(liveRevenuePerHour)
+                : "-"}
+            </p>
+            <p className="mt-1 text-[11px] text-purple-200/70">
+              From your latest quick quote.
+            </p>
+          </div>
         </div>
-      </main>
-    </div>
+
+        {!loaded && (
+          <p className="text-xs text-zinc-500">
+            Loading your local data&hellip;
+          </p>
+        )}
+
+        {loaded && quotes.length === 0 && (
+          <Panel className="mt-2 border-dashed">
+            <p className="text-sm font-medium text-zinc-100">
+              No quotes yet.
+            </p>
+            <p className="mt-1 text-xs text-zinc-500">
+              Jump into the Quick Quote Builder to price your first driveway,
+              then save it to see live numbers here.
+            </p>
+          </Panel>
+        )}
+      </section>
+    </AppShell>
   );
 }
+
