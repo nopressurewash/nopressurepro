@@ -126,10 +126,10 @@ export function useLocalData() {
   }, []);
 
   const overwriteAll = useCallback(
-    (payload: { quotes: Quote[]; clients: Client[]; rates: Rates }) => {
+    (payload: { quotes: Quote[]; clients: Client[]; rates: Partial<Rates> }) => {
       setQuotes(payload.quotes ?? []);
       setClients(payload.clients ?? []);
-      setRates(payload.rates ?? DEFAULT_RATES);
+      setRates(normalizeRates(payload.rates));
     },
     [],
   );
