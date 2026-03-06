@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "../../components/layout/AppShell";
 import { Panel } from "../../components/ui/Panel";
+import { RatesPanel } from "../../components/settings/RatesPanel";
 import { useLocalData } from "../../hooks/useLocalData";
 
 const BACKUP_KEY = "npp_last_backup_at";
@@ -29,7 +30,8 @@ function formatDateTime(value: string | null) {
 }
 
 export default function SettingsPage() {
-  const { quotes, clients, rates, overwriteAll, loaded } = useLocalData();
+  const { quotes, clients, rates, overwriteAll, updateRates, loaded } =
+    useLocalData();
   const [lastBackup, setLastBackup] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
@@ -145,7 +147,7 @@ export default function SettingsPage() {
             Settings
           </h1>
           <p className="mt-1 text-sm text-zinc-400">
-            Backup or restore your No Pressure Pro data on this device.
+            Backup, restore, and tune your pricing on this device.
           </p>
         </div>
 
@@ -220,8 +222,11 @@ export default function SettingsPage() {
             onChange={handleImportChange}
           />
         </Panel>
+
+        <RatesPanel rates={rates} onChange={updateRates} />
       </section>
     </AppShell>
   );
 }
+
 

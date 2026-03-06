@@ -2,19 +2,11 @@
 
 import { useEffect, useState, useCallback } from "react";
 import type { Client, Quote, Rates, QuoteStatus } from "../lib/types";
+import { DEFAULT_RATES } from "../lib/pricing/defaultRates";
+import { RATES_KEY, normalizeRates } from "../lib/pricing/pricingStorage";
 
 const QUOTES_KEY = "npp_quotes_v1";
 const CLIENTS_KEY = "npp_clients_v1";
-const RATES_KEY = "npp_rates_v1";
-
-const defaultRates: Rates = {
-  driveway: 4.5,
-  paths: 4,
-  patio: 4.2,
-  houseWash: 320,
-  roofWash: 580,
-  wallsExtras: 260,
-};
 
 function safeParse<T>(value: string | null, fallback: T): T {
   if (!value) return fallback;
@@ -67,7 +59,7 @@ function upsertClientForQuote(prevClients: Client[], quote: Quote): Client[] {
 export function useLocalData() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
-  const [rates, setRates] = useState<Rates>(defaultRates);
+  const [rates, setRates] = useState<Rates>(DEFAULT_RATES);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -81,10 +73,11 @@ export function useLocalData() {
       window.localStorage.getItem(CLIENTS_KEY),
       [],
     );
-    const storedRates = safeParse<Rates>(
+    const rawRates = safeParse<Partial<Rates> | null>(
       window.localStorage.getItem(RATES_KEY),
-      defaultRates,
+      null,
     );
+    const storedRates = normalizeRates(rawRates ?? null);
 
     setQuotes(storedQuotes);
     setClients(storedClients);
@@ -136,7 +129,7 @@ export function useLocalData() {
     (payload: { quotes: Quote[]; clients: Client[]; rates: Rates }) => {
       setQuotes(payload.quotes ?? []);
       setClients(payload.clients ?? []);
-      setRates(payload.rates ?? defaultRates);
+      setRates(payload.rates ?? DEFAULT_RATES);
     },
     [],
   );
