@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { AppShell } from "../../components/layout/AppShell";
 import { Panel } from "../../components/ui/Panel";
 import { TextAreaField, TextField } from "../../components/ui/FormField";
+import { AreaMeasureMap } from "../../components/map/AreaMeasureMap";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
 import type { StainLevel } from "../../lib/types";
@@ -60,6 +61,7 @@ export default function QuickQuotePage() {
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [savedBanner, setSavedBanner] = useState<string | null>(null);
+  const [showMeasureModal, setShowMeasureModal] = useState(false);
 
   const totals = useMemo(() => {
     const areaTotal =
@@ -204,9 +206,18 @@ export default function QuickQuotePage() {
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
               Surfaces (m²)
             </p>
-            <p className="text-[11px] text-zinc-500">
-              Rates are editable from any page.
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="hidden text-[11px] text-zinc-500 sm:block">
+                Rates are editable from any page.
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowMeasureModal(true)}
+                className="rounded-full border border-purple-500/60 bg-gradient-to-r from-purple-800 via-fuchsia-700 to-purple-900 px-3 py-1.5 text-[11px] font-semibold text-zinc-50 shadow-[0_0_24px_rgba(147,51,234,0.6)]"
+              >
+                Measure driveway
+              </button>
+            </div>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <TextField
@@ -408,6 +419,38 @@ export default function QuickQuotePage() {
             <p className="text-xs text-amber-300">{savedBanner}</p>
           )}
         </div>
+
+        {showMeasureModal && (
+          <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/80 px-3 pb-6 pt-16 sm:items-center sm:px-4">
+            <div className="w-full max-w-3xl rounded-3xl border border-zinc-800 bg-gradient-to-b from-zinc-950 via-black to-zinc-950 p-4 shadow-[0_0_60px_rgba(0,0,0,0.9)] sm:p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
+                    Driveway measurement
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-zinc-100">
+                    Draw a polygon around the driveway to estimate m².
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowMeasureModal(false)}
+                  className="rounded-full border border-zinc-700 bg-zinc-900/80 px-2 py-1 text-xs text-zinc-400 hover:border-zinc-500 hover:text-zinc-100"
+                >
+                  Close
+                </button>
+              </div>
+              <div className="mt-3">
+                <AreaMeasureMap
+                  onAreaConfirm={(area) => {
+                    setDrivewaySqm(Math.round(area));
+                    setShowMeasureModal(false);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </section>
     </AppShell>
   );
