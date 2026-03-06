@@ -4,6 +4,7 @@ import { AppShell } from "../../components/layout/AppShell";
 import { Panel } from "../../components/ui/Panel";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
+import { exportQuotePdf } from "../../lib/pdf/exportQuotePdf";
 import type { QuoteStatus } from "../../lib/types";
 
 function formatDate(iso: string) {
@@ -91,13 +92,22 @@ export default function SavedQuotesPage() {
                       ))}
                     </select>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => deleteQuote(q.id)}
-                    className="text-[11px] text-zinc-500 underline-offset-2 hover:text-red-400 hover:underline"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => exportQuotePdf(q)}
+                      className="text-[11px] text-purple-300 underline-offset-2 hover:text-purple-200 hover:underline"
+                    >
+                      Export PDF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteQuote(q.id)}
+                      className="text-[11px] text-zinc-500 underline-offset-2 hover:text-red-400 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
                 {q.notes && (
                   <p className="mt-1 text-[11px] text-zinc-400">

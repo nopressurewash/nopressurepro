@@ -7,6 +7,7 @@ import { TextAreaField, TextField } from "../../components/ui/FormField";
 import { AreaMeasureMap } from "../../components/map/AreaMeasureMap";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
+import { exportQuotePdf } from "../../lib/pdf/exportQuotePdf";
 import type { StainLevel } from "../../lib/types";
 import { Quote } from "../../lib/types";
 
@@ -112,6 +113,38 @@ export default function QuickQuotePage() {
   ): void {
     const num = Number(value.replace(",", "."));
     setter(Number.isFinite(num) && num >= 0 ? num : 0);
+  }
+
+  function buildDraftQuote(): Quote {
+    return {
+      id: `draft-${Date.now()}`,
+      clientName: clientName.trim() || "Walk-in Quote",
+      suburb: suburb.trim() || "Gold Coast",
+      phone: phone.trim(),
+      drivewaySqm,
+      pathsSqm,
+      patioSqm,
+      stainLevel,
+      estimatedHours,
+      includeHouseWash: houseWash,
+      includeRoofWash: roofWash,
+      includeWallsExtras: wallsExtras,
+      notes: notes.trim(),
+      serviceType: buildServiceType({
+        drivewaySqm,
+        pathsSqm,
+        patioSqm,
+        house: houseWash,
+        roof: roofWash,
+        walls: wallsExtras,
+      }),
+      low: totals.low,
+      recommended: totals.recommended,
+      high: totals.high,
+      revenuePerHour: totals.revenuePerHour,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    };
   }
 
   async function handleSave() {
@@ -407,14 +440,23 @@ export default function QuickQuotePage() {
         </Panel>
 
         <div className="space-y-2">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-amber-400/80 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 px-4 py-3 text-sm font-semibold text-zinc-950 shadow-[0_0_45px_rgba(250,204,21,0.6)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {saving ? "Saving quote..." : "Save quote to list"}
-          </button>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => exportQuotePdf(buildDraftQuote())}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-purple-500/60 bg-gradient-to-r from-purple-800 via-fuchsia-700 to-purple-900 px-4 py-3 text-sm font-semibold text-zinc-50 shadow-[0_0_35px_rgba(147,51,234,0.55)] transition active:scale-[0.99]"
+            >
+              Export PDF
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-amber-400/80 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 px-4 py-3 text-sm font-semibold text-zinc-950 shadow-[0_0_45px_rgba(250,204,21,0.6)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving ? "Saving quote..." : "Save quote to list"}
+            </button>
+          </div>
           {savedBanner && (
             <p className="text-xs text-amber-300">{savedBanner}</p>
           )}
