@@ -8,43 +8,14 @@ import { AreaMeasureMap } from "../../components/map/AreaMeasureMap";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
 import { exportQuotePdf } from "../../lib/pdf/exportQuotePdf";
+import {
+  buildServiceType,
+  calculateQuoteTotals,
+  parseNumericInput,
+} from "../../lib/quoteCalc";
 import { getQuoteStatusLabel } from "../../lib/quoteStatus";
 import type { StainLevel } from "../../lib/types";
 import { Quote } from "../../lib/types";
-
-function getStainMultiplier(stain: StainLevel) {
-  switch (stain) {
-    case "light":
-      return 0.95;
-    case "medium":
-      return 1;
-    case "heavy":
-      return 1.18;
-    default:
-      return 1;
-  }
-}
-
-function buildServiceType(options: {
-  drivewaySqm: number;
-  pathsSqm: number;
-  patioSqm: number;
-  house: boolean;
-  roof: boolean;
-  walls: boolean;
-}): string {
-  const tags: string[] = [];
-  if (options.drivewaySqm > 0) tags.push("Driveway");
-  if (options.pathsSqm > 0) tags.push("Paths");
-  if (options.patioSqm > 0) tags.push("Patio");
-  if (options.house) tags.push("House Wash");
-  if (options.roof) tags.push("Roof Wash");
-  if (options.walls) tags.push("Walls / Extras");
-  if (!tags.length) return "Mixed";
-  if (tags.length === 1) return tags[0]!;
-  if (tags.length === 2) return `${tags[0]} + ${tags[1]}`;
-  return `${tags[0]}, ${tags[1]} +`;
-}
 
 const toggleBase =
   "flex items-center justify-between rounded-xl border px-3 py-3 text-xs font-medium transition-all duration-200";
@@ -68,30 +39,21 @@ export default function QuickQuotePage() {
   const [savedBanner, setSavedBanner] = useState<string | null>(null);
   const [showMeasureModal, setShowMeasureModal] = useState(false);
 
-  const totals = useMemo(() => {
-    const areaTotal =
-      drivewaySqm * rates.driveway +
-      pathsSqm * rates.paths +
-      patioSqm * rates.patio;
-
-    const addonTotal =
-      (houseWash ? rates.houseWash : 0) +
-      (roofWash ? rates.roofWash : 0) +
-      (wallsExtras ? rates.wallsExtras : 0);
-
-    const base = (areaTotal + addonTotal) * getStainMultiplier(stainLevel);
-    const recommended = Math.round(base);
-    const low = Math.round(recommended * 0.9);
-    const high = Math.round(recommended * 1.12);
-    const revenuePerHour =
-      estimatedHours > 0 ? Math.round(recommended / estimatedHours) : 0;
-
-    return { low, recommended, high, revenuePerHour };
-  }, [
-    drivewaySqm, pathsSqm, patioSqm,
-    houseWash, roofWash, wallsExtras,
-    rates, stainLevel, estimatedHours,
-  ]);
+  const totals = useMemo(
+    () =>
+      calculateQuoteTotals({
+        drivewaySqm,
+        pathsSqm,
+        patioSqm,
+        houseWash,
+        roofWash,
+        wallsExtras,
+        stainLevel,
+        estimatedHours,
+        rates,
+      }),
+    [drivewaySqm, pathsSqm, patioSqm, houseWash, roofWash, wallsExtras, rates, stainLevel, estimatedHours],
+  );
 
   const chemicalMixHint = useMemo(() => {
     if (stainLevel === "light") return "Soft wash · ~0.8–1.0% SH on organic.";
@@ -104,8 +66,7 @@ export default function QuickQuotePage() {
     value: string,
     setter: (v: number) => void,
   ): void {
-    const num = Number(value.replace(",", "."));
-    setter(Number.isFinite(num) && num >= 0 ? num : 0);
+    setter(parseNumericInput(value));
   }
 
   function buildDraftQuote(): Quote {
