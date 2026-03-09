@@ -9,6 +9,7 @@ interface JobCalendarProps {
   jobsByDate: Map<string, Quote[]>;
   getJobsForDate: (dateKey: string) => Quote[];
   onMarkCompleted: (id: string) => void;
+  onReschedule: (job: Quote) => void;
 }
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -33,11 +34,7 @@ interface CalendarDay {
 
 function buildCalendarDays(year: number, month: number): CalendarDay[] {
   const today = new Date();
-  const todayKey = toDateKey(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  );
+  const todayKey = toDateKey(today.getFullYear(), today.getMonth(), today.getDate());
 
   const firstOfMonth = new Date(year, month, 1);
   const startDow = (firstOfMonth.getDay() + 6) % 7;
@@ -76,6 +73,7 @@ function buildCalendarDays(year: number, month: number): CalendarDay[] {
 export function JobCalendar({
   getJobsForDate,
   onMarkCompleted,
+  onReschedule,
 }: JobCalendarProps) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -111,19 +109,17 @@ export function JobCalendar({
     setViewMonth(now.getMonth());
   }
 
-  const selectedDayJobs = selectedDateKey
-    ? getJobsForDate(selectedDateKey)
-    : [];
+  const selectedDayJobs = selectedDateKey ? getJobsForDate(selectedDateKey) : [];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-fade-in-up">
       <div className="flex items-center justify-between gap-2">
         <button
           type="button"
           onClick={goToPrevMonth}
           className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
         >
-          ← Prev
+          ←
         </button>
 
         <div className="text-center">
@@ -144,7 +140,7 @@ export function JobCalendar({
           onClick={goToNextMonth}
           className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
         >
-          Next →
+          →
         </button>
       </div>
 
@@ -177,6 +173,7 @@ export function JobCalendar({
           jobs={selectedDayJobs}
           onClose={() => setSelectedDateKey(null)}
           onMarkCompleted={onMarkCompleted}
+          onReschedule={onReschedule}
         />
       )}
     </div>

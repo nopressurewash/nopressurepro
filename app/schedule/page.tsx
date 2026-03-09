@@ -1,72 +1,130 @@
 "use client";
 
+import { useState } from "react";
 import { AppShell } from "../../components/layout/AppShell";
 import { Panel } from "../../components/ui/Panel";
 import { JobCalendar } from "../../components/calendar/JobCalendar";
+import { TodayView } from "../../components/calendar/TodayView";
+import { AgendaView } from "../../components/calendar/AgendaView";
+import { ScheduleJobModal } from "../../components/calendar/ScheduleJobModal";
 import { useLocalData } from "../../hooks/useLocalData";
 import { useScheduledJobs } from "../../hooks/useScheduledJobs";
 import { formatCurrency } from "../../lib/format";
+import type { Quote } from "../../lib/types";
+
+type ScheduleTab = "today" | "agenda" | "calendar";
+
+const TABS: { id: ScheduleTab; label: string }[] = [
+  { id: "today", label: "Today" },
+  { id: "agenda", label: "Agenda" },
+  { id: "calendar", label: "Calendar" },
+];
 
 export default function SchedulePage() {
-  const { quotes, updateQuoteStatus } = useLocalData();
-  const { scheduledJobs, jobsByDate, getJobsForDate } = useScheduledJobs(quotes);
+  const { quotes, updateQuoteStatus, updateQuoteSchedule } = useLocalData();
+  const { scheduledJobs, jobsByDate, getJobsForDate } =
+    useScheduledJobs(quotes);
 
-  const bookedCount = scheduledJobs.filter((j) => j.status === "booked").length;
-  const totalScheduledValue = scheduledJobs
-    .filter((j) => j.status === "booked")
-    .reduce((sum, j) => sum + j.recommended, 0);
+  const [activeTab, setActiveTab] = useState<ScheduleTab>("today");
+  const [reschedulingJob, setReschedulingJob] = useState<Quote | null>(null);
+
+  const bookedJobs = scheduledJobs.filter((j) => j.status === "booked");
+  const bookedCount = bookedJobs.length;
+  const totalScheduledValue = bookedJobs.reduce(
+    (sum, j) => sum + j.recommended,
+    0,
+  );
+
+  function handleMarkCompleted(id: string) {
+    updateQuoteStatus(id, "completed");
+  }
+
+  function handleReschedule(job: Quote) {
+    setReschedulingJob(job);
+  }
 
   return (
     <AppShell>
-      <section className="space-y-6">
+      <section className="space-y-5">
+        {/* Header */}
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-50">
             Schedule
           </h1>
-          <p className="mt-1.5 text-sm text-zinc-500">
-            View and manage your upcoming jobs on the calendar.
+          <p className="mt-1 text-sm text-zinc-500">
+            {bookedCount > 0
+              ? `${bookedCount} upcoming job${bookedCount !== 1 ? "s" : ""} · ${formatCurrency(totalScheduledValue)} booked`
+              : "No upcoming jobs scheduled."}
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-3.5">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400">
-              Booked Jobs
-            </p>
-            <p className="mt-1.5 text-xl font-bold tabular-nums text-amber-300">
-              {bookedCount}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-purple-500/20 bg-purple-500/[0.05] p-3.5">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-purple-400">
-              Scheduled Value
-            </p>
-            <p className="mt-1.5 text-xl font-bold tabular-nums text-purple-300">
-              {formatCurrency(totalScheduledValue)}
-            </p>
-          </div>
+        {/* Tab bar */}
+        <div className="flex gap-1 rounded-2xl border border-zinc-800/80 bg-zinc-950 p-1">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 rounded-xl px-3 py-2.5 text-xs font-bold uppercase tracking-[0.15em] transition-all duration-200 ${
+                activeTab === tab.id
+                  ? "bg-amber-500/15 text-amber-400"
+                  : "text-zinc-500 hover:text-zinc-300 active:bg-zinc-800/50"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        <Panel className="p-3 sm:p-4">
-          <JobCalendar
-            jobsByDate={jobsByDate}
-            getJobsForDate={getJobsForDate}
-            onMarkCompleted={(id) => updateQuoteStatus(id, "completed")}
+        {/* Tab content */}
+        {activeTab === "today" && (
+          <TodayView
+            jobs={scheduledJobs}
+            onMarkCompleted={handleMarkCompleted}
+            onReschedule={handleReschedule}
           />
-        </Panel>
+        )}
 
-        {scheduledJobs.length === 0 && (
-          <Panel className="border-dashed border-zinc-700 py-8 text-center">
-            <p className="text-base font-bold text-zinc-200">
-              No scheduled jobs yet.
-            </p>
-            <p className="mx-auto mt-2 max-w-xs text-sm text-zinc-500">
-              Schedule a job from the Saved Quotes page to see it appear here on
-              the calendar.
-            </p>
+        {activeTab === "agenda" && (
+          <AgendaView
+            jobs={scheduledJobs}
+            onMarkCompleted={handleMarkCompleted}
+            onReschedule={handleReschedule}
+          />
+        )}
+
+        {activeTab === "calendar" && (
+          <Panel className="p-3 sm:p-4">
+            <JobCalendar
+              jobsByDate={jobsByDate}
+              getJobsForDate={getJobsForDate}
+              onMarkCompleted={handleMarkCompleted}
+              onReschedule={handleReschedule}
+            />
           </Panel>
         )}
+
+        {/* Empty state across all views */}
+        {scheduledJobs.length === 0 && activeTab !== "today" && (
+          <div className="rounded-2xl border border-dashed border-zinc-800 py-10 text-center">
+            <p className="text-sm font-bold text-zinc-300">
+              No scheduled jobs yet.
+            </p>
+            <p className="mt-1 text-xs text-zinc-600">
+              Schedule a job from Saved Quotes to see it here.
+            </p>
+          </div>
+        )}
       </section>
+
+      {/* Reschedule modal */}
+      {reschedulingJob && (
+        <ScheduleJobModal
+          quote={reschedulingJob}
+          onSchedule={updateQuoteSchedule}
+          onClose={() => setReschedulingJob(null)}
+        />
+      )}
     </AppShell>
   );
 }
