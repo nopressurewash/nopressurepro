@@ -334,10 +334,8 @@ export async function exportQuotePdf(quote: Quote) {
   });
 
   const pdfBytes = await pdfDoc.save();
-  const blob = new Blob(
-    [pdfBytes.buffer.slice(pdfBytes.byteOffset, pdfBytes.byteOffset + pdfBytes.byteLength)],
-    { type: "application/pdf" },
-  );
+  const safeBytes = new Uint8Array(pdfBytes);
+  const blob = new Blob([safeBytes], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   const clientPart = sanitizeFilename(quote.clientName || "quote");
