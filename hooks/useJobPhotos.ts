@@ -110,6 +110,31 @@ export function useJobPhotos(quoteId: string) {
     [photos],
   );
 
+  const updateCaption = useCallback(
+    async (id: string, caption: string) => {
+      const existing = photos.find((photo) => photo.id === id);
+      if (!existing) return;
+
+      const updated: JobPhotoRecord = {
+        ...existing,
+        caption: caption.trim() || undefined,
+      };
+
+      try {
+        setError(null);
+        await updatePhotoRecord(updated);
+        setPhotos((prev) =>
+          prev.map((photo) => (photo.id === id ? updated : photo)),
+        );
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Could not save photo caption.",
+        );
+      }
+    },
+    [photos],
+  );
+
   return {
     photos,
     loading,
@@ -118,6 +143,7 @@ export function useJobPhotos(quoteId: string) {
     addPhotos,
     deletePhoto,
     movePhoto,
+    updateCaption,
     reload: loadPhotos,
   };
 }

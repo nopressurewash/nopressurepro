@@ -116,6 +116,40 @@ export async function getPhotosForQuote(
   });
 }
 
+export async function getPhotoCountsForQuoteIds(
+  quoteIds: string[],
+): Promise<Record<string, number>> {
+  const uniqueQuoteIds = Array.from(new Set(quoteIds.filter(Boolean)));
+  if (uniqueQuoteIds.length === 0) return {};
+
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, "readonly");
+    const store = transaction.objectStore(STORE_NAME);
+    const index = store.index(QUOTE_ID_INDEX);
+
+    const counts: Record<string, number> = {};
+    let remaining = uniqueQuoteIds.length;
+
+    for (const quoteId of uniqueQuoteIds) {
+      const request = index.count(quoteId);
+
+      request.onsuccess = () => {
+        counts[quoteId] = request.result;
+        remaining -= 1;
+        if (remaining === 0) {
+          resolve(counts);
+        }
+      };
+
+      request.onerror = () => {
+        reject(request.error ?? new Error("Failed to count job photos."));
+      };
+    }
+  });
+}
+
 export async function addPhotoRecord(input: {
   quoteId: string;
   category: JobPhotoCategory;

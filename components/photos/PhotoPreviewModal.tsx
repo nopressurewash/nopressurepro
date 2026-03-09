@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { JobPhotoCategory, JobPhotoRecord } from "../../lib/types";
 
 interface PhotoPreviewModalProps {
@@ -8,6 +8,7 @@ interface PhotoPreviewModalProps {
   onClose: () => void;
   onDelete: (id: string) => void;
   onMoveCategory: (id: string, category: JobPhotoCategory) => void;
+  onSaveCaption: (id: string, caption: string) => void;
 }
 
 const categories: JobPhotoCategory[] = ["before", "after", "other"];
@@ -28,10 +29,16 @@ export function PhotoPreviewModal({
   onClose,
   onDelete,
   onMoveCategory,
+  onSaveCaption,
 }: PhotoPreviewModalProps) {
   const imageUrl = useMemo(() => {
     if (!photo) return null;
     return URL.createObjectURL(photo.blob);
+  }, [photo]);
+  const [captionDraft, setCaptionDraft] = useState("");
+
+  useEffect(() => {
+    setCaptionDraft(photo?.caption ?? "");
   }, [photo]);
 
   useEffect(() => {
@@ -74,6 +81,27 @@ export function PhotoPreviewModal({
         </div>
 
         <div className="mt-3 space-y-3">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+              Caption
+            </p>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+              <input
+                value={captionDraft}
+                onChange={(event) => setCaptionDraft(event.target.value)}
+                placeholder="Add a short note for this photo"
+                className="flex-1 rounded-2xl border border-zinc-800 bg-zinc-900/80 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-amber-400/70 focus:ring-2 focus:ring-amber-400/30"
+              />
+              <button
+                type="button"
+                onClick={() => onSaveCaption(photo.id, captionDraft)}
+                className="rounded-2xl border border-amber-400/80 bg-amber-400/15 px-3 py-2 text-xs font-semibold text-amber-200 transition hover:bg-amber-400/20"
+              >
+                Save Caption
+              </button>
+            </div>
+          </div>
+
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
               Move to category

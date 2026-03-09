@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "../../components/layout/AppShell";
 import { JobPhotoGallery } from "../../components/photos/JobPhotoGallery";
 import { Panel } from "../../components/ui/Panel";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
+import { getPhotoCountsForQuoteIds } from "../../lib/photoStorage";
 import { exportQuotePdf } from "../../lib/pdf/exportQuotePdf";
 import {
   getQuoteStatusClasses,
@@ -28,6 +29,30 @@ export default function SavedQuotesPage() {
   const [expandedPhotoQuoteId, setExpandedPhotoQuoteId] = useState<string | null>(
     null,
   );
+  const [photoCounts, setPhotoCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadCounts() {
+      try {
+        const counts = await getPhotoCountsForQuoteIds(quotes.map((quote) => quote.id));
+        if (active) {
+          setPhotoCounts(counts);
+        }
+      } catch {
+        if (active) {
+          setPhotoCounts({});
+        }
+      }
+    }
+
+    void loadCounts();
+
+    return () => {
+      active = false;
+    };
+  }, [quotes]);
 
   return (
     <AppShell>
@@ -84,11 +109,16 @@ export default function SavedQuotesPage() {
                   <p className="text-zinc-400">
                     {q.serviceType} · {formatDate(q.createdAt)}
                   </p>
-                  <p className="text-zinc-500">
-                    {q.estimatedHours > 0
-                      ? `${q.estimatedHours.toFixed(1)}h · ${formatCurrency(q.revenuePerHour)}/hr`
-                      : "-"}
-                  </p>
+                  <div className="text-right">
+                    <p className="text-zinc-500">
+                      {q.estimatedHours > 0
+                        ? `${q.estimatedHours.toFixed(1)}h · ${formatCurrency(q.revenuePerHour)}/hr`
+                        : "-"}
+                    </p>
+                    <p className="mt-1 text-[11px] text-zinc-500">
+                      Photos: {photoCounts[q.id] ?? 0}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-1 text-xs">
                   <div className="flex items-center gap-2">
@@ -148,7 +178,21 @@ export default function SavedQuotesPage() {
                 )}
                 {expandedPhotoQuoteId === q.id && (
                   <div className="pt-2">
-                    <JobPhotoGallery quoteId={q.id} />
+                    <JobPhotoGallery
+                      quoteId={q.id}
+                      onPhotoCountChange={(count) =>
+                        setPhotoCounts((prev) => {
+                          if ((prev[q.id] ?? 0) === count) {
+                            return prev;
+                          }
+
+                          return {
+                            ...prev,
+                            [q.id]: count,
+                          };
+                        })
+                      }
+                    />
                   </div>
                 )}
               </Panel>

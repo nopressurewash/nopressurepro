@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useJobPhotos } from "../../hooks/useJobPhotos";
 import type { JobPhotoCategory, JobPhotoRecord } from "../../lib/types";
 import { PhotoPreviewModal } from "./PhotoPreviewModal";
@@ -8,6 +8,7 @@ import { PhotoUploadButton } from "./PhotoUploadButton";
 
 interface JobPhotoGalleryProps {
   quoteId: string;
+  onPhotoCountChange?: (count: number) => void;
 }
 
 const categories: JobPhotoCategory[] = ["before", "after", "other"];
@@ -63,17 +64,35 @@ function PhotoTile({
         <p className="mt-1 text-[11px] text-zinc-300">
           {formatDateTime(photo.createdAt)}
         </p>
+        {photo.caption && (
+          <p className="mt-1 truncate text-[11px] text-zinc-500">
+            {photo.caption}
+          </p>
+        )}
       </div>
     </button>
   );
 }
 
-export function JobPhotoGallery({ quoteId }: JobPhotoGalleryProps) {
-  const { photos, loading, uploading, error, addPhotos, deletePhoto, movePhoto } =
-    useJobPhotos(quoteId);
+export function JobPhotoGallery({
+  quoteId,
+  onPhotoCountChange,
+}: JobPhotoGalleryProps) {
+  const {
+    photos,
+    loading,
+    uploading,
+    error,
+    addPhotos,
+    deletePhoto,
+    movePhoto,
+    updateCaption,
+  } = useJobPhotos(quoteId);
   const [activeCategory, setActiveCategory] =
     useState<JobPhotoCategory>("before");
   const [previewPhoto, setPreviewPhoto] = useState<JobPhotoRecord | null>(null);
+  const latestCountCallbackRef = useRef(onPhotoCountChange);
+  const lastReportedCountRef = useRef<number | null>(null);
 
   const photosByCategory = useMemo(() => {
     return {
@@ -84,6 +103,34 @@ export function JobPhotoGallery({ quoteId }: JobPhotoGalleryProps) {
   }, [photos]);
 
   const activePhotos = photosByCategory[activeCategory];
+  const totalPhotoCount = photos.length;
+
+  useEffect(() => {
+    latestCountCallbackRef.current = onPhotoCountChange;
+  }, [onPhotoCountChange]);
+
+  useEffect(() => {
+    if (lastReportedCountRef.current === totalPhotoCount) {
+      return;
+    }
+
+    lastReportedCountRef.current = totalPhotoCount;
+    latestCountCallbackRef.current?.(totalPhotoCount);
+  }, [totalPhotoCount]);
+
+  useEffect(() => {
+    if (!previewPhoto) return;
+
+    const nextPreview = photos.find((photo) => photo.id === previewPhoto.id) ?? null;
+    if (!nextPreview) {
+      setPreviewPhoto(null);
+      return;
+    }
+
+    if (nextPreview !== previewPhoto) {
+      setPreviewPhoto(nextPreview);
+    }
+  }, [photos, previewPhoto]);
 
   return (
     <div className="space-y-3 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-3">
@@ -147,6 +194,7 @@ export function JobPhotoGallery({ quoteId }: JobPhotoGalleryProps) {
         onClose={() => setPreviewPhoto(null)}
         onDelete={deletePhoto}
         onMoveCategory={movePhoto}
+        onSaveCaption={updateCaption}
       />
     </div>
   );
