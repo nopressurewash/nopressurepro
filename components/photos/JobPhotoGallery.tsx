@@ -149,11 +149,11 @@ export function JobPhotoGallery({
 
   return (
     <div className="space-y-3 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-3">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-start justify-between gap-2">
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
           Job Photos
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           {firstBeforePhoto && firstAfterPhoto && (
             <button
               type="button"
