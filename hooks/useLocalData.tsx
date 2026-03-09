@@ -57,6 +57,27 @@ function upsertClientForQuote(prevClients: Client[], quote: Quote): Client[] {
   return [...prevClients, newClient];
 }
 
+function rebuildClients(prevClients: Client[], editedQuote: Quote): Client[] {
+  const existingById = prevClients.find((c) => c.id === editedQuote.id);
+  if (existingById) {
+    return prevClients.map((c) =>
+      c.id === editedQuote.id
+        ? {
+            ...c,
+            name: editedQuote.clientName,
+            suburb: editedQuote.suburb,
+            phone: editedQuote.phone,
+          }
+        : c,
+    );
+  }
+  const match = prevClients.find(
+    (c) => c.phone === editedQuote.phone && c.name === editedQuote.clientName,
+  );
+  if (match) return prevClients;
+  return prevClients;
+}
+
 function normalizeQuote(quote: Quote): Quote {
   return {
     ...quote,
@@ -117,6 +138,14 @@ export function useLocalData() {
     [],
   );
 
+  const updateQuote = useCallback((updated: Quote) => {
+    const normalized = normalizeQuote(updated);
+    setQuotes((prev) =>
+      prev.map((q) => (q.id === normalized.id ? normalized : q)),
+    );
+    setClients((prev) => rebuildClients(prev, normalized));
+  }, []);
+
   const deleteQuote = useCallback((id: string) => {
     setQuotes((prev) => prev.filter((q) => q.id !== id));
   }, []);
@@ -167,6 +196,7 @@ export function useLocalData() {
     clients,
     rates,
     addQuote,
+    updateQuote,
     deleteQuote,
     updateQuoteStatus,
     updateQuoteSchedule,

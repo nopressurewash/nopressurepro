@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AppShell } from "../../components/layout/AppShell";
 import { ScheduleJobModal } from "../../components/calendar/ScheduleJobModal";
+import { EditQuoteModal } from "../../components/quotes/EditQuoteModal";
 import { JobPhotoGallery } from "../../components/photos/JobPhotoGallery";
 import { Panel } from "../../components/ui/Panel";
 import { useLocalData } from "../../hooks/useLocalData";
@@ -29,13 +30,21 @@ const actionLink =
   "rounded-lg px-2 py-1 text-[11px] font-medium transition-all duration-200 active:scale-[0.97]";
 
 export default function SavedQuotesPage() {
-  const { quotes, deleteQuote, updateQuoteStatus, updateQuoteSchedule } =
-    useLocalData();
+  const {
+    quotes,
+    rates,
+    updateQuote,
+    deleteQuote,
+    updateQuoteStatus,
+    updateQuoteSchedule,
+  } = useLocalData();
   const [expandedPhotoQuoteId, setExpandedPhotoQuoteId] = useState<
     string | null
   >(null);
   const [photoCounts, setPhotoCounts] = useState<Record<string, number>>({});
   const [schedulingQuote, setSchedulingQuote] = useState<Quote | null>(null);
+  const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
+  const [editSavedBanner, setEditSavedBanner] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -160,6 +169,13 @@ export default function SavedQuotesPage() {
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
+                      onClick={() => setEditingQuote(q)}
+                      className={`${actionLink} text-zinc-300 hover:bg-zinc-800`}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setSchedulingQuote(q)}
                       className={`${actionLink} ${q.scheduledDate ? "text-emerald-400 hover:bg-emerald-500/10" : "text-sky-400 hover:bg-sky-500/10"}`}
                     >
@@ -223,6 +239,26 @@ export default function SavedQuotesPage() {
           </div>
         )}
       </section>
+
+      {editSavedBanner && (
+        <div className="fixed left-1/2 top-16 z-50 -translate-x-1/2 animate-fade-in rounded-2xl border border-amber-500/40 bg-zinc-950 px-5 py-3 text-xs font-semibold text-amber-400 shadow-lg">
+          {editSavedBanner}
+        </div>
+      )}
+
+      {editingQuote && (
+        <EditQuoteModal
+          quote={editingQuote}
+          rates={rates}
+          onSave={(updated) => {
+            updateQuote(updated);
+            setEditingQuote(null);
+            setEditSavedBanner("Quote updated.");
+            setTimeout(() => setEditSavedBanner(null), 2400);
+          }}
+          onClose={() => setEditingQuote(null)}
+        />
+      )}
 
       {schedulingQuote && (
         <ScheduleJobModal
