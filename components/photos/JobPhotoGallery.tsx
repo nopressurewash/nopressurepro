@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useJobPhotos } from "../../hooks/useJobPhotos";
+import { useObjectUrl } from "../../hooks/useObjectUrl";
 import type { JobPhotoCategory, JobPhotoRecord } from "../../lib/types";
+import { BeforeAfterModal } from "./BeforeAfterModal";
 import { PhotoPreviewModal } from "./PhotoPreviewModal";
 import { PhotoUploadButton } from "./PhotoUploadButton";
 
@@ -40,11 +42,21 @@ function PhotoTile({
   photo: JobPhotoRecord;
   onClick: () => void;
 }) {
-  const imageUrl = useMemo(() => URL.createObjectURL(photo.blob), [photo.blob]);
+  const imageUrl = useObjectUrl(photo.blob);
 
-  useEffect(() => {
-    return () => URL.revokeObjectURL(imageUrl);
-  }, [imageUrl]);
+  if (!imageUrl) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/80">
+        <div className="aspect-square w-full bg-zinc-900/80" />
+        <div className="px-2.5 py-2">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+            {getCategoryLabel(photo.category)}
+          </p>
+          <p className="mt-1 text-[11px] text-zinc-500">Loading image...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <button
@@ -91,6 +103,7 @@ export function JobPhotoGallery({
   const [activeCategory, setActiveCategory] =
     useState<JobPhotoCategory>("before");
   const [previewPhoto, setPreviewPhoto] = useState<JobPhotoRecord | null>(null);
+  const [showComparison, setShowComparison] = useState(false);
   const latestCountCallbackRef = useRef(onPhotoCountChange);
   const lastReportedCountRef = useRef<number | null>(null);
 
@@ -104,6 +117,8 @@ export function JobPhotoGallery({
 
   const activePhotos = photosByCategory[activeCategory];
   const totalPhotoCount = photos.length;
+  const firstBeforePhoto = photosByCategory.before[0] ?? null;
+  const firstAfterPhoto = photosByCategory.after[0] ?? null;
 
   useEffect(() => {
     latestCountCallbackRef.current = onPhotoCountChange;
@@ -138,10 +153,21 @@ export function JobPhotoGallery({
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
           Job Photos
         </p>
-        <PhotoUploadButton
-          loading={uploading}
-          onFilesSelected={(files) => addPhotos(files, activeCategory)}
-        />
+        <div className="flex items-center gap-2">
+          {firstBeforePhoto && firstAfterPhoto && (
+            <button
+              type="button"
+              onClick={() => setShowComparison(true)}
+              className="rounded-2xl border border-amber-400/80 bg-amber-400/15 px-3 py-2 text-xs font-semibold text-amber-200 transition hover:bg-amber-400/20"
+            >
+              Compare Before / After
+            </button>
+          )}
+          <PhotoUploadButton
+            loading={uploading}
+            onFilesSelected={(files) => addPhotos(files, activeCategory)}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
@@ -195,6 +221,12 @@ export function JobPhotoGallery({
         onDelete={deletePhoto}
         onMoveCategory={movePhoto}
         onSaveCaption={updateCaption}
+      />
+      <BeforeAfterModal
+        open={showComparison}
+        beforePhoto={firstBeforePhoto}
+        afterPhoto={firstAfterPhoto}
+        onClose={() => setShowComparison(false)}
       />
     </div>
   );

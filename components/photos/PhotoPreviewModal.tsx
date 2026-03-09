@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useObjectUrl } from "../../hooks/useObjectUrl";
 import type { JobPhotoCategory, JobPhotoRecord } from "../../lib/types";
 
 interface PhotoPreviewModalProps {
@@ -31,23 +32,12 @@ export function PhotoPreviewModal({
   onMoveCategory,
   onSaveCaption,
 }: PhotoPreviewModalProps) {
-  const imageUrl = useMemo(() => {
-    if (!photo) return null;
-    return URL.createObjectURL(photo.blob);
-  }, [photo]);
+  const imageUrl = useObjectUrl(photo?.blob);
   const [captionDraft, setCaptionDraft] = useState("");
 
   useEffect(() => {
     setCaptionDraft(photo?.caption ?? "");
   }, [photo]);
-
-  useEffect(() => {
-    return () => {
-      if (imageUrl) {
-        URL.revokeObjectURL(imageUrl);
-      }
-    };
-  }, [imageUrl]);
 
   if (!photo || !imageUrl) return null;
 
