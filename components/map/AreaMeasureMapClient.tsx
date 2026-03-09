@@ -127,6 +127,7 @@ export function AreaMeasureMapClient({
   onAreaConfirm,
 }: AreaMeasureMapClientProps) {
   const featureGroupRef = useRef<FeatureGroupType | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
   const [areaSqm, setAreaSqm] = useState(0);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -590,14 +591,15 @@ export function AreaMeasureMapClient({
 
       <div className="relative">
         <MapContainer
+          ref={mapRef}
           center={[-28.0, 153.4]}
           zoom={19.5}
           zoomControl={true}
           maxZoom={22}
           className="h-64 w-full overflow-hidden rounded-2xl border border-zinc-800 bg-black sm:h-80"
-          whenReady={(e) => {
+          whenReady={() => {
             window.setTimeout(() => {
-              e.target.invalidateSize();
+              mapRef.current?.invalidateSize();
             }, 0);
           }}
         >
@@ -659,7 +661,7 @@ export function AreaMeasureMapClient({
                 },
               }}
               edit={{
-                edit: true,
+                edit: {},
                 remove: true,
               }}
             />
