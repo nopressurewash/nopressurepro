@@ -41,6 +41,8 @@ export interface Quote {
   revenuePerHour: number;
   status: QuoteStatus;
   createdAt: string;
+  scheduledDate?: string;
+  scheduledTime?: string;
 }
 
 export interface Client {

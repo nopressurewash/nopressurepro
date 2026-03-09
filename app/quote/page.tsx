@@ -46,6 +46,9 @@ function buildServiceType(options: {
   return `${tags[0]}, ${tags[1]} +`;
 }
 
+const toggleBase =
+  "flex items-center justify-between rounded-xl border px-3 py-3 text-xs font-medium transition-all duration-200";
+
 export default function QuickQuotePage() {
   const { rates, addQuote } = useLocalData();
 
@@ -83,22 +86,11 @@ export default function QuickQuotePage() {
     const revenuePerHour =
       estimatedHours > 0 ? Math.round(recommended / estimatedHours) : 0;
 
-    return {
-      low,
-      recommended,
-      high,
-      revenuePerHour,
-    };
+    return { low, recommended, high, revenuePerHour };
   }, [
-    drivewaySqm,
-    pathsSqm,
-    patioSqm,
-    houseWash,
-    roofWash,
-    wallsExtras,
-    rates,
-    stainLevel,
-    estimatedHours,
+    drivewaySqm, pathsSqm, patioSqm,
+    houseWash, roofWash, wallsExtras,
+    rates, stainLevel, estimatedHours,
   ]);
 
   const chemicalMixHint = useMemo(() => {
@@ -122,22 +114,15 @@ export default function QuickQuotePage() {
       clientName: clientName.trim() || "Walk-in Quote",
       suburb: suburb.trim() || "Gold Coast",
       phone: phone.trim(),
-      drivewaySqm,
-      pathsSqm,
-      patioSqm,
-      stainLevel,
-      estimatedHours,
+      drivewaySqm, pathsSqm, patioSqm,
+      stainLevel, estimatedHours,
       includeHouseWash: houseWash,
       includeRoofWash: roofWash,
       includeWallsExtras: wallsExtras,
       notes: notes.trim(),
       serviceType: buildServiceType({
-        drivewaySqm,
-        pathsSqm,
-        patioSqm,
-        house: houseWash,
-        roof: roofWash,
-        walls: wallsExtras,
+        drivewaySqm, pathsSqm, patioSqm,
+        house: houseWash, roof: roofWash, walls: wallsExtras,
       }),
       low: totals.low,
       recommended: totals.recommended,
@@ -162,11 +147,8 @@ export default function QuickQuotePage() {
         clientName: clientName.trim(),
         suburb: suburb.trim(),
         phone: phone.trim(),
-        drivewaySqm,
-        pathsSqm,
-        patioSqm,
-        stainLevel,
-        estimatedHours,
+        drivewaySqm, pathsSqm, patioSqm,
+        stainLevel, estimatedHours,
         includeHouseWash: houseWash,
         includeRoofWash: roofWash,
         includeWallsExtras: wallsExtras,
@@ -181,12 +163,8 @@ export default function QuickQuotePage() {
       };
 
       quote.serviceType = buildServiceType({
-        drivewaySqm,
-        pathsSqm,
-        patioSqm,
-        house: houseWash,
-        roof: roofWash,
-        walls: wallsExtras,
+        drivewaySqm, pathsSqm, patioSqm,
+        house: houseWash, roof: roofWash, walls: wallsExtras,
       }) as any;
 
       addQuote(quote);
@@ -197,9 +175,6 @@ export default function QuickQuotePage() {
     }
   }
 
-  const toggleBase =
-    "flex items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-medium transition-colors";
-
   return (
     <AppShell>
       <section className="space-y-5">
@@ -207,12 +182,13 @@ export default function QuickQuotePage() {
           <h1 className="text-2xl font-bold tracking-tight text-zinc-50">
             Quick Quote
           </h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1.5 text-sm text-zinc-500">
             Price a job in under a minute. Adjust live on-site.
           </p>
         </div>
 
-        <Panel className="space-y-3">
+        {/* Client section */}
+        <Panel className="space-y-4">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
             Client
           </p>
@@ -238,7 +214,8 @@ export default function QuickQuotePage() {
           />
         </Panel>
 
-        <Panel className="space-y-3">
+        {/* Surfaces section */}
+        <Panel className="space-y-4">
           <div className="flex items-center justify-between gap-2">
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
               Surfaces (m²)
@@ -246,12 +223,12 @@ export default function QuickQuotePage() {
             <button
               type="button"
               onClick={() => setShowMeasureModal(true)}
-              className="rounded-xl border border-purple-500/40 bg-purple-500/10 px-3 py-1.5 text-[11px] font-semibold text-purple-300 transition-colors hover:bg-purple-500/15"
+              className="rounded-xl border border-purple-500/40 bg-purple-500/10 px-3 py-2 text-[11px] font-semibold text-purple-300 transition-all duration-200 hover:bg-purple-500/15 active:scale-[0.98]"
             >
               Measure driveway
             </button>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2.5">
             <TextField
               label="Driveway"
               inputMode="decimal"
@@ -294,10 +271,10 @@ export default function QuickQuotePage() {
                       key={level}
                       type="button"
                       onClick={() => setStainLevel(level)}
-                      className={`rounded-xl border px-2 py-2 capitalize font-medium transition-colors ${
+                      className={`rounded-xl border px-2 py-2.5 capitalize font-medium transition-all duration-200 ${
                         active
                           ? "border-amber-500/50 bg-amber-500/10 text-amber-400"
-                          : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-600"
+                          : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
                       }`}
                     >
                       {level}
@@ -317,18 +294,18 @@ export default function QuickQuotePage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <button
               type="button"
               onClick={() => setHouseWash((v) => !v)}
               className={`${toggleBase} ${
                 houseWash
                   ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-                  : "border-zinc-800 bg-zinc-900 text-zinc-400"
+                  : "border-zinc-800 bg-zinc-900 text-zinc-400 active:bg-zinc-800"
               }`}
             >
               <span>House wash</span>
-              <span className="text-[11px] text-zinc-400">
+              <span className="text-[11px] tabular-nums text-zinc-500">
                 {formatCurrency(rates.houseWash)}
               </span>
             </button>
@@ -338,11 +315,11 @@ export default function QuickQuotePage() {
               className={`${toggleBase} ${
                 roofWash
                   ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
-                  : "border-zinc-800 bg-zinc-900 text-zinc-400"
+                  : "border-zinc-800 bg-zinc-900 text-zinc-400 active:bg-zinc-800"
               }`}
             >
               <span>Roof wash</span>
-              <span className="text-[11px] text-zinc-400">
+              <span className="text-[11px] tabular-nums text-zinc-500">
                 {formatCurrency(rates.roofWash)}
               </span>
             </button>
@@ -352,84 +329,86 @@ export default function QuickQuotePage() {
               className={`${toggleBase} ${
                 wallsExtras
                   ? "border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-300"
-                  : "border-zinc-800 bg-zinc-900 text-zinc-400"
+                  : "border-zinc-800 bg-zinc-900 text-zinc-400 active:bg-zinc-800"
               }`}
             >
               <span>Walls / extras</span>
-              <span className="text-[11px] text-zinc-400">
+              <span className="text-[11px] tabular-nums text-zinc-500">
                 {formatCurrency(rates.wallsExtras)}
               </span>
             </button>
           </div>
         </Panel>
 
-        <div className="space-y-3 rounded-2xl border border-zinc-800/90 bg-zinc-950 p-4">
+        {/* Quote bands */}
+        <Panel className="space-y-4">
           <div className="flex items-center justify-between gap-2">
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400">
               Quote bands
             </p>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-zinc-600">
               Lead with confidence.
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-3 text-xs">
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Low
               </p>
-              <p className="mt-1 text-lg font-bold text-zinc-200">
+              <p className="mt-1.5 text-xl font-bold tabular-nums text-zinc-300">
                 {formatCurrency(totals.low)}
               </p>
-              <p className="mt-1 text-[11px] text-zinc-500">
-                Softer / repeat clients.
+              <p className="mt-1 text-[11px] text-zinc-600">
+                Softer / repeat.
               </p>
             </div>
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400">
                 Recommended
               </p>
-              <p className="mt-1 text-lg font-bold text-amber-300">
+              <p className="mt-1.5 text-xl font-bold tabular-nums text-amber-300">
                 {formatCurrency(totals.recommended)}
               </p>
-              <p className="mt-1 text-[11px] text-zinc-500">
-                Your normal lead price.
+              <p className="mt-1 text-[11px] text-zinc-600">
+                Normal lead price.
               </p>
             </div>
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 High
               </p>
-              <p className="mt-1 text-lg font-bold text-zinc-200">
+              <p className="mt-1.5 text-xl font-bold tabular-nums text-zinc-300">
                 {formatCurrency(totals.high)}
               </p>
-              <p className="mt-1 text-[11px] text-zinc-500">
-                Hard access, rush jobs.
+              <p className="mt-1 text-[11px] text-zinc-600">
+                Hard access / rush.
               </p>
             </div>
           </div>
 
-          <div className="mt-2 grid grid-cols-2 gap-3 text-xs">
-            <div className="rounded-xl border border-zinc-800 bg-black px-3 py-2.5">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-zinc-800 bg-black/50 px-3 py-3">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Revenue / hour
               </p>
-              <p className="mt-1 text-base font-bold text-zinc-200">
+              <p className="mt-1.5 text-base font-bold tabular-nums text-zinc-200">
                 {totals.revenuePerHour > 0
                   ? formatCurrency(totals.revenuePerHour)
                   : "-"}
               </p>
             </div>
-            <div className="rounded-xl border border-zinc-800 bg-black px-3 py-2.5">
+            <div className="rounded-xl border border-zinc-800 bg-black/50 px-3 py-3">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Chem mix helper
               </p>
-              <p className="mt-1 text-[11px] text-zinc-400">
+              <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-400">
                 {chemicalMixHint}
               </p>
             </div>
           </div>
-        </div>
+        </Panel>
 
+        {/* Notes */}
         <Panel className="space-y-3">
           <TextAreaField
             label="Job notes"
@@ -440,7 +419,8 @@ export default function QuickQuotePage() {
           />
         </Panel>
 
-        <div className="space-y-2">
+        {/* Actions */}
+        <div className="space-y-3">
           <p className="text-xs text-zinc-500">
             New quotes save as{" "}
             <span className="font-medium text-amber-400">
@@ -448,11 +428,11 @@ export default function QuickQuotePage() {
             </span>
             .
           </p>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <button
               type="button"
               onClick={() => exportQuotePdf(buildDraftQuote())}
-              className="flex w-full items-center justify-center rounded-2xl border border-purple-500/40 bg-purple-500/10 px-4 py-3 text-sm font-semibold text-purple-300 transition-colors hover:bg-purple-500/15 active:scale-[0.99]"
+              className="flex w-full items-center justify-center rounded-2xl border border-purple-500/40 bg-purple-500/10 px-4 py-3.5 text-sm font-semibold text-purple-300 transition-all duration-200 hover:bg-purple-500/15 active:scale-[0.98]"
             >
               Export PDF
             </button>
@@ -460,19 +440,22 @@ export default function QuickQuotePage() {
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="flex w-full items-center justify-center rounded-2xl border border-amber-500/50 bg-amber-500/15 px-4 py-3 text-sm font-bold text-amber-400 transition-colors hover:bg-amber-500/20 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center rounded-2xl border border-amber-500/50 bg-amber-500/15 px-4 py-3.5 text-sm font-bold text-amber-400 transition-all duration-200 hover:bg-amber-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {saving ? "Saving quote..." : "Save quote to list"}
+              {saving ? "Saving..." : "Save quote to list"}
             </button>
           </div>
           {savedBanner && (
-            <p className="text-xs text-amber-400">{savedBanner}</p>
+            <p className="animate-fade-in text-xs font-medium text-amber-400">
+              {savedBanner}
+            </p>
           )}
         </div>
 
+        {/* Measure modal */}
         {showMeasureModal && (
-          <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/90 px-3 pb-6 pt-16 sm:items-center sm:px-4">
-            <div className="w-full max-w-3xl rounded-2xl border border-zinc-800 bg-zinc-950 p-4 sm:p-5">
+          <div className="animate-fade-in fixed inset-0 z-40 flex items-end justify-center bg-black/90 px-3 pb-6 pt-16 sm:items-center sm:px-4">
+            <div className="animate-fade-in-up w-full max-w-3xl rounded-2xl border border-zinc-800 bg-zinc-950 p-4 sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
@@ -485,7 +468,7 @@ export default function QuickQuotePage() {
                 <button
                   type="button"
                   onClick={() => setShowMeasureModal(false)}
-                  className="rounded-xl border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-400 transition-colors hover:border-zinc-500 hover:text-zinc-100"
+                  className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.98]"
                 >
                   Close
                 </button>

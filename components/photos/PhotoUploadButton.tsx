@@ -43,8 +43,11 @@ export function PhotoUploadButton({
     event.currentTarget.value = "";
   }
 
+  const btnBase =
+    "inline-flex cursor-pointer items-center justify-center rounded-xl px-3 py-2 text-[11px] font-semibold transition-all duration-200 active:scale-[0.97]";
+
   return (
-    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
+    <div className={`flex flex-wrap items-center gap-1.5 ${className}`}>
       <input
         id={libraryInputId}
         type="file"
@@ -66,7 +69,7 @@ export function PhotoUploadButton({
           />
           <label
             htmlFor={cameraInputId}
-            className={`inline-flex cursor-pointer items-center justify-center rounded-2xl border border-amber-400/80 bg-amber-400/15 px-3 py-2 text-xs font-semibold text-amber-200 transition active:scale-[0.99] hover:bg-amber-400/20 ${loading ? "pointer-events-none opacity-60" : ""}`}
+            className={`${btnBase} border border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 ${loading ? "pointer-events-none opacity-50" : ""}`}
           >
             {loading ? "Uploading..." : "Take Photo"}
           </label>
@@ -75,7 +78,7 @@ export function PhotoUploadButton({
 
       <label
         htmlFor={libraryInputId}
-        className={`inline-flex cursor-pointer items-center justify-center rounded-2xl border border-purple-500/60 bg-gradient-to-r from-purple-800 via-fuchsia-700 to-purple-900 px-3 py-2 text-xs font-semibold text-zinc-50 shadow-[0_0_20px_rgba(147,51,234,0.45)] transition active:scale-[0.99] ${loading ? "pointer-events-none opacity-60" : ""}`}
+        className={`${btnBase} border border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/15 ${loading ? "pointer-events-none opacity-50" : ""}`}
       >
         {loading
           ? "Uploading..."
@@ -86,4 +89,3 @@ export function PhotoUploadButton({
     </div>
   );
 }
-
