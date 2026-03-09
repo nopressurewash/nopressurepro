@@ -662,7 +662,7 @@ export function AreaMeasureMapClient({
               }}
               edit={{
                 edit: {},
-                remove: {},
+                remove: true,
               }}
             />
           </FeatureGroup>
