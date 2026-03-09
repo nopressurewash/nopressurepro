@@ -55,19 +55,19 @@ export function getQuoteStatusLabel(status: QuoteStatus): string {
 export function getQuoteStatusClasses(status: QuoteStatus): string {
   switch (status) {
     case "draft":
-      return "border-zinc-700 bg-zinc-900/80 text-zinc-300";
+      return "border-zinc-700 bg-zinc-800/60 text-zinc-400";
     case "sent":
-      return "border-sky-500/50 bg-sky-500/10 text-sky-200";
+      return "border-sky-500/40 bg-sky-500/10 text-sky-400";
     case "approved":
-      return "border-purple-500/50 bg-purple-500/10 text-purple-200";
+      return "border-purple-500/40 bg-purple-500/10 text-purple-400";
     case "booked":
-      return "border-amber-500/60 bg-amber-500/10 text-amber-200";
+      return "border-amber-500/40 bg-amber-500/10 text-amber-400";
     case "completed":
-      return "border-emerald-500/60 bg-emerald-500/10 text-emerald-200";
+      return "border-emerald-500/40 bg-emerald-500/10 text-emerald-400";
     case "paid":
-      return "border-yellow-400/70 bg-yellow-400/15 text-yellow-200";
+      return "border-yellow-500/40 bg-yellow-500/10 text-yellow-400";
     case "lost":
-      return "border-rose-500/60 bg-rose-500/10 text-rose-200";
+      return "border-rose-500/40 bg-rose-500/10 text-rose-400";
   }
 }
 

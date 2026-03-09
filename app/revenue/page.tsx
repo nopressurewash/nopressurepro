@@ -88,33 +88,33 @@ export default function RevenuePage() {
 
   return (
     <AppShell>
-      <section className="space-y-4">
+      <section className="space-y-5">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-50">
             Revenue
           </h1>
-          <p className="mt-1 text-sm text-zinc-400">
-            Track what&apos;s actually locked in from completed and paid work.
+          <p className="mt-1 text-sm text-zinc-500">
+            Track closed revenue from completed and paid work.
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-emerald-400/40 bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-black p-4 shadow-[0_0_40px_rgba(16,185,129,0.5)]">
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-emerald-100/80">
+          <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.06] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-400">
               Today
             </p>
-            <p className="mt-2 text-2xl font-semibold text-emerald-100">
+            <p className="mt-2 text-2xl font-bold text-emerald-300">
               {formatCurrency(todayTotal)}
             </p>
-            <p className="mt-1 text-[11px] text-emerald-100/80">
-              Jobs marked completed or paid today.
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Completed or paid today.
             </p>
           </div>
           <Panel>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-400">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
               This week
             </p>
-            <p className="mt-2 text-2xl font-semibold text-zinc-50">
+            <p className="mt-2 text-2xl font-bold text-zinc-100">
               {formatCurrency(weekTotal)}
             </p>
             <p className="mt-1 text-[11px] text-zinc-500">
@@ -122,10 +122,10 @@ export default function RevenuePage() {
             </p>
           </Panel>
           <Panel>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-400">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
               This month
             </p>
-            <p className="mt-2 text-2xl font-semibold text-zinc-50">
+            <p className="mt-2 text-2xl font-bold text-zinc-100">
               {formatCurrency(monthTotal)}
             </p>
             <p className="mt-1 text-[11px] text-zinc-500">
@@ -135,37 +135,37 @@ export default function RevenuePage() {
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-purple-500/40 bg-gradient-to-br from-purple-900/70 via-fuchsia-900/60 to-black p-4 text-sm shadow-[0_0_45px_rgba(147,51,234,0.6)]">
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-purple-100/80">
+          <div className="rounded-2xl border border-purple-500/20 bg-purple-500/[0.05] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-purple-400">
               Avg revenue per hour
             </p>
-            <p className="mt-2 text-2xl font-semibold text-purple-100">
+            <p className="mt-2 text-2xl font-bold text-purple-300">
               {averagePerHour > 0 ? formatCurrency(averagePerHour) : "-"}
             </p>
-            <p className="mt-1 text-[11px] text-purple-100/80">
-              Based on hours you estimated on completed or paid work.
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Based on estimated hours on closed work.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-500/20 via-yellow-400/10 to-black p-4 text-sm shadow-[0_0_40px_rgba(250,204,21,0.5)]">
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-amber-100/90">
+          <div className="rounded-2xl border border-amber-500/25 bg-amber-500/[0.06] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400">
               Top service type
             </p>
-            <p className="mt-2 text-lg font-semibold text-amber-100">
+            <p className="mt-2 text-lg font-bold text-amber-300">
               {topService}
             </p>
-            <p className="mt-1 text-[11px] text-amber-50/80">
-              The service category bringing in the most closed revenue.
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Highest closed revenue by category.
             </p>
           </div>
         </div>
 
         {quotes.filter((q) => isClosedRevenueStatus(q.status)).length === 0 && (
-          <Panel className="border-dashed">
-            <p className="text-sm font-medium text-zinc-100">
+          <Panel className="border-dashed border-zinc-700">
+            <p className="text-sm font-semibold text-zinc-200">
               No closed revenue yet.
             </p>
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="mt-1.5 text-xs text-zinc-500">
               Mark quotes as completed or paid, plus estimated hours, to see
               real numbers here.
             </p>
@@ -175,4 +175,3 @@ export default function RevenuePage() {
     </AppShell>
   );
 }
-

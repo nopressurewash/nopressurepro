@@ -57,90 +57,90 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <section className="space-y-4">
+      <section className="space-y-5">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-50">
             Dashboard
           </h1>
-          <p className="mt-1 text-sm text-zinc-400">
-            Glance at revenue, momentum, and quoting performance.
+          <p className="mt-1 text-sm text-zinc-500">
+            Revenue, momentum, and quoting performance.
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-yellow-500/25 bg-gradient-to-br from-yellow-500/10 via-amber-500/5 to-fuchsia-700/20 p-4 shadow-[0_0_40px_rgba(250,204,21,0.25)]">
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-yellow-300/80">
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400">
               Completed Revenue
             </p>
-            <p className="mt-2 text-2xl font-semibold text-yellow-200">
+            <p className="mt-2 text-2xl font-bold text-amber-300">
               {formatCurrency(totalCompletedRevenue)}
             </p>
-            <p className="mt-1 text-[11px] text-zinc-400">
-              Only quotes marked completed or paid.
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Completed or paid quotes only.
             </p>
           </div>
 
-          <Panel className="border-zinc-800/80 bg-zinc-900/60">
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-400">
+          <Panel>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
               Pipeline Revenue
             </p>
-            <p className="mt-2 text-2xl font-semibold text-zinc-50">
+            <p className="mt-2 text-2xl font-bold text-zinc-100">
               {formatCurrency(totalProjectedRevenue)}
             </p>
             <p className="mt-1 text-[11px] text-zinc-500">
-              Sent, approved, and booked work still in the pipeline.
+              Sent, approved, and booked work.
             </p>
           </Panel>
 
-          <Panel className="border-zinc-800/80 bg-zinc-900/60">
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-400">
+          <Panel>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
               Average Quote
             </p>
-            <p className="mt-2 text-2xl font-semibold text-zinc-50">
+            <p className="mt-2 text-2xl font-bold text-zinc-100">
               {formatCurrency(averageQuoteValue)}
             </p>
             <p className="mt-1 text-[11px] text-zinc-500">
-              Across every quote you&apos;ve saved.
+              Across every saved quote.
             </p>
           </Panel>
 
-          <div className="rounded-2xl border border-purple-500/40 bg-gradient-to-br from-purple-900/60 via-fuchsia-900/50 to-black p-4 shadow-[0_0_45px_rgba(147,51,234,0.5)]">
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-purple-200/80">
+          <div className="rounded-2xl border border-purple-500/20 bg-purple-500/[0.05] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-purple-400">
               Completion Rate
             </p>
-            <p className="mt-2 text-2xl font-semibold text-purple-100">
+            <p className="mt-2 text-2xl font-bold text-purple-300">
               {completionRate.toFixed(0)}%
             </p>
-            <p className="mt-1 text-[11px] text-purple-200/70">
-              Completed or paid quotes vs total pipeline.
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Completed or paid vs total.
             </p>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-purple-500/40 bg-gradient-to-br from-purple-900/60 via-fuchsia-900/50 to-black p-4 shadow-[0_0_45px_rgba(147,51,234,0.5)]">
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-purple-200/80">
+        <div className="rounded-2xl border border-purple-500/20 bg-purple-500/[0.05] p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-purple-400">
             Live Revenue / Hour
           </p>
-          <p className="mt-2 text-2xl font-semibold text-purple-100">
+          <p className="mt-2 text-2xl font-bold text-purple-300">
             {liveRevenuePerHour > 0 ? formatCurrency(liveRevenuePerHour) : "-"}
           </p>
-          <p className="mt-1 text-[11px] text-purple-200/70">
+          <p className="mt-1 text-[11px] text-zinc-500">
             From your latest quick quote.
           </p>
         </div>
 
         {!loaded && (
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-zinc-600">
             Loading your local data&hellip;
           </p>
         )}
 
         {loaded && quotes.length === 0 && (
-          <Panel className="mt-2 border-dashed">
-            <p className="text-sm font-medium text-zinc-100">
+          <Panel className="mt-2 border-dashed border-zinc-700">
+            <p className="text-sm font-semibold text-zinc-200">
               No quotes yet.
             </p>
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="mt-1.5 text-xs text-zinc-500">
               Jump into the Quick Quote Builder to price your first driveway,
               then save it to see live numbers here.
             </p>
@@ -150,4 +150,3 @@ export default function DashboardPage() {
     </AppShell>
   );
 }
-

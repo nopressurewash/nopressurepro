@@ -141,42 +141,42 @@ export default function SettingsPage() {
 
   return (
     <AppShell>
-      <section className="space-y-4">
+      <section className="space-y-5">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-50">
             Settings
           </h1>
-          <p className="mt-1 text-sm text-zinc-400">
+          <p className="mt-1 text-sm text-zinc-500">
             Backup, restore, and tune your pricing on this device.
           </p>
         </div>
 
         <Panel className="space-y-3">
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
             Backup status
           </p>
           <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
                 Last backup
               </p>
-              <p className="mt-1 text-xs text-zinc-200">
+              <p className="mt-1 text-xs text-zinc-300">
                 {formatDateTime(lastBackup)}
               </p>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
                 Total quotes
               </p>
-              <p className="mt-1 text-base font-semibold text-amber-100">
+              <p className="mt-1 text-base font-bold text-amber-400">
                 {quotes.length}
               </p>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
                 Total clients
               </p>
-              <p className="mt-1 text-base font-semibold text-emerald-100">
+              <p className="mt-1 text-base font-bold text-emerald-400">
                 {clients.length}
               </p>
             </div>
@@ -184,10 +184,10 @@ export default function SettingsPage() {
         </Panel>
 
         <Panel className="space-y-3">
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
             Backup &amp; restore
           </p>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-zinc-500">
             Backups are stored as a JSON file on your device only. Restoring
             will overwrite current quotes, clients, and rates on this device.
           </p>
@@ -196,7 +196,7 @@ export default function SettingsPage() {
               type="button"
               onClick={handleExport}
               disabled={!loaded}
-              className="flex-1 rounded-2xl border border-amber-400/80 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 px-4 py-2.5 text-sm font-semibold text-zinc-950 shadow-[0_0_30px_rgba(250,204,21,0.6)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex-1 rounded-2xl border border-amber-500/50 bg-amber-500/15 px-4 py-2.5 text-sm font-bold text-amber-400 transition-colors hover:bg-amber-500/20 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Export backup
             </button>
@@ -204,13 +204,13 @@ export default function SettingsPage() {
               type="button"
               onClick={triggerImport}
               disabled={importing}
-              className="flex-1 rounded-2xl border border-purple-500/60 bg-gradient-to-r from-purple-700 via-fuchsia-700 to-purple-900 px-4 py-2.5 text-sm font-semibold text-zinc-50 shadow-[0_0_35px_rgba(147,51,234,0.6)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex-1 rounded-2xl border border-purple-500/40 bg-purple-500/10 px-4 py-2.5 text-sm font-semibold text-purple-300 transition-colors hover:bg-purple-500/15 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {importing ? "Importing…" : "Import backup"}
             </button>
           </div>
           {message && (
-            <p className="text-xs text-amber-200" role="status">
+            <p className="text-xs text-amber-400" role="status">
               {message}
             </p>
           )}
@@ -228,5 +228,3 @@ export default function SettingsPage() {
     </AppShell>
   );
 }
-
-

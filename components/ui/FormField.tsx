@@ -12,15 +12,20 @@ function FieldShell({ label, helpText, children }: FieldShellProps) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
-        <label className="text-xs text-zinc-400">{label}</label>
+        <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+          {label}
+        </label>
         {helpText ? (
-          <p className="text-[10px] text-zinc-500">{helpText}</p>
+          <p className="text-[10px] text-zinc-600">{helpText}</p>
         ) : null}
       </div>
       {children}
     </div>
   );
 }
+
+const inputBase =
+  "w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 transition-colors focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/25";
 
 type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
@@ -29,7 +34,7 @@ export function TextField({ label, helpText, ...props }: FieldProps & InputProps
     <FieldShell label={label} helpText={helpText}>
       <input
         {...props}
-        className={`w-full rounded-xl border border-zinc-800 bg-zinc-900/80 px-3 py-2 text-sm text-zinc-100 outline-none ring-0 placeholder:text-zinc-600 focus:border-amber-400/70 focus:ring-2 focus:ring-amber-400/30 ${props.className ?? ""}`}
+        className={`${inputBase} ${props.className ?? ""}`}
       />
     </FieldShell>
   );
@@ -46,9 +51,8 @@ export function TextAreaField({
     <FieldShell label={label} helpText={helpText}>
       <textarea
         {...props}
-        className={`w-full rounded-xl border border-zinc-800 bg-zinc-900/80 px-3 py-2 text-sm text-zinc-100 outline-none ring-0 placeholder:text-zinc-600 focus:border-amber-400/70 focus:ring-2 focus:ring-amber-400/30 ${props.className ?? ""}`}
+        className={`${inputBase} ${props.className ?? ""}`}
       />
     </FieldShell>
   );
 }
-
