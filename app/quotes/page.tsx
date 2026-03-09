@@ -56,22 +56,22 @@ export default function SavedQuotesPage() {
 
   return (
     <AppShell>
-      <section className="space-y-4">
+      <section className="space-y-5">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-50">
             Saved Quotes
           </h1>
-          <p className="mt-1 text-sm text-zinc-400">
-            Every quote you lock in from the builder, ready to follow up.
+          <p className="mt-1 text-sm text-zinc-500">
+            Every quote from the builder, ready to follow up.
           </p>
         </div>
 
         {quotes.length === 0 ? (
-          <Panel className="border-dashed">
-            <p className="text-sm font-medium text-zinc-100">
+          <Panel className="border-dashed border-zinc-700">
+            <p className="text-sm font-semibold text-zinc-200">
               No saved quotes yet.
             </p>
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="mt-1.5 text-xs text-zinc-500">
               Use the Quick Quote Builder to price a job, then tap &ldquo;Save
               quote&rdquo; to store it here.
             </p>
@@ -81,23 +81,23 @@ export default function SavedQuotesPage() {
             {quotes.map((q) => (
               <Panel
                 key={q.id}
-                className="space-y-2 p-3.5 text-sm"
+                className="space-y-2.5 p-3.5 text-sm"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="text-[13px] font-semibold text-zinc-50">
+                    <p className="text-[13px] font-bold text-zinc-100">
                       {q.clientName || "Unnamed client"}
                     </p>
-                    <p className="text-xs text-zinc-500">
+                    <p className="mt-0.5 text-xs text-zinc-500">
                       {q.suburb || "Suburb unknown"} · {q.phone || "No phone"}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-base font-semibold text-amber-200">
+                    <p className="text-base font-bold text-amber-400">
                       {formatCurrency(q.recommended)}
                     </p>
                     <span
-                      className={`mt-1 inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] ${getQuoteStatusClasses(
+                      className={`mt-1 inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] ${getQuoteStatusClasses(
                         q.status,
                       )}`}
                     >
@@ -106,7 +106,7 @@ export default function SavedQuotesPage() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between gap-2 text-xs">
-                  <p className="text-zinc-400">
+                  <p className="text-zinc-500">
                     {q.serviceType} · {formatDate(q.createdAt)}
                   </p>
                   <div className="text-right">
@@ -115,14 +115,14 @@ export default function SavedQuotesPage() {
                         ? `${q.estimatedHours.toFixed(1)}h · ${formatCurrency(q.revenuePerHour)}/hr`
                         : "-"}
                     </p>
-                    <p className="mt-1 text-[11px] text-zinc-500">
+                    <p className="mt-0.5 text-[11px] text-zinc-600">
                       Photos: {photoCounts[q.id] ?? 0}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between gap-2 pt-1 text-xs">
+                <div className="flex items-center justify-between gap-2 border-t border-zinc-800/60 pt-2.5 text-xs">
                   <div className="flex items-center gap-2">
-                    <label className="text-[11px] text-zinc-500">
+                    <label className="text-[11px] font-medium text-zinc-500">
                       Status
                     </label>
                     <select
@@ -130,7 +130,7 @@ export default function SavedQuotesPage() {
                       onChange={(e) =>
                         updateQuoteStatus(q.id, e.target.value as QuoteStatus)
                       }
-                      className="rounded-full border border-zinc-700 bg-black/60 px-3 py-1 text-[11px] text-zinc-100 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50"
+                      className="rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-[11px] text-zinc-200 outline-none transition-colors focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/25"
                     >
                       {QUOTE_STATUS_OPTIONS.map((status) => (
                         <option key={status} value={status}>
@@ -147,7 +147,7 @@ export default function SavedQuotesPage() {
                           current === q.id ? null : q.id,
                         )
                       }
-                      className="text-[11px] text-amber-300 underline-offset-2 hover:text-amber-200 hover:underline"
+                      className="text-[11px] font-medium text-amber-400 transition-colors hover:text-amber-300"
                     >
                       {expandedPhotoQuoteId === q.id
                         ? "Hide Photos"
@@ -156,21 +156,21 @@ export default function SavedQuotesPage() {
                     <button
                       type="button"
                       onClick={() => exportQuotePdf(q)}
-                      className="text-[11px] text-purple-300 underline-offset-2 hover:text-purple-200 hover:underline"
+                      className="text-[11px] font-medium text-purple-400 transition-colors hover:text-purple-300"
                     >
                       Export PDF
                     </button>
                     <button
                       type="button"
                       onClick={() => deleteQuote(q.id)}
-                      className="text-[11px] text-zinc-500 underline-offset-2 hover:text-red-400 hover:underline"
+                      className="text-[11px] font-medium text-zinc-500 transition-colors hover:text-rose-400"
                     >
                       Delete
                     </button>
                   </div>
                 </div>
                 {q.notes && (
-                  <p className="mt-1 text-[11px] text-zinc-400">
+                  <p className="text-[11px] text-zinc-500">
                     {q.notes.length > 160
                       ? `${q.notes.slice(0, 160)}…`
                       : q.notes}
@@ -203,4 +203,3 @@ export default function SavedQuotesPage() {
     </AppShell>
   );
 }
-

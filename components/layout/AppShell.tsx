@@ -17,29 +17,29 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-black via-[#05010d] to-black text-zinc-100">
-      <header className="border-b border-zinc-800/60 bg-black/60 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
+    <div className="flex min-h-screen flex-col bg-black text-zinc-100">
+      <header className="border-b border-zinc-800/80 bg-black">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3.5">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-500">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-amber-400/90">
               No Pressure Pro
             </p>
-            <p className="text-sm font-medium text-zinc-100">
+            <p className="mt-0.5 text-sm font-medium text-zinc-200">
               Exterior Business HQ
             </p>
           </div>
-          <div className="rounded-full bg-gradient-to-br from-yellow-400/90 via-amber-500 to-fuchsia-700 px-3 py-[2px] text-[11px] font-semibold uppercase tracking-[0.18em] text-black shadow-[0_0_35px_rgba(250,204,21,0.45)]">
-            V1 · MVP
+          <div className="rounded-full border border-amber-500/50 bg-amber-500/10 px-3 py-[3px] text-[10px] font-bold uppercase tracking-[0.2em] text-amber-400">
+            V1
           </div>
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 pb-20 pt-4">
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 pb-20 pt-5">
         {children}
       </main>
 
-      <nav className="sticky bottom-0 border-t border-zinc-800/60 bg-black/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-1 px-2 py-2">
+      <nav className="sticky bottom-0 border-t border-zinc-800/80 bg-black/95 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-0.5 px-1.5 py-1.5">
           {navItems.map((item) => {
             const active =
               item.href === "/"
@@ -50,10 +50,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-1 flex-col items-center rounded-2xl px-2 py-1.5 text-[11px] font-medium transition ${
+                className={`flex flex-1 flex-col items-center rounded-xl px-1 py-1.5 text-[10px] font-semibold tracking-wide transition-colors ${
                   active
-                    ? "bg-gradient-to-br from-yellow-400/20 via-amber-500/15 to-fuchsia-700/20 text-yellow-300 shadow-[0_0_25px_rgba(250,204,21,0.45)]"
-                    : "text-zinc-400 hover:bg-zinc-900/80 hover:text-zinc-100"
+                    ? "bg-amber-500/10 text-amber-400"
+                    : "text-zinc-500 hover:text-zinc-200"
                 }`}
               >
                 <span>{item.label}</span>
@@ -65,4 +65,3 @@ export function AppShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
-

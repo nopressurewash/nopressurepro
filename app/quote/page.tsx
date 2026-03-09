@@ -197,20 +197,23 @@ export default function QuickQuotePage() {
     }
   }
 
+  const toggleBase =
+    "flex items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-medium transition-colors";
+
   return (
     <AppShell>
-      <section className="space-y-4">
+      <section className="space-y-5">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-50">
             Quick Quote
           </h1>
-          <p className="mt-1 text-sm text-zinc-400">
+          <p className="mt-1 text-sm text-zinc-500">
             Price a job in under a minute. Adjust live on-site.
           </p>
         </div>
 
         <Panel className="space-y-3">
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
             Client
           </p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -237,21 +240,16 @@ export default function QuickQuotePage() {
 
         <Panel className="space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
               Surfaces (m²)
             </p>
-            <div className="flex items-center gap-2">
-              <p className="hidden text-[11px] text-zinc-500 sm:block">
-                Rates are editable from any page.
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowMeasureModal(true)}
-                className="rounded-full border border-purple-500/60 bg-gradient-to-r from-purple-800 via-fuchsia-700 to-purple-900 px-3 py-1.5 text-[11px] font-semibold text-zinc-50 shadow-[0_0_24px_rgba(147,51,234,0.6)]"
-              >
-                Measure driveway
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowMeasureModal(true)}
+              className="rounded-xl border border-purple-500/40 bg-purple-500/10 px-3 py-1.5 text-[11px] font-semibold text-purple-300 transition-colors hover:bg-purple-500/15"
+            >
+              Measure driveway
+            </button>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <TextField
@@ -285,7 +283,9 @@ export default function QuickQuotePage() {
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-xs text-zinc-400">Stain level</label>
+              <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+                Stain level
+              </label>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 {(["light", "medium", "heavy"] as StainLevel[]).map((level) => {
                   const active = stainLevel === level;
@@ -294,10 +294,10 @@ export default function QuickQuotePage() {
                       key={level}
                       type="button"
                       onClick={() => setStainLevel(level)}
-                      className={`rounded-xl border px-2 py-1.5 capitalize transition ${
+                      className={`rounded-xl border px-2 py-2 capitalize font-medium transition-colors ${
                         active
-                          ? "border-amber-400 bg-amber-400/15 text-amber-200 shadow-[0_0_24px_rgba(250,204,21,0.4)]"
-                          : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:border-zinc-600"
+                          ? "border-amber-500/50 bg-amber-500/10 text-amber-400"
+                          : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-600"
                       }`}
                     >
                       {level}
@@ -321,109 +321,109 @@ export default function QuickQuotePage() {
             <button
               type="button"
               onClick={() => setHouseWash((v) => !v)}
-              className={`flex items-center justify-between rounded-xl border px-3 py-2 ${
+              className={`${toggleBase} ${
                 houseWash
-                  ? "border-emerald-400/80 bg-emerald-500/20 text-emerald-100 shadow-[0_0_24px_rgba(16,185,129,0.45)]"
-                  : "border-zinc-800 bg-zinc-900/70 text-zinc-400"
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+                  : "border-zinc-800 bg-zinc-900 text-zinc-400"
               }`}
             >
               <span>House wash</span>
-              <span className="text-[11px] text-zinc-300">
+              <span className="text-[11px] text-zinc-400">
                 {formatCurrency(rates.houseWash)}
               </span>
             </button>
             <button
               type="button"
               onClick={() => setRoofWash((v) => !v)}
-              className={`flex items-center justify-between rounded-xl border px-3 py-2 ${
+              className={`${toggleBase} ${
                 roofWash
-                  ? "border-sky-400/80 bg-sky-500/20 text-sky-100 shadow-[0_0_24px_rgba(56,189,248,0.45)]"
-                  : "border-zinc-800 bg-zinc-900/70 text-zinc-400"
+                  ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
+                  : "border-zinc-800 bg-zinc-900 text-zinc-400"
               }`}
             >
               <span>Roof wash</span>
-              <span className="text-[11px] text-zinc-300">
+              <span className="text-[11px] text-zinc-400">
                 {formatCurrency(rates.roofWash)}
               </span>
             </button>
             <button
               type="button"
               onClick={() => setWallsExtras((v) => !v)}
-              className={`flex items-center justify-between rounded-xl border px-3 py-2 ${
+              className={`${toggleBase} ${
                 wallsExtras
-                  ? "border-fuchsia-400/80 bg-fuchsia-500/20 text-fuchsia-100 shadow-[0_0_24px_rgba(217,70,239,0.45)]"
-                  : "border-zinc-800 bg-zinc-900/70 text-zinc-400"
+                  ? "border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-300"
+                  : "border-zinc-800 bg-zinc-900 text-zinc-400"
               }`}
             >
               <span>Walls / extras</span>
-              <span className="text-[11px] text-zinc-300">
+              <span className="text-[11px] text-zinc-400">
                 {formatCurrency(rates.wallsExtras)}
               </span>
             </button>
           </div>
         </Panel>
 
-        <div className="space-y-3 rounded-2xl border border-purple-500/40 bg-gradient-to-br from-purple-900/70 via-fuchsia-900/60 to-black p-4 text-sm shadow-[0_0_45px_rgba(147,51,234,0.6)]">
+        <div className="space-y-3 rounded-2xl border border-zinc-800/90 bg-zinc-950 p-4">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-purple-100/80">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400">
               Quote bands
             </p>
-            <p className="text-[11px] text-purple-100/80">
-              Drag numbers up &amp; down with confidence.
+            <p className="text-[11px] text-zinc-500">
+              Lead with confidence.
             </p>
           </div>
           <div className="grid grid-cols-3 gap-3 text-xs">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-purple-100/70">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Low
               </p>
-              <p className="mt-1 text-lg font-semibold text-zinc-50">
+              <p className="mt-1 text-lg font-bold text-zinc-200">
                 {formatCurrency(totals.low)}
               </p>
-              <p className="mt-1 text-[11px] text-purple-100/70">
-                For softer / repeat clients.
+              <p className="mt-1 text-[11px] text-zinc-500">
+                Softer / repeat clients.
               </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-amber-200/80">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400">
                 Recommended
               </p>
-              <p className="mt-1 text-lg font-semibold text-amber-100">
+              <p className="mt-1 text-lg font-bold text-amber-300">
                 {formatCurrency(totals.recommended)}
               </p>
-              <p className="mt-1 text-[11px] text-amber-100/80">
-                What you should normally lead with.
+              <p className="mt-1 text-[11px] text-zinc-500">
+                Your normal lead price.
               </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-purple-100/70">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 High
               </p>
-              <p className="mt-1 text-lg font-semibold text-zinc-50">
+              <p className="mt-1 text-lg font-bold text-zinc-200">
                 {formatCurrency(totals.high)}
               </p>
-              <p className="mt-1 text-[11px] text-purple-100/70">
-                For hard access, heavy stain, rush jobs.
+              <p className="mt-1 text-[11px] text-zinc-500">
+                Hard access, rush jobs.
               </p>
             </div>
           </div>
 
           <div className="mt-2 grid grid-cols-2 gap-3 text-xs">
-            <div className="rounded-xl border border-purple-200/30 bg-black/40 px-3 py-2.5">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-purple-100/80">
+            <div className="rounded-xl border border-zinc-800 bg-black px-3 py-2.5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Revenue / hour
               </p>
-              <p className="mt-1 text-base font-semibold text-purple-100">
+              <p className="mt-1 text-base font-bold text-zinc-200">
                 {totals.revenuePerHour > 0
                   ? formatCurrency(totals.revenuePerHour)
                   : "-"}
               </p>
             </div>
-            <div className="rounded-xl border border-purple-200/30 bg-black/40 px-3 py-2.5">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-purple-100/80">
+            <div className="rounded-xl border border-zinc-800 bg-black px-3 py-2.5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Chem mix helper
               </p>
-              <p className="mt-1 text-[11px] text-purple-100/80">
+              <p className="mt-1 text-[11px] text-zinc-400">
                 {chemicalMixHint}
               </p>
             </div>
@@ -442,8 +442,8 @@ export default function QuickQuotePage() {
 
         <div className="space-y-2">
           <p className="text-xs text-zinc-500">
-            New quotes save into the pipeline as{" "}
-            <span className="font-medium text-amber-200">
+            New quotes save as{" "}
+            <span className="font-medium text-amber-400">
               {getQuoteStatusLabel("draft")}
             </span>
             .
@@ -452,7 +452,7 @@ export default function QuickQuotePage() {
             <button
               type="button"
               onClick={() => exportQuotePdf(buildDraftQuote())}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-purple-500/60 bg-gradient-to-r from-purple-800 via-fuchsia-700 to-purple-900 px-4 py-3 text-sm font-semibold text-zinc-50 shadow-[0_0_35px_rgba(147,51,234,0.55)] transition active:scale-[0.99]"
+              className="flex w-full items-center justify-center rounded-2xl border border-purple-500/40 bg-purple-500/10 px-4 py-3 text-sm font-semibold text-purple-300 transition-colors hover:bg-purple-500/15 active:scale-[0.99]"
             >
               Export PDF
             </button>
@@ -460,32 +460,32 @@ export default function QuickQuotePage() {
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-amber-400/80 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 px-4 py-3 text-sm font-semibold text-zinc-950 shadow-[0_0_45px_rgba(250,204,21,0.6)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-center rounded-2xl border border-amber-500/50 bg-amber-500/15 px-4 py-3 text-sm font-bold text-amber-400 transition-colors hover:bg-amber-500/20 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Saving quote..." : "Save quote to list"}
             </button>
           </div>
           {savedBanner && (
-            <p className="text-xs text-amber-300">{savedBanner}</p>
+            <p className="text-xs text-amber-400">{savedBanner}</p>
           )}
         </div>
 
         {showMeasureModal && (
-          <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/80 px-3 pb-6 pt-16 sm:items-center sm:px-4">
-            <div className="w-full max-w-3xl rounded-3xl border border-zinc-800 bg-gradient-to-b from-zinc-950 via-black to-zinc-950 p-4 shadow-[0_0_60px_rgba(0,0,0,0.9)] sm:p-5">
+          <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/90 px-3 pb-6 pt-16 sm:items-center sm:px-4">
+            <div className="w-full max-w-3xl rounded-2xl border border-zinc-800 bg-zinc-950 p-4 sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                     Driveway measurement
                   </p>
-                  <p className="mt-1 text-sm font-medium text-zinc-100">
+                  <p className="mt-1 text-sm font-medium text-zinc-200">
                     Draw a polygon around the driveway to estimate m².
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowMeasureModal(false)}
-                  className="rounded-full border border-zinc-700 bg-zinc-900/80 px-2 py-1 text-xs text-zinc-400 hover:border-zinc-500 hover:text-zinc-100"
+                  className="rounded-xl border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-400 transition-colors hover:border-zinc-500 hover:text-zinc-100"
                 >
                   Close
                 </button>
@@ -505,4 +505,3 @@ export default function QuickQuotePage() {
     </AppShell>
   );
 }
-

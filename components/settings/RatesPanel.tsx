@@ -64,7 +64,6 @@ export function RatesPanel({ rates, onChange }: RatesPanelProps) {
   }
 
   function handleFieldChange(key: RateKey, value: string) {
-    // Prevent obvious negative values while still allowing decimals.
     if (value.trim().startsWith("-")) return;
     setDraft((prev) => ({ ...prev, [key]: value }));
   }
@@ -103,7 +102,7 @@ export function RatesPanel({ rates, onChange }: RatesPanelProps) {
   return (
     <Panel className="space-y-4">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
           Rates
         </p>
         <p className="text-[11px] text-zinc-500">
@@ -157,25 +156,24 @@ export function RatesPanel({ rates, onChange }: RatesPanelProps) {
         <button
           type="button"
           onClick={handleSave}
-          className="flex-1 rounded-2xl border border-amber-400/80 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 px-4 py-2.5 text-sm font-semibold text-zinc-950 shadow-[0_0_30px_rgba(250,204,21,0.6)] transition active:scale-[0.99]"
+          className="flex-1 rounded-2xl border border-amber-500/50 bg-amber-500/15 px-4 py-2.5 text-sm font-bold text-amber-400 transition-colors hover:bg-amber-500/20 active:scale-[0.99]"
         >
           Save rates
         </button>
         <button
           type="button"
           onClick={handleReset}
-          className="flex-1 rounded-2xl border border-zinc-700 bg-zinc-900/80 px-4 py-2.5 text-sm font-semibold text-zinc-200 transition hover:border-zinc-500 hover:bg-zinc-900"
+          className="flex-1 rounded-2xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100"
         >
           Reset to defaults
         </button>
       </div>
 
       {message && (
-        <p className="text-xs text-amber-200" role="status">
+        <p className="text-xs text-amber-400" role="status">
           {message}
         </p>
       )}
     </Panel>
   );
 }
-
