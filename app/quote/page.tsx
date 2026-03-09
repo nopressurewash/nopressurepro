@@ -8,6 +8,7 @@ import { AreaMeasureMap } from "../../components/map/AreaMeasureMap";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
 import { exportQuotePdf } from "../../lib/pdf/exportQuotePdf";
+import { getQuoteStatusLabel } from "../../lib/quoteStatus";
 import type { StainLevel } from "../../lib/types";
 import { Quote } from "../../lib/types";
 
@@ -142,7 +143,7 @@ export default function QuickQuotePage() {
       recommended: totals.recommended,
       high: totals.high,
       revenuePerHour: totals.revenuePerHour,
-      status: "pending",
+      status: "draft",
       createdAt: new Date().toISOString(),
     };
   }
@@ -175,7 +176,7 @@ export default function QuickQuotePage() {
         recommended: totals.recommended,
         high: totals.high,
         revenuePerHour: totals.revenuePerHour,
-        status: "pending",
+        status: "draft",
         createdAt: new Date().toISOString(),
       };
 
@@ -440,6 +441,13 @@ export default function QuickQuotePage() {
         </Panel>
 
         <div className="space-y-2">
+          <p className="text-xs text-zinc-500">
+            New quotes save into the pipeline as{" "}
+            <span className="font-medium text-amber-200">
+              {getQuoteStatusLabel("draft")}
+            </span>
+            .
+          </p>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button
               type="button"

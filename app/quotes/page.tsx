@@ -5,6 +5,11 @@ import { Panel } from "../../components/ui/Panel";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
 import { exportQuotePdf } from "../../lib/pdf/exportQuotePdf";
+import {
+  getQuoteStatusClasses,
+  getQuoteStatusLabel,
+  QUOTE_STATUS_OPTIONS,
+} from "../../lib/quoteStatus";
 import type { QuoteStatus } from "../../lib/types";
 
 function formatDate(iso: string) {
@@ -15,8 +20,6 @@ function formatDate(iso: string) {
     month: "short",
   });
 }
-
-const statusOptions: QuoteStatus[] = ["pending", "scheduled", "won", "lost"];
 
 export default function SavedQuotesPage() {
   const { quotes, deleteQuote, updateQuoteStatus } = useLocalData();
@@ -59,9 +62,18 @@ export default function SavedQuotesPage() {
                       {q.suburb || "Suburb unknown"} · {q.phone || "No phone"}
                     </p>
                   </div>
-                  <p className="text-right text-base font-semibold text-amber-200">
-                    {formatCurrency(q.recommended)}
-                  </p>
+                  <div className="text-right">
+                    <p className="text-base font-semibold text-amber-200">
+                      {formatCurrency(q.recommended)}
+                    </p>
+                    <span
+                      className={`mt-1 inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] ${getQuoteStatusClasses(
+                        q.status,
+                      )}`}
+                    >
+                      {getQuoteStatusLabel(q.status)}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between gap-2 text-xs">
                   <p className="text-zinc-400">
@@ -85,9 +97,9 @@ export default function SavedQuotesPage() {
                       }
                       className="rounded-full border border-zinc-700 bg-black/60 px-3 py-1 text-[11px] text-zinc-100 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50"
                     >
-                      {statusOptions.map((status) => (
+                      {QUOTE_STATUS_OPTIONS.map((status) => (
                         <option key={status} value={status}>
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                          {getQuoteStatusLabel(status)}
                         </option>
                       ))}
                     </select>

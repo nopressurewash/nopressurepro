@@ -1,4 +1,11 @@
-export type QuoteStatus = "pending" | "won" | "lost" | "scheduled";
+export type QuoteStatus =
+  | "draft"
+  | "sent"
+  | "approved"
+  | "booked"
+  | "completed"
+  | "paid"
+  | "lost";
 
 export type StainLevel = "light" | "medium" | "heavy";
 
