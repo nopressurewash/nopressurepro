@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { AppShell } from "../../components/layout/AppShell";
+import { JobPhotoGallery } from "../../components/photos/JobPhotoGallery";
 import { Panel } from "../../components/ui/Panel";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
@@ -23,6 +25,9 @@ function formatDate(iso: string) {
 
 export default function SavedQuotesPage() {
   const { quotes, deleteQuote, updateQuoteStatus } = useLocalData();
+  const [expandedPhotoQuoteId, setExpandedPhotoQuoteId] = useState<string | null>(
+    null,
+  );
 
   return (
     <AppShell>
@@ -107,6 +112,19 @@ export default function SavedQuotesPage() {
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
+                      onClick={() =>
+                        setExpandedPhotoQuoteId((current) =>
+                          current === q.id ? null : q.id,
+                        )
+                      }
+                      className="text-[11px] text-amber-300 underline-offset-2 hover:text-amber-200 hover:underline"
+                    >
+                      {expandedPhotoQuoteId === q.id
+                        ? "Hide Photos"
+                        : "Job Photos"}
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => exportQuotePdf(q)}
                       className="text-[11px] text-purple-300 underline-offset-2 hover:text-purple-200 hover:underline"
                     >
@@ -127,6 +145,11 @@ export default function SavedQuotesPage() {
                       ? `${q.notes.slice(0, 160)}…`
                       : q.notes}
                   </p>
+                )}
+                {expandedPhotoQuoteId === q.id && (
+                  <div className="pt-2">
+                    <JobPhotoGallery quoteId={q.id} />
+                  </div>
                 )}
               </Panel>
             ))}

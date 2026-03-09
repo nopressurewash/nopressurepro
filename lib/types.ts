@@ -53,3 +53,14 @@ export interface Client {
   clientType: "Residential" | "Commercial";
 }
 
+export type JobPhotoCategory = "before" | "after" | "other";
+
+export interface JobPhotoRecord {
+  id: string;
+  quoteId: string;
+  category: JobPhotoCategory;
+  createdAt: string;
+  blob: Blob;
+  caption?: string;
+}
+
