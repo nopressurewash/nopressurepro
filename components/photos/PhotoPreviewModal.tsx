@@ -25,6 +25,9 @@ function getCategoryLabel(category: JobPhotoCategory) {
   }
 }
 
+const pillBase =
+  "rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200";
+
 export function PhotoPreviewModal({
   photo,
   onClose,
@@ -42,37 +45,37 @@ export function PhotoPreviewModal({
   if (!photo || !imageUrl) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/85 px-3 pb-6 pt-16 sm:items-center sm:px-4">
-      <div className="w-full max-w-3xl rounded-3xl border border-zinc-800 bg-gradient-to-b from-zinc-950 via-black to-zinc-950 p-4 shadow-[0_0_60px_rgba(0,0,0,0.9)] sm:p-5">
+    <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 px-3 pb-6 pt-16 sm:items-center sm:px-4">
+      <div className="animate-fade-in-up w-full max-w-3xl rounded-2xl border border-zinc-800 bg-zinc-950 p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
               Job Photo
             </p>
-            <p className="mt-1 text-sm font-medium text-zinc-100">
+            <p className="mt-1 text-sm font-semibold text-zinc-100">
               {getCategoryLabel(photo.category)}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-zinc-700 bg-zinc-900/80 px-2 py-1 text-xs text-zinc-400 hover:border-zinc-500 hover:text-zinc-100"
+            className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
           >
             Close
           </button>
         </div>
 
-        <div className="mt-3 overflow-hidden rounded-2xl border border-zinc-800 bg-black">
+        <div className="mt-3 overflow-hidden rounded-xl border border-zinc-800 bg-black">
           <img
             src={imageUrl}
             alt="Job photo preview"
-            className="h-auto max-h-[65vh] w-full object-contain"
+            className="h-auto max-h-[60vh] w-full object-contain"
           />
         </div>
 
-        <div className="mt-3 space-y-3">
+        <div className="mt-4 space-y-4">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
               Caption
             </p>
             <div className="mt-2 flex flex-col gap-2 sm:flex-row">
@@ -80,12 +83,12 @@ export function PhotoPreviewModal({
                 value={captionDraft}
                 onChange={(event) => setCaptionDraft(event.target.value)}
                 placeholder="Add a short note for this photo"
-                className="flex-1 rounded-2xl border border-zinc-800 bg-zinc-900/80 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-amber-400/70 focus:ring-2 focus:ring-amber-400/30"
+                className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 transition-all duration-200 focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20"
               />
               <button
                 type="button"
                 onClick={() => onSaveCaption(photo.id, captionDraft)}
-                className="rounded-2xl border border-amber-400/80 bg-amber-400/15 px-3 py-2 text-xs font-semibold text-amber-200 transition hover:bg-amber-400/20"
+                className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2.5 text-xs font-semibold text-amber-400 transition-all duration-200 hover:bg-amber-500/15 active:scale-[0.97]"
               >
                 Save Caption
               </button>
@@ -93,7 +96,7 @@ export function PhotoPreviewModal({
           </div>
 
           <div>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
               Move to category
             </p>
             <div className="mt-2 grid grid-cols-3 gap-2">
@@ -104,10 +107,10 @@ export function PhotoPreviewModal({
                     key={category}
                     type="button"
                     onClick={() => onMoveCategory(photo.id, category)}
-                    className={`rounded-2xl border px-3 py-2 text-xs font-semibold transition ${
+                    className={`${pillBase} ${
                       active
-                        ? "border-amber-400/80 bg-amber-400/15 text-amber-200"
-                        : "border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:border-zinc-600"
+                        ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
+                        : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
                     }`}
                   >
                     {getCategoryLabel(category)}
@@ -124,7 +127,7 @@ export function PhotoPreviewModal({
                 onDelete(photo.id);
                 onClose();
               }}
-              className="rounded-2xl border border-rose-500/60 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/15"
+              className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-400 transition-all duration-200 hover:bg-rose-500/15 active:scale-[0.97]"
             >
               Delete Photo
             </button>
@@ -134,4 +137,3 @@ export function PhotoPreviewModal({
     </div>
   );
 }
-

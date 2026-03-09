@@ -132,6 +132,22 @@ export function useLocalData() {
     [],
   );
 
+  const updateQuoteSchedule = useCallback(
+    (id: string, scheduledDate: string, scheduledTime: string) => {
+      const preBookingStatuses: QuoteStatus[] = ["draft", "sent", "approved"];
+      setQuotes((prev) =>
+        prev.map((q) => {
+          if (q.id !== id) return q;
+          const status = preBookingStatuses.includes(q.status)
+            ? ("booked" as QuoteStatus)
+            : q.status;
+          return { ...q, scheduledDate, scheduledTime, status };
+        }),
+      );
+    },
+    [],
+  );
+
   const updateRates = useCallback((nextRates: Rates) => {
     setRates(nextRates);
   }, []);
@@ -153,6 +169,7 @@ export function useLocalData() {
     addQuote,
     deleteQuote,
     updateQuoteStatus,
+    updateQuoteSchedule,
     updateRates,
     overwriteAll,
   };

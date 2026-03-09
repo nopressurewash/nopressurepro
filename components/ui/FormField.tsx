@@ -25,7 +25,7 @@ function FieldShell({ label, helpText, children }: FieldShellProps) {
 }
 
 const inputBase =
-  "w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 transition-colors focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/25";
+  "w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 transition-all duration-200 focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20 focus:bg-zinc-900/80";
 
 type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
