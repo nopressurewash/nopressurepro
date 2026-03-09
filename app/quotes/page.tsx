@@ -1,10 +1,18 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AppShell } from "../../components/layout/AppShell";
+import { JobPhotoGallery } from "../../components/photos/JobPhotoGallery";
 import { Panel } from "../../components/ui/Panel";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
+import { getPhotoCountsForQuoteIds } from "../../lib/photoStorage";
 import { exportQuotePdf } from "../../lib/pdf/exportQuotePdf";
+import {
+  getQuoteStatusClasses,
+  getQuoteStatusLabel,
+  QUOTE_STATUS_OPTIONS,
+} from "../../lib/quoteStatus";
 import type { QuoteStatus } from "../../lib/types";
 
 function formatDate(iso: string) {
@@ -16,10 +24,35 @@ function formatDate(iso: string) {
   });
 }
 
-const statusOptions: QuoteStatus[] = ["pending", "scheduled", "won", "lost"];
-
 export default function SavedQuotesPage() {
   const { quotes, deleteQuote, updateQuoteStatus } = useLocalData();
+  const [expandedPhotoQuoteId, setExpandedPhotoQuoteId] = useState<string | null>(
+    null,
+  );
+  const [photoCounts, setPhotoCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadCounts() {
+      try {
+        const counts = await getPhotoCountsForQuoteIds(quotes.map((quote) => quote.id));
+        if (active) {
+          setPhotoCounts(counts);
+        }
+      } catch {
+        if (active) {
+          setPhotoCounts({});
+        }
+      }
+    }
+
+    void loadCounts();
+
+    return () => {
+      active = false;
+    };
+  }, [quotes]);
 
   return (
     <AppShell>
@@ -59,19 +92,33 @@ export default function SavedQuotesPage() {
                       {q.suburb || "Suburb unknown"} · {q.phone || "No phone"}
                     </p>
                   </div>
-                  <p className="text-right text-base font-semibold text-amber-200">
-                    {formatCurrency(q.recommended)}
-                  </p>
+                  <div className="text-right">
+                    <p className="text-base font-semibold text-amber-200">
+                      {formatCurrency(q.recommended)}
+                    </p>
+                    <span
+                      className={`mt-1 inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] ${getQuoteStatusClasses(
+                        q.status,
+                      )}`}
+                    >
+                      {getQuoteStatusLabel(q.status)}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between gap-2 text-xs">
                   <p className="text-zinc-400">
                     {q.serviceType} · {formatDate(q.createdAt)}
                   </p>
-                  <p className="text-zinc-500">
-                    {q.estimatedHours > 0
-                      ? `${q.estimatedHours.toFixed(1)}h · ${formatCurrency(q.revenuePerHour)}/hr`
-                      : "-"}
-                  </p>
+                  <div className="text-right">
+                    <p className="text-zinc-500">
+                      {q.estimatedHours > 0
+                        ? `${q.estimatedHours.toFixed(1)}h · ${formatCurrency(q.revenuePerHour)}/hr`
+                        : "-"}
+                    </p>
+                    <p className="mt-1 text-[11px] text-zinc-500">
+                      Photos: {photoCounts[q.id] ?? 0}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-1 text-xs">
                   <div className="flex items-center gap-2">
@@ -85,14 +132,27 @@ export default function SavedQuotesPage() {
                       }
                       className="rounded-full border border-zinc-700 bg-black/60 px-3 py-1 text-[11px] text-zinc-100 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50"
                     >
-                      {statusOptions.map((status) => (
+                      {QUOTE_STATUS_OPTIONS.map((status) => (
                         <option key={status} value={status}>
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                          {getQuoteStatusLabel(status)}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedPhotoQuoteId((current) =>
+                          current === q.id ? null : q.id,
+                        )
+                      }
+                      className="text-[11px] text-amber-300 underline-offset-2 hover:text-amber-200 hover:underline"
+                    >
+                      {expandedPhotoQuoteId === q.id
+                        ? "Hide Photos"
+                        : "Job Photos"}
+                    </button>
                     <button
                       type="button"
                       onClick={() => exportQuotePdf(q)}
@@ -115,6 +175,25 @@ export default function SavedQuotesPage() {
                       ? `${q.notes.slice(0, 160)}…`
                       : q.notes}
                   </p>
+                )}
+                {expandedPhotoQuoteId === q.id && (
+                  <div className="pt-2">
+                    <JobPhotoGallery
+                      quoteId={q.id}
+                      onPhotoCountChange={(count) =>
+                        setPhotoCounts((prev) => {
+                          if ((prev[q.id] ?? 0) === count) {
+                            return prev;
+                          }
+
+                          return {
+                            ...prev,
+                            [q.id]: count,
+                          };
+                        })
+                      }
+                    />
+                  </div>
                 )}
               </Panel>
             ))}

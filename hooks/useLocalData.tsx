@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import type { Client, Quote, Rates, QuoteStatus } from "../lib/types";
 import { DEFAULT_RATES } from "../lib/pricing/defaultRates";
 import { RATES_KEY, normalizeRates } from "../lib/pricing/pricingStorage";
+import { normalizeQuoteStatus } from "../lib/quoteStatus";
 
 const QUOTES_KEY = "npp_quotes_v1";
 const CLIENTS_KEY = "npp_clients_v1";
@@ -56,6 +57,13 @@ function upsertClientForQuote(prevClients: Client[], quote: Quote): Client[] {
   return [...prevClients, newClient];
 }
 
+function normalizeQuote(quote: Quote): Quote {
+  return {
+    ...quote,
+    status: normalizeQuoteStatus(quote.status),
+  };
+}
+
 export function useLocalData() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -68,7 +76,7 @@ export function useLocalData() {
     const storedQuotes = safeParse<Quote[]>(
       window.localStorage.getItem(QUOTES_KEY),
       [],
-    );
+    ).map(normalizeQuote);
     const storedClients = safeParse<Client[]>(
       window.localStorage.getItem(CLIENTS_KEY),
       [],
@@ -102,8 +110,9 @@ export function useLocalData() {
 
   const addQuote = useCallback(
     (quote: Quote) => {
-      setQuotes((prev) => [quote, ...prev]);
-      setClients((prev) => upsertClientForQuote(prev, quote));
+      const normalized = normalizeQuote(quote);
+      setQuotes((prev) => [normalized, ...prev]);
+      setClients((prev) => upsertClientForQuote(prev, normalized));
     },
     [],
   );
@@ -115,7 +124,9 @@ export function useLocalData() {
   const updateQuoteStatus = useCallback(
     (id: string, status: QuoteStatus) => {
       setQuotes((prev) =>
-        prev.map((q) => (q.id === id ? { ...q, status } : q)),
+        prev.map((q) =>
+          q.id === id ? { ...q, status: normalizeQuoteStatus(status) } : q,
+        ),
       );
     },
     [],
@@ -127,7 +138,7 @@ export function useLocalData() {
 
   const overwriteAll = useCallback(
     (payload: { quotes: Quote[]; clients: Client[]; rates: Partial<Rates> }) => {
-      setQuotes(payload.quotes ?? []);
+      setQuotes((payload.quotes ?? []).map(normalizeQuote));
       setClients(payload.clients ?? []);
       setRates(normalizeRates(payload.rates));
     },

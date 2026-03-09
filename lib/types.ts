@@ -1,4 +1,11 @@
-export type QuoteStatus = "pending" | "won" | "lost" | "scheduled";
+export type QuoteStatus =
+  | "draft"
+  | "sent"
+  | "approved"
+  | "booked"
+  | "completed"
+  | "paid"
+  | "lost";
 
 export type StainLevel = "light" | "medium" | "heavy";
 
@@ -44,5 +51,16 @@ export interface Client {
   totalJobs: number;
   totalValue: number;
   clientType: "Residential" | "Commercial";
+}
+
+export type JobPhotoCategory = "before" | "after" | "other";
+
+export interface JobPhotoRecord {
+  id: string;
+  quoteId: string;
+  category: JobPhotoCategory;
+  createdAt: string;
+  blob: Blob;
+  caption?: string;
 }
 

@@ -4,6 +4,7 @@ import { AppShell } from "../../components/layout/AppShell";
 import { Panel } from "../../components/ui/Panel";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
+import { isClosedRevenueStatus } from "../../lib/quoteStatus";
 import { Quote } from "../../lib/types";
 
 function isSameDay(a: Date, b: Date) {
@@ -34,7 +35,7 @@ function isSameMonth(a: Date, b: Date) {
 }
 
 function calculateRevenue(quotes: Quote[]) {
-  const won = quotes.filter((q) => q.status === "won");
+  const completed = quotes.filter((q) => isClosedRevenueStatus(q.status));
   const today = new Date();
 
   let todayTotal = 0;
@@ -43,7 +44,7 @@ function calculateRevenue(quotes: Quote[]) {
   let hoursTotal = 0;
   const serviceCount: Record<string, number> = {};
 
-  for (const q of won) {
+  for (const q of completed) {
     const d = new Date(q.createdAt);
     if (Number.isNaN(d.getTime())) continue;
 
@@ -60,7 +61,11 @@ function calculateRevenue(quotes: Quote[]) {
   }
 
   const averagePerHour =
-    hoursTotal > 0 ? Math.round(won.reduce((s, q) => s + q.recommended, 0) / hoursTotal) : 0;
+    hoursTotal > 0
+      ? Math.round(
+          completed.reduce((s, q) => s + q.recommended, 0) / hoursTotal,
+        )
+      : 0;
 
   const topService =
     Object.entries(serviceCount).sort((a, b) => b[1] - a[1])[0]?.[0] ??
@@ -89,7 +94,7 @@ export default function RevenuePage() {
             Revenue
           </h1>
           <p className="mt-1 text-sm text-zinc-400">
-            Track what&apos;s actually locked in from your won quotes.
+            Track what&apos;s actually locked in from completed and paid work.
           </p>
         </div>
 
@@ -102,7 +107,7 @@ export default function RevenuePage() {
               {formatCurrency(todayTotal)}
             </p>
             <p className="mt-1 text-[11px] text-emerald-100/80">
-              Jobs marked as &ldquo;Won&rdquo; today.
+              Jobs marked completed or paid today.
             </p>
           </div>
           <Panel>
@@ -138,7 +143,7 @@ export default function RevenuePage() {
               {averagePerHour > 0 ? formatCurrency(averagePerHour) : "-"}
             </p>
             <p className="mt-1 text-[11px] text-purple-100/80">
-              Based on hours you estimated on won work.
+              Based on hours you estimated on completed or paid work.
             </p>
           </div>
 
@@ -150,19 +155,19 @@ export default function RevenuePage() {
               {topService}
             </p>
             <p className="mt-1 text-[11px] text-amber-50/80">
-              The service category bringing in the most won revenue.
+              The service category bringing in the most closed revenue.
             </p>
           </div>
         </div>
 
-        {quotes.filter((q) => q.status === "won").length === 0 && (
+        {quotes.filter((q) => isClosedRevenueStatus(q.status)).length === 0 && (
           <Panel className="border-dashed">
             <p className="text-sm font-medium text-zinc-100">
-              No won revenue yet.
+              No closed revenue yet.
             </p>
             <p className="mt-1 text-xs text-zinc-500">
-              Mark a few saved quotes as &ldquo;Won&rdquo; and estimated hours
-              to see real numbers here.
+              Mark quotes as completed or paid, plus estimated hours, to see
+              real numbers here.
             </p>
           </Panel>
         )}

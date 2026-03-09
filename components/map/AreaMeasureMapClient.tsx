@@ -7,6 +7,7 @@ import {
   MapContainer,
   TileLayer,
   useMap,
+  useMapEvents,
 } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
 import L from "leaflet";
@@ -29,6 +30,39 @@ interface SearchSuggestion {
   type?: string;
   houseNumber?: string;
   road?: string;
+}
+
+type ResolvedAddressStatus =
+  | "idle"
+  | "resolved"
+  | "generic"
+  | "reverse_failed";
+
+interface ReverseGeocodeResult {
+  status: ResolvedAddressStatus;
+  hasDisplayName: boolean;
+}
+
+function buildSearchQuery(query: string) {
+  const normalized = query.trim();
+  const lower = normalized.toLowerCase();
+  const hasQueensland = /\b(qld|queensland)\b/.test(lower);
+  const hasGoldCoast = /gold coast/.test(lower);
+  const hasOxenford = /oxenford/.test(lower);
+  const hasAustralia = /\baustralia\b/.test(lower);
+
+  const parts = [normalized];
+  if (!hasOxenford) parts.push("Oxenford");
+  if (!hasGoldCoast) parts.push("Gold Coast");
+  if (!hasQueensland) parts.push("Queensland");
+  if (!hasAustralia) parts.push("Australia");
+
+  return parts.join(", ");
+}
+
+function buildGoldCoastBiasViewbox() {
+  // Rough Gold Coast / SEQ bias box: west, north, east, south.
+  return "153.11,-27.84,153.55,-28.18";
 }
 
 function MapViewportController({
@@ -70,6 +104,25 @@ function MapViewportController({
   return null;
 }
 
+function MapCenterTracker({
+  onCenterChange,
+}: {
+  onCenterChange: (center: [number, number]) => void;
+}) {
+  useMapEvents({
+    move(event) {
+      const center = event.target.getCenter();
+      onCenterChange([center.lat, center.lng]);
+    },
+    moveend(event) {
+      const center = event.target.getCenter();
+      onCenterChange([center.lat, center.lng]);
+    },
+  });
+
+  return null;
+}
+
 export function AreaMeasureMapClient({
   onAreaConfirm,
 }: AreaMeasureMapClientProps) {
@@ -86,6 +139,11 @@ export function AreaMeasureMapClient({
     [[number, number], [number, number]] | null
   >(null);
   const [mapMode, setMapMode] = useState<MapMode>("imagery");
+  const [mapCenter, setMapCenter] = useState<[number, number]>([-28.0, 153.4]);
+  const [locating, setLocating] = useState(false);
+  const [locationMessage, setLocationMessage] = useState<string | null>(null);
+  const [resolvedAddressStatus, setResolvedAddressStatus] =
+    useState<ResolvedAddressStatus>("idle");
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -109,14 +167,16 @@ export function AreaMeasureMapClient({
         setSearching(true);
         const normalizedQuery = debouncedQuery.toLowerCase().trim();
         const queryHasHouseNumber = /\b\d+[a-z]?\b/i.test(normalizedQuery);
+        const searchQuery = buildSearchQuery(debouncedQuery);
 
         const params = new URLSearchParams({
-          q: debouncedQuery,
+          q: searchQuery,
           format: "jsonv2",
           limit: "8",
           addressdetails: "1",
           countrycodes: "au",
           dedupe: "1",
+          viewbox: buildGoldCoastBiasViewbox(),
         });
 
         const response = await fetch(
@@ -204,6 +264,12 @@ export function AreaMeasureMapClient({
             const bRoadMatch = b.road
               ? normalizedQuery.includes(b.road.toLowerCase())
               : false;
+            const aQueenslandBias = /queensland|qld/.test(aText);
+            const bQueenslandBias = /queensland|qld/.test(bText);
+            const aGoldCoastBias = /gold coast/.test(aText);
+            const bGoldCoastBias = /gold coast/.test(bText);
+            const aOxenfordBias = /oxenford/.test(aText);
+            const bOxenfordBias = /oxenford/.test(bText);
 
             if (queryHasHouseNumber && aHasHouseNumber !== bHasHouseNumber) {
               return aHasHouseNumber ? -1 : 1;
@@ -219,6 +285,18 @@ export function AreaMeasureMapClient({
 
             if (aRoadMatch !== bRoadMatch) {
               return aRoadMatch ? -1 : 1;
+            }
+
+            if (aGoldCoastBias !== bGoldCoastBias) {
+              return aGoldCoastBias ? -1 : 1;
+            }
+
+            if (aOxenfordBias !== bOxenfordBias) {
+              return aOxenfordBias ? -1 : 1;
+            }
+
+            if (aQueenslandBias !== bQueenslandBias) {
+              return aQueenslandBias ? -1 : 1;
             }
 
             return b.importance - a.importance;
@@ -240,6 +318,142 @@ export function AreaMeasureMapClient({
 
     return () => controller.abort();
   }, [debouncedQuery]);
+
+  async function reverseGeocodeAndPrefill(
+    center: [number, number],
+  ): Promise<ReverseGeocodeResult> {
+    try {
+      const params = new URLSearchParams({
+        lat: String(center[0]),
+        lon: String(center[1]),
+        format: "jsonv2",
+        addressdetails: "1",
+        zoom: "19",
+      });
+
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?${params.toString()}`,
+        {
+          headers: {
+            Accept: "application/json",
+          },
+        },
+      );
+
+      if (!response.ok) {
+        setResolvedAddressStatus("reverse_failed");
+        return { status: "reverse_failed", hasDisplayName: false };
+      }
+
+      const data = (await response.json()) as {
+        display_name?: string;
+        boundingbox?: [string, string, string, string];
+      };
+
+      if (data.display_name) {
+        setQuery(data.display_name);
+        const lower = data.display_name.toLowerCase();
+        const hasExactAddress = /\b\d+[a-z]?\b/i.test(lower);
+        const status = hasExactAddress ? "resolved" : "generic";
+        setResolvedAddressStatus(status);
+        if (data.boundingbox?.length === 4) {
+          setSelectedBounds([
+            [Number(data.boundingbox[0]), Number(data.boundingbox[2])],
+            [Number(data.boundingbox[1]), Number(data.boundingbox[3])],
+          ]);
+        }
+        return { status, hasDisplayName: true };
+      } else {
+        setResolvedAddressStatus("generic");
+        if (data.boundingbox?.length === 4) {
+          setSelectedBounds([
+            [Number(data.boundingbox[0]), Number(data.boundingbox[2])],
+            [Number(data.boundingbox[1]), Number(data.boundingbox[3])],
+          ]);
+        }
+        return { status: "generic", hasDisplayName: false };
+      }
+    } catch {
+      // Reverse geocode is a helper only; map centering still works if this fails.
+      setResolvedAddressStatus("reverse_failed");
+      return { status: "reverse_failed", hasDisplayName: false };
+    }
+  }
+
+  function handleUseMyLocation() {
+    if (!navigator.geolocation) {
+      setResolvedAddressStatus("reverse_failed");
+      setLocationMessage("Location is unavailable in this browser. You can still move the map manually.");
+      return;
+    }
+
+    setLocating(true);
+    setLocationMessage(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const center: [number, number] = [
+          position.coords.latitude,
+          position.coords.longitude,
+        ];
+        setSelectedCenter(center);
+        setSelectedBounds(null);
+        setMapCenter(center);
+        setSuggestions([]);
+        const reverse = await reverseGeocodeAndPrefill(center);
+        if (reverse.status === "reverse_failed") {
+          setLocationMessage(
+            "Location found, but exact address could not be resolved. You can still use the map manually.",
+          );
+        } else if (reverse.status === "generic") {
+          setLocationMessage(
+            reverse.hasDisplayName
+              ? "Location found, but only an approximate address was resolved. Use the map center if needed."
+              : "Location found, but exact address could not be resolved. You can still use the map manually.",
+          );
+        } else {
+          setLocationMessage("Location found and map centered on your position.");
+        }
+        setLocating(false);
+      },
+      (error) => {
+        setLocating(false);
+        setResolvedAddressStatus("reverse_failed");
+
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationMessage(
+            "Location permission was denied. You can still search or move the map manually.",
+          );
+          return;
+        }
+
+        if (error.code === error.POSITION_UNAVAILABLE) {
+          setLocationMessage(
+            "Your location could not be determined. Try moving the map manually.",
+          );
+          return;
+        }
+
+        setLocationMessage(
+          "Could not get your location right now. Try again or use the map manually.",
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 12000,
+        maximumAge: 0,
+      },
+    );
+  }
+
+  function handleUseMapCenter() {
+    setSelectedCenter(mapCenter);
+    setSelectedBounds(null);
+    setSuggestions([]);
+    setLocationMessage(null);
+    setResolvedAddressStatus("idle");
+    void reverseGeocodeAndPrefill(mapCenter);
+  }
 
   function recalcArea() {
     const fg = featureGroupRef.current;
@@ -332,98 +546,145 @@ export function AreaMeasureMapClient({
           </div>
         </div>
 
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={handleUseMapCenter}
+            className="rounded-2xl border border-amber-400/80 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 px-3 py-2 text-xs font-semibold text-zinc-950 shadow-[0_0_20px_rgba(250,204,21,0.45)] transition active:scale-[0.99]"
+          >
+            Use Map Center
+          </button>
+          <button
+            type="button"
+            onClick={handleUseMyLocation}
+            disabled={locating}
+            className="rounded-2xl border border-purple-500/60 bg-gradient-to-r from-purple-800 via-fuchsia-700 to-purple-900 px-3 py-2 text-xs font-semibold text-zinc-50 shadow-[0_0_20px_rgba(147,51,234,0.45)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {locating ? "Locating..." : "Use My Location"}
+          </button>
+        </div>
+
         <p className="text-[11px] text-zinc-500">
-          Search an address, zoom in close, then trace the driveway polygon.
+          Search street or suburb, use your location, or move the map manually.
         </p>
+        {locationMessage && (
+          <p className="text-xs text-amber-200">{locationMessage}</p>
+        )}
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-[11px] text-zinc-500">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span>Lat: {mapCenter[0].toFixed(6)}</span>
+            <span>Lng: {mapCenter[1].toFixed(6)}</span>
+            <span>
+              Address:{" "}
+              {resolvedAddressStatus === "resolved"
+                ? "Exact / resolved"
+                : resolvedAddressStatus === "generic"
+                  ? "Approximate only"
+                  : resolvedAddressStatus === "reverse_failed"
+                    ? "Reverse geocode failed"
+                    : "Not resolved yet"}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <MapContainer
-        center={[-28.0, 153.4]}
-        zoom={19.5}
-        zoomControl={true}
-        maxZoom={22}
-        className="h-64 w-full overflow-hidden rounded-2xl border border-zinc-800 bg-black sm:h-80"
-        whenReady={(e) => {
-          window.setTimeout(() => {
-            e.target.invalidateSize();
-          }, 0);
-        }}
-      >
-        <MapViewportController
-          targetCenter={selectedCenter}
-          targetBounds={selectedBounds}
-        />
-        {mapMode === "imagery" ? (
-          <TileLayer
-            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-            attribution="Tiles &copy; Esri"
-            maxZoom={22}
-            maxNativeZoom={19}
-          />
-        ) : (
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; OpenStreetMap contributors"
-            maxZoom={22}
-            maxNativeZoom={19}
-          />
-        )}
-        <FeatureGroup
-          ref={(ref) => {
-            featureGroupRef.current = ref as unknown as FeatureGroupType | null;
+      <div className="relative">
+        <MapContainer
+          center={[-28.0, 153.4]}
+          zoom={19.5}
+          zoomControl={true}
+          maxZoom={22}
+          className="h-64 w-full overflow-hidden rounded-2xl border border-zinc-800 bg-black sm:h-80"
+          whenReady={(e) => {
+            window.setTimeout(() => {
+              e.target.invalidateSize();
+            }, 0);
           }}
         >
-          <EditControl
-            position="topleft"
-            onCreated={(event) => {
-              const layer = (event as { layer?: L.Layer }).layer;
-              const fg = featureGroupRef.current;
-              if (fg && layer) {
-                fg.clearLayers();
-                fg.addLayer(layer);
-              }
-              recalcArea();
+          <MapViewportController
+            targetCenter={selectedCenter}
+            targetBounds={selectedBounds}
+          />
+          <MapCenterTracker onCenterChange={setMapCenter} />
+          {mapMode === "imagery" ? (
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution="Tiles &copy; Esri"
+              maxZoom={22}
+              maxNativeZoom={19}
+            />
+          ) : (
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution="&copy; OpenStreetMap contributors"
+              maxZoom={22}
+              maxNativeZoom={19}
+            />
+          )}
+          <FeatureGroup
+            ref={(ref) => {
+              featureGroupRef.current = ref as unknown as FeatureGroupType | null;
             }}
-            onEdited={recalcArea}
-            onDeleted={() => {
-              setAreaSqm(0);
-            }}
-            draw={{
-              marker: false,
-              circle: false,
-              circlemarker: false,
-              polyline: false,
-              rectangle: false,
-              polygon: {
-                allowIntersection: false,
-                showArea: true,
-                shapeOptions: {
-                  color: "#facc15",
-                  weight: 2,
-                  fillColor: "#facc15",
-                  fillOpacity: 0.25,
+          >
+            <EditControl
+              position="topleft"
+              onCreated={(event) => {
+                const layer = (event as { layer?: L.Layer }).layer;
+                const fg = featureGroupRef.current;
+                if (fg && layer) {
+                  fg.clearLayers();
+                  fg.addLayer(layer);
+                }
+                recalcArea();
+              }}
+              onEdited={recalcArea}
+              onDeleted={() => {
+                setAreaSqm(0);
+              }}
+              draw={{
+                marker: false,
+                circle: false,
+                circlemarker: false,
+                polyline: false,
+                rectangle: false,
+                polygon: {
+                  allowIntersection: false,
+                  showArea: true,
+                  shapeOptions: {
+                    color: "#facc15",
+                    weight: 2,
+                    fillColor: "#facc15",
+                    fillOpacity: 0.25,
+                  },
                 },
-              },
-            }}
-            edit={{
-              edit: true,
-              remove: true,
-            }}
-          />
-        </FeatureGroup>
-        {selectedCenter && (
-          <CircleMarker
-            center={selectedCenter}
-            radius={7}
-            pathOptions={{
-              color: "#facc15",
-              fillColor: "#facc15",
-              fillOpacity: 0.8,
-              weight: 2,
-            }}
-          />
-        )}
-      </MapContainer>
+              }}
+              edit={{
+                edit: true,
+                remove: true,
+              }}
+            />
+          </FeatureGroup>
+          {selectedCenter && (
+            <CircleMarker
+              center={selectedCenter}
+              radius={7}
+              pathOptions={{
+                color: "#facc15",
+                fillColor: "#facc15",
+                fillOpacity: 0.8,
+                weight: 2,
+              }}
+            />
+          )}
+        </MapContainer>
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="relative h-8 w-8">
+            <div className="absolute left-1/2 top-0 h-8 w-px -translate-x-1/2 bg-amber-300/90" />
+            <div className="absolute left-0 top-1/2 h-px w-8 -translate-y-1/2 bg-amber-300/90" />
+            <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-300/90 bg-black/60" />
+          </div>
+        </div>
+      </div>
 
       <div className="flex items-center justify-between gap-3 text-xs">
         <div>

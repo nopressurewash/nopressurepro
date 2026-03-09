@@ -4,13 +4,22 @@ import { AppShell } from "../components/layout/AppShell";
 import { Panel } from "../components/ui/Panel";
 import { useLocalData } from "../hooks/useLocalData";
 import { formatCurrency } from "../lib/format";
+import {
+  isClosedRevenueStatus,
+  isPipelineRevenueStatus,
+} from "../lib/quoteStatus";
 import { Quote } from "../lib/types";
 
 function calculateDashboardStats(quotes: Quote[]) {
   const totalQuotes = quotes.length;
-  const wonQuotes = quotes.filter((q) => q.status === "won");
+  const completedQuotes = quotes.filter((q) => isClosedRevenueStatus(q.status));
+  const pipelineQuotes = quotes.filter((q) => isPipelineRevenueStatus(q.status));
 
-  const totalWonRevenue = wonQuotes.reduce(
+  const totalCompletedRevenue = completedQuotes.reduce(
+    (sum, q) => sum + q.recommended,
+    0,
+  );
+  const totalProjectedRevenue = pipelineQuotes.reduce(
     (sum, q) => sum + q.recommended,
     0,
   );
@@ -20,16 +29,17 @@ function calculateDashboardStats(quotes: Quote[]) {
       ? 0
       : quotes.reduce((sum, q) => sum + q.recommended, 0) / totalQuotes;
 
-  const winRate =
-    totalQuotes === 0 ? 0 : (wonQuotes.length / totalQuotes) * 100;
+  const completionRate =
+    totalQuotes === 0 ? 0 : (completedQuotes.length / totalQuotes) * 100;
 
   const latestQuote = quotes[0];
   const liveRevenuePerHour = latestQuote?.revenuePerHour ?? 0;
 
   return {
-    totalWonRevenue,
+    totalCompletedRevenue,
+    totalProjectedRevenue,
     averageQuoteValue,
-    winRate,
+    completionRate,
     liveRevenuePerHour,
   };
 }
@@ -37,8 +47,13 @@ function calculateDashboardStats(quotes: Quote[]) {
 export default function DashboardPage() {
   const { quotes, loaded } = useLocalData();
 
-  const { totalWonRevenue, averageQuoteValue, winRate, liveRevenuePerHour } =
-    calculateDashboardStats(quotes);
+  const {
+    totalCompletedRevenue,
+    totalProjectedRevenue,
+    averageQuoteValue,
+    completionRate,
+    liveRevenuePerHour,
+  } = calculateDashboardStats(quotes);
 
   return (
     <AppShell>
@@ -55,15 +70,27 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="rounded-2xl border border-yellow-500/25 bg-gradient-to-br from-yellow-500/10 via-amber-500/5 to-fuchsia-700/20 p-4 shadow-[0_0_40px_rgba(250,204,21,0.25)]">
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-yellow-300/80">
-              Total Won Revenue
+              Completed Revenue
             </p>
             <p className="mt-2 text-2xl font-semibold text-yellow-200">
-              {formatCurrency(totalWonRevenue)}
+              {formatCurrency(totalCompletedRevenue)}
             </p>
             <p className="mt-1 text-[11px] text-zinc-400">
-              Closed work based on saved quotes.
+              Only quotes marked completed or paid.
             </p>
           </div>
+
+          <Panel className="border-zinc-800/80 bg-zinc-900/60">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-400">
+              Pipeline Revenue
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-zinc-50">
+              {formatCurrency(totalProjectedRevenue)}
+            </p>
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Sent, approved, and booked work still in the pipeline.
+            </p>
+          </Panel>
 
           <Panel className="border-zinc-800/80 bg-zinc-900/60">
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-400">
@@ -77,31 +104,29 @@ export default function DashboardPage() {
             </p>
           </Panel>
 
-          <Panel className="border-zinc-800/80 bg-zinc-900/60">
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-400">
-              Win Rate
-            </p>
-            <p className="mt-2 text-2xl font-semibold text-emerald-400">
-              {winRate.toFixed(0)}%
-            </p>
-            <p className="mt-1 text-[11px] text-zinc-500">
-              Won vs total saved quotes.
-            </p>
-          </Panel>
-
           <div className="rounded-2xl border border-purple-500/40 bg-gradient-to-br from-purple-900/60 via-fuchsia-900/50 to-black p-4 shadow-[0_0_45px_rgba(147,51,234,0.5)]">
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-purple-200/80">
-              Live Revenue / Hour
+              Completion Rate
             </p>
             <p className="mt-2 text-2xl font-semibold text-purple-100">
-              {liveRevenuePerHour > 0
-                ? formatCurrency(liveRevenuePerHour)
-                : "-"}
+              {completionRate.toFixed(0)}%
             </p>
             <p className="mt-1 text-[11px] text-purple-200/70">
-              From your latest quick quote.
+              Completed or paid quotes vs total pipeline.
             </p>
           </div>
+        </div>
+
+        <div className="rounded-2xl border border-purple-500/40 bg-gradient-to-br from-purple-900/60 via-fuchsia-900/50 to-black p-4 shadow-[0_0_45px_rgba(147,51,234,0.5)]">
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-purple-200/80">
+            Live Revenue / Hour
+          </p>
+          <p className="mt-2 text-2xl font-semibold text-purple-100">
+            {liveRevenuePerHour > 0 ? formatCurrency(liveRevenuePerHour) : "-"}
+          </p>
+          <p className="mt-1 text-[11px] text-purple-200/70">
+            From your latest quick quote.
+          </p>
         </div>
 
         {!loaded && (

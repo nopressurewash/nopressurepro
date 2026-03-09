@@ -1,6 +1,7 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { Quote } from "../types";
 import { formatCurrency } from "../format";
+import { getQuoteStatusLabel } from "../quoteStatus";
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -136,7 +137,7 @@ export async function exportQuotePdf(quote: Quote) {
     color: colors.white,
   });
 
-  page.drawText(`Status: ${quote.status.toUpperCase()}`, {
+  page.drawText(`Status: ${getQuoteStatusLabel(quote.status)}`, {
     x: width - 185,
     y: height - 80,
     size: 10,
