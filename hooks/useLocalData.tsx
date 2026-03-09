@@ -134,10 +134,15 @@ export function useLocalData() {
 
   const updateQuoteSchedule = useCallback(
     (id: string, scheduledDate: string, scheduledTime: string) => {
+      const preBookingStatuses: QuoteStatus[] = ["draft", "sent", "approved"];
       setQuotes((prev) =>
-        prev.map((q) =>
-          q.id === id ? { ...q, scheduledDate, scheduledTime } : q,
-        ),
+        prev.map((q) => {
+          if (q.id !== id) return q;
+          const status = preBookingStatuses.includes(q.status)
+            ? ("booked" as QuoteStatus)
+            : q.status;
+          return { ...q, scheduledDate, scheduledTime, status };
+        }),
       );
     },
     [],
