@@ -1,12 +1,14 @@
 import type { TextareaHTMLAttributes, InputHTMLAttributes, ReactNode } from "react";
 
-interface BaseFieldProps {
+interface FieldShellProps {
   label: string;
   helpText?: string;
-  children: ReactNode;
+  children?: ReactNode;
 }
 
-function FieldShell({ label, helpText, children }: BaseFieldProps) {
+type FieldProps = Omit<FieldShellProps, "children">;
+
+function FieldShell({ label, helpText, children }: FieldShellProps) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
@@ -22,7 +24,7 @@ function FieldShell({ label, helpText, children }: BaseFieldProps) {
 
 type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
-export function TextField({ label, helpText, ...props }: BaseFieldProps & InputProps) {
+export function TextField({ label, helpText, ...props }: FieldProps & InputProps) {
   return (
     <FieldShell label={label} helpText={helpText}>
       <input
@@ -39,7 +41,7 @@ export function TextAreaField({
   label,
   helpText,
   ...props
-}: BaseFieldProps & TextareaProps) {
+}: FieldProps & TextareaProps) {
   return (
     <FieldShell label={label} helpText={helpText}>
       <textarea
