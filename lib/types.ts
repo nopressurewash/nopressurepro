@@ -66,3 +66,28 @@ export interface JobPhotoRecord {
   caption?: string;
 }
 
+export type InvoiceStatus = "draft" | "sent" | "paid" | "overdue";
+
+export interface InvoiceLineItem {
+  description: string;
+  amount: number;
+}
+
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  quoteId: string;
+  clientName: string;
+  suburb: string;
+  phone: string;
+  serviceType: string;
+  lineItems: InvoiceLineItem[];
+  amount: number;
+  status: InvoiceStatus;
+  issueDate: string;
+  dueDate: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+

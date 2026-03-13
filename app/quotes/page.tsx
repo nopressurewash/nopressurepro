@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AppShell } from "../../components/layout/AppShell";
 import { ScheduleJobModal } from "../../components/calendar/ScheduleJobModal";
 import { EditQuoteModal } from "../../components/quotes/EditQuoteModal";
@@ -8,6 +9,7 @@ import { JobPhotoGallery } from "../../components/photos/JobPhotoGallery";
 import { Panel } from "../../components/ui/Panel";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
+import { buildInvoiceFromQuote } from "../../lib/invoiceUtils";
 import { getPhotoCountsForQuoteIds } from "../../lib/photoStorage";
 import { exportQuotePdf } from "../../lib/pdf/exportQuotePdf";
 import {
@@ -33,11 +35,14 @@ export default function SavedQuotesPage() {
   const {
     quotes,
     rates,
+    invoices,
+    addInvoice,
     updateQuote,
     deleteQuote,
     updateQuoteStatus,
     updateQuoteSchedule,
   } = useLocalData();
+  const router = useRouter();
   const [expandedPhotoQuoteId, setExpandedPhotoQuoteId] = useState<
     string | null
   >(null);
@@ -200,6 +205,17 @@ export default function SavedQuotesPage() {
                       className={`${actionLink} text-brand-purple-light hover:bg-brand-purple/10`}
                     >
                       PDF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const invoice = buildInvoiceFromQuote(q, invoices);
+                        addInvoice(invoice);
+                        router.push("/invoices");
+                      }}
+                      className={`${actionLink} text-gold hover:bg-gold/10`}
+                    >
+                      To Invoice
                     </button>
                     <button
                       type="button"

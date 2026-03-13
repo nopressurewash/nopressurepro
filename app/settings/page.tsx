@@ -14,6 +14,7 @@ interface BackupPayload {
   quotes: unknown;
   clients: unknown;
   rates: unknown;
+  invoices?: unknown;
 }
 
 function formatDateTime(value: string | null) {
@@ -30,7 +31,7 @@ function formatDateTime(value: string | null) {
 }
 
 export default function SettingsPage() {
-  const { quotes, clients, rates, overwriteAll, updateRates, loaded } =
+  const { quotes, clients, rates, invoices, overwriteAll, updateRates, loaded } =
     useLocalData();
   const [lastBackup, setLastBackup] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -52,6 +53,7 @@ export default function SettingsPage() {
       quotes,
       clients,
       rates,
+      invoices,
     };
 
     const json = JSON.stringify(payload, null, 2);
@@ -116,6 +118,7 @@ export default function SettingsPage() {
           quotes: data.quotes as any,
           clients: data.clients as any,
           rates: data.rates as any,
+          ...(Array.isArray(data.invoices) && { invoices: data.invoices as any }),
         });
 
         setMessage("Backup imported successfully.");
@@ -155,7 +158,7 @@ export default function SettingsPage() {
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
             Backup status
           </p>
-          <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-4">
             <div>
               <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
                 Last backup
@@ -180,6 +183,14 @@ export default function SettingsPage() {
                 {clients.length}
               </p>
             </div>
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+                Total invoices
+              </p>
+              <p className="mt-1 text-base font-bold text-brand-purple-light">
+                {invoices.length}
+              </p>
+            </div>
           </div>
         </Panel>
 
@@ -189,7 +200,7 @@ export default function SettingsPage() {
           </p>
           <p className="text-xs text-zinc-500">
             Backups are stored as a JSON file on your device only. Restoring
-            will overwrite current quotes, clients, and rates on this device.
+            will overwrite current quotes, clients, rates, and invoices on this device.
           </p>
           <div className="flex flex-col gap-2 sm:flex-row">
             <button

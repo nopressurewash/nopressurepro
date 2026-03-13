@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import type { Client, Quote, Rates, QuoteStatus } from "../lib/types";
+import type { Client, Invoice, InvoiceStatus, Quote, Rates, QuoteStatus } from "../lib/types";
 import { DEFAULT_RATES } from "../lib/pricing/defaultRates";
 import { RATES_KEY, normalizeRates } from "../lib/pricing/pricingStorage";
 import { normalizeQuoteStatus } from "../lib/quoteStatus";
 
 const QUOTES_KEY = "npp_quotes_v1";
 const CLIENTS_KEY = "npp_clients_v1";
+const INVOICES_KEY = "npp_invoices_v1";
 
 function safeParse<T>(value: string | null, fallback: T): T {
   if (!value) return fallback;
@@ -89,6 +90,7 @@ export function useLocalData() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [rates, setRates] = useState<Rates>(DEFAULT_RATES);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -107,10 +109,15 @@ export function useLocalData() {
       null,
     );
     const storedRates = normalizeRates(rawRates ?? null);
+    const storedInvoices = safeParse<Invoice[]>(
+      window.localStorage.getItem(INVOICES_KEY),
+      [],
+    );
 
     setQuotes(storedQuotes);
     setClients(storedClients);
     setRates(storedRates);
+    setInvoices(storedInvoices);
     setLoaded(true);
   }, []);
 
@@ -128,6 +135,11 @@ export function useLocalData() {
     if (!loaded || typeof window === "undefined") return;
     persist(RATES_KEY, rates);
   }, [rates, loaded]);
+
+  useEffect(() => {
+    if (!loaded || typeof window === "undefined") return;
+    persist(INVOICES_KEY, invoices);
+  }, [invoices, loaded]);
 
   const addQuote = useCallback(
     (quote: Quote) => {
@@ -181,11 +193,36 @@ export function useLocalData() {
     setRates(nextRates);
   }, []);
 
+  const addInvoice = useCallback((invoice: Invoice) => {
+    setInvoices((prev) => [invoice, ...prev]);
+  }, []);
+
+  const updateInvoiceStatus = useCallback((id: string, status: InvoiceStatus) => {
+    const now = new Date().toISOString();
+    setInvoices((prev) =>
+      prev.map((inv) =>
+        inv.id === id ? { ...inv, status, updatedAt: now } : inv,
+      ),
+    );
+  }, []);
+
+  const deleteInvoice = useCallback((id: string) => {
+    setInvoices((prev) => prev.filter((inv) => inv.id !== id));
+  }, []);
+
   const overwriteAll = useCallback(
-    (payload: { quotes: Quote[]; clients: Client[]; rates: Partial<Rates> }) => {
+    (payload: {
+      quotes: Quote[];
+      clients: Client[];
+      rates: Partial<Rates>;
+      invoices?: Invoice[];
+    }) => {
       setQuotes((payload.quotes ?? []).map(normalizeQuote));
       setClients(payload.clients ?? []);
       setRates(normalizeRates(payload.rates));
+      if (payload.invoices !== undefined) {
+        setInvoices(payload.invoices);
+      }
     },
     [],
   );
@@ -195,12 +232,16 @@ export function useLocalData() {
     quotes,
     clients,
     rates,
+    invoices,
     addQuote,
     updateQuote,
     deleteQuote,
     updateQuoteStatus,
     updateQuoteSchedule,
     updateRates,
+    addInvoice,
+    updateInvoiceStatus,
+    deleteInvoice,
     overwriteAll,
   };
 }
