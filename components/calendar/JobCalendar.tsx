@@ -117,7 +117,7 @@ export function JobCalendar({
         <button
           type="button"
           onClick={goToPrevMonth}
-          className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
+          className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
         >
           ←
         </button>
@@ -129,7 +129,7 @@ export function JobCalendar({
           <button
             type="button"
             onClick={goToToday}
-            className="mt-0.5 text-[10px] font-medium text-amber-400/70 transition-colors hover:text-amber-400"
+            className="mt-0.5 text-[10px] font-medium text-gold/70 transition-colors hover:text-gold"
           >
             Today
           </button>
@@ -138,7 +138,7 @@ export function JobCalendar({
         <button
           type="button"
           onClick={goToNextMonth}
-          className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
+          className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
         >
           →
         </button>

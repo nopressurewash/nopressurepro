@@ -59,13 +59,13 @@ export function getQuoteStatusClasses(status: QuoteStatus): string {
     case "sent":
       return "border-sky-500/40 bg-sky-500/10 text-sky-400";
     case "approved":
-      return "border-purple-500/40 bg-purple-500/10 text-purple-400";
+      return "border-[var(--brand-purple)]/40 bg-[var(--brand-purple)]/10 text-[var(--brand-purple-light)]";
     case "booked":
-      return "border-amber-500/40 bg-amber-500/10 text-amber-400";
+      return "border-[var(--brand-gold)]/40 bg-[var(--brand-gold)]/10 text-[var(--brand-gold)]";
     case "completed":
       return "border-emerald-500/40 bg-emerald-500/10 text-emerald-400";
     case "paid":
-      return "border-yellow-500/40 bg-yellow-500/10 text-yellow-400";
+      return "border-[var(--brand-gold-light)]/40 bg-[var(--brand-gold-light)]/10 text-[var(--brand-gold-light)]";
     case "lost":
       return "border-rose-500/40 bg-rose-500/10 text-rose-400";
   }

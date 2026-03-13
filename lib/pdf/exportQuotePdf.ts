@@ -69,6 +69,11 @@ function wrapText(text: string, maxChars: number) {
   return lines;
 }
 
+const WORDMARK_URL = "/branding/wordmark-primary.png";
+const HEADER_BAND_HEIGHT = 100;
+const WORDMARK_MAX_WIDTH = 200;
+const MARGIN = 42;
+
 export async function exportQuotePdf(quote: Quote) {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595, 842]);
@@ -78,60 +83,69 @@ export async function exportQuotePdf(quote: Quote) {
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   const colors = {
-    black: rgb(0.03, 0.03, 0.06),
-    gold: rgb(0.98, 0.8, 0.08),
-    goldSoft: rgb(0.95, 0.9, 0.65),
-    purple: rgb(0.28, 0.1, 0.42),
+    black: rgb(0.035, 0.035, 0.043),
+    gold: rgb(0.784, 0.588, 0.173),
+    goldSoft: rgb(0.859, 0.706, 0.392),
+    purple: rgb(0.486, 0.227, 0.929),
     white: rgb(0.98, 0.98, 0.99),
     body: rgb(0.17, 0.17, 0.21),
     muted: rgb(0.46, 0.46, 0.52),
-    border: rgb(0.88, 0.86, 0.75),
+    border: rgb(0.85, 0.82, 0.72),
     panel: rgb(0.97, 0.96, 0.93),
   };
 
+  // Header band: near-black background
   page.drawRectangle({
     x: 0,
-    y: height - 150,
+    y: height - HEADER_BAND_HEIGHT,
     width,
-    height: 150,
+    height: HEADER_BAND_HEIGHT,
     color: colors.black,
   });
 
-  page.drawRectangle({
-    x: 0,
-    y: height - 150,
-    width,
-    height: 10,
-    color: colors.gold,
-  });
+  let wordmarkDrawn = false;
+  try {
+    const response = await fetch(WORDMARK_URL);
+    if (response.ok) {
+      const arrayBuffer = await response.arrayBuffer();
+      const pngImage = await pdfDoc.embedPng(new Uint8Array(arrayBuffer));
+      const imgW = pngImage.width;
+      const imgH = pngImage.height;
+      const scale = Math.min(WORDMARK_MAX_WIDTH / imgW, 42 / imgH);
+      const drawW = imgW * scale;
+      const drawH = imgH * scale;
+      page.drawImage(pngImage, {
+        x: MARGIN,
+        y: height - HEADER_BAND_HEIGHT + (HEADER_BAND_HEIGHT - drawH) / 2,
+        width: drawW,
+        height: drawH,
+      });
+      wordmarkDrawn = true;
+    }
+  } catch {
+    // Fallback: text branding below
+  }
 
-  page.drawText("NO PRESSURE PRO", {
-    x: 42,
-    y: height - 58,
-    size: 22,
-    font: fontBold,
-    color: colors.gold,
-  });
-
-  page.drawText("Premium Exterior Cleaning Quote", {
-    x: 42,
-    y: height - 84,
-    size: 11,
-    font: fontRegular,
-    color: colors.goldSoft,
-  });
-
-  page.drawText("Professional quoting for pressure washing and exterior cleaning.", {
-    x: 42,
-    y: height - 102,
-    size: 10,
-    font: fontRegular,
-    color: colors.white,
-  });
+  if (!wordmarkDrawn) {
+    page.drawText("NO PRESSURE PRO", {
+      x: MARGIN,
+      y: height - 52,
+      size: 20,
+      font: fontBold,
+      color: colors.gold,
+    });
+    page.drawText("Premium Exterior Cleaning Quote", {
+      x: MARGIN,
+      y: height - 72,
+      size: 10,
+      font: fontRegular,
+      color: colors.goldSoft,
+    });
+  }
 
   page.drawText(`Quote date: ${formatDate(quote.createdAt)}`, {
     x: width - 185,
-    y: height - 62,
+    y: height - 48,
     size: 10,
     font: fontBold,
     color: colors.white,
@@ -139,13 +153,22 @@ export async function exportQuotePdf(quote: Quote) {
 
   page.drawText(`Status: ${getQuoteStatusLabel(quote.status)}`, {
     x: width - 185,
-    y: height - 80,
+    y: height - 64,
     size: 10,
     font: fontRegular,
     color: colors.goldSoft,
   });
 
-  let cursorY = height - 190;
+  // Gold accent line under header
+  page.drawRectangle({
+    x: 0,
+    y: height - HEADER_BAND_HEIGHT,
+    width,
+    height: 3,
+    color: colors.gold,
+  });
+
+  let cursorY = height - HEADER_BAND_HEIGHT - 45;
 
   page.drawText("Client", {
     x: 42,
@@ -310,25 +333,28 @@ export async function exportQuotePdf(quote: Quote) {
     }
   }
 
-  page.drawLine({
-    start: { x: 42, y: 76 },
-    end: { x: width - 42, y: 76 },
-    thickness: 1,
+  // Footer: gold line and branded tagline
+  const footerY = 70;
+  page.drawRectangle({
+    x: MARGIN,
+    y: footerY - 2,
+    width: width - 2 * MARGIN,
+    height: 2,
     color: colors.gold,
   });
 
-  page.drawText("Thank you for considering No Pressure Pro.", {
-    x: 42,
-    y: 56,
-    size: 10.5,
+  page.drawText("Thank you for your business.", {
+    x: MARGIN,
+    y: footerY - 22,
+    size: 11,
     font: fontBold,
-    color: colors.black,
+    color: colors.body,
   });
 
-  page.drawText("Premium quoting. Clear options. Professional presentation.", {
-    x: 42,
-    y: 40,
-    size: 9.5,
+  page.drawText("No Pressure Pro — Premium exterior cleaning quotes. Clear options. Professional presentation.", {
+    x: MARGIN,
+    y: footerY - 38,
+    size: 9,
     font: fontRegular,
     color: colors.muted,
   });

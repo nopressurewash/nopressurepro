@@ -59,22 +59,22 @@ export function TodayView({ jobs, onMarkCompleted, onReschedule }: TodayViewProp
     <div className="space-y-6 animate-fade-in-up">
       {/* Today summary bar */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 rounded-2xl border border-amber-500/30 bg-amber-500/[0.04] px-4 py-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">
+        <div className="flex-1 rounded-2xl border border-[var(--brand-border-accent)] bg-gold/[0.04] px-4 py-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold/70">
             Today
           </p>
-          <p className="mt-1 text-lg font-bold tabular-nums text-amber-300">
+          <p className="mt-1 text-lg font-bold tabular-nums text-gold-light">
             {todayJobs.length}{" "}
-            <span className="text-sm font-medium text-amber-400/50">
+            <span className="text-sm font-medium text-gold/50">
               job{todayJobs.length !== 1 ? "s" : ""}
             </span>
           </p>
         </div>
-        <div className="flex-1 rounded-2xl border border-purple-500/20 bg-purple-500/[0.04] px-4 py-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-purple-400/70">
+        <div className="flex-1 rounded-2xl border border-brand-purple/20 bg-brand-purple/[0.04] px-4 py-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-purple-light/70">
             Value
           </p>
-          <p className="mt-1 text-lg font-bold tabular-nums text-purple-300">
+          <p className="mt-1 text-lg font-bold tabular-nums text-brand-purple-light">
             {formatCurrency(todayValue)}
           </p>
         </div>
@@ -86,7 +86,7 @@ export function TodayView({ jobs, onMarkCompleted, onReschedule }: TodayViewProp
           Today&rsquo;s Jobs
         </p>
         {todayJobs.length === 0 ? (
-          <div className="mt-3 rounded-2xl border border-dashed border-zinc-800 py-10 text-center">
+          <div className="mt-3 rounded-2xl border border-dashed border-zinc-800/60 py-10 text-center">
             <p className="text-sm font-bold text-zinc-300">Nothing scheduled today.</p>
             <p className="mt-1 text-xs text-zinc-600">
               Schedule jobs from Saved Quotes to fill the day.

@@ -71,7 +71,7 @@ export function AgendaView({ jobs, onMarkCompleted, onReschedule }: AgendaViewPr
 
   if (groups.length === 0) {
     return (
-      <div className="animate-fade-in-up rounded-2xl border border-dashed border-zinc-800 py-12 text-center">
+      <div className="animate-fade-in-up rounded-2xl border border-dashed border-zinc-800/60 py-12 text-center">
         <p className="text-sm font-bold text-zinc-300">No scheduled jobs yet.</p>
         <p className="mt-1 text-xs text-zinc-600">
           Schedule jobs from Saved Quotes to build your agenda.
@@ -88,13 +88,13 @@ export function AgendaView({ jobs, onMarkCompleted, onReschedule }: AgendaViewPr
             <div
               className={`h-2 w-2 rounded-full ${
                 group.label === "Today"
-                  ? "bg-amber-400"
+                  ? "bg-gold"
                   : "bg-zinc-600"
               }`}
             />
             <p
               className={`text-xs font-bold uppercase tracking-[0.15em] ${
-                group.label === "Today" ? "text-amber-400" : "text-zinc-400"
+                group.label === "Today" ? "text-gold" : "text-zinc-400"
               }`}
             >
               {group.label}

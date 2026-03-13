@@ -26,16 +26,16 @@ export function CalendarDayCell({
       onClick={onClick}
       className={`group relative flex min-h-[72px] flex-col rounded-xl border p-1.5 text-left transition-all duration-200 active:scale-[0.97] sm:min-h-[88px] sm:p-2 ${
         isToday
-          ? "border-amber-500/40 bg-amber-500/[0.06]"
+          ? "border-[var(--brand-border-accent)] bg-gold/[0.05]"
           : hasJobs
-            ? "border-zinc-700/80 bg-zinc-900/50 hover:border-zinc-600"
-            : "border-zinc-800/50 bg-zinc-950 hover:border-zinc-700"
+            ? "border-zinc-700/60 bg-surface-raised hover:border-zinc-600"
+            : "border-[var(--brand-border)] bg-surface hover:border-zinc-700"
       } ${!isCurrentMonth ? "opacity-40" : ""}`}
     >
       <span
         className={`text-[11px] font-bold tabular-nums ${
           isToday
-            ? "text-amber-400"
+            ? "text-gold"
             : isCurrentMonth
               ? "text-zinc-300"
               : "text-zinc-600"
@@ -55,7 +55,7 @@ export function CalendarDayCell({
             </p>
           ))}
           {jobs.length > 2 && (
-            <p className="text-[9px] font-semibold text-amber-400/70 sm:text-[10px]">
+            <p className="text-[9px] font-semibold text-gold/70 sm:text-[10px]">
               +{jobs.length - 2} more
             </p>
           )}
@@ -63,7 +63,7 @@ export function CalendarDayCell({
       )}
 
       {hasJobs && (
-        <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500/20 text-[9px] font-bold text-amber-400">
+        <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold/20 text-[9px] font-bold text-gold">
           {jobs.length}
         </span>
       )}

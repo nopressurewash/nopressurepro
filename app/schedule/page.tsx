@@ -59,7 +59,7 @@ export default function SchedulePage() {
         </div>
 
         {/* Tab bar */}
-        <div className="flex gap-1 rounded-2xl border border-zinc-800/80 bg-zinc-950 p-1">
+        <div className="flex gap-1 rounded-2xl border border-[var(--brand-border)] bg-surface-raised p-1">
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -67,7 +67,7 @@ export default function SchedulePage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 rounded-xl px-3 py-2.5 text-xs font-bold uppercase tracking-[0.15em] transition-all duration-200 ${
                 activeTab === tab.id
-                  ? "bg-amber-500/15 text-amber-400"
+                  ? "bg-gold/10 text-gold"
                   : "text-zinc-500 hover:text-zinc-300 active:bg-zinc-800/50"
               }`}
             >
@@ -106,7 +106,7 @@ export default function SchedulePage() {
 
         {/* Empty state across all views */}
         {scheduledJobs.length === 0 && activeTab !== "today" && (
-          <div className="rounded-2xl border border-dashed border-zinc-800 py-10 text-center">
+          <div className="rounded-2xl border border-dashed border-zinc-800/60 py-10 text-center">
             <p className="text-sm font-bold text-zinc-300">
               No scheduled jobs yet.
             </p>

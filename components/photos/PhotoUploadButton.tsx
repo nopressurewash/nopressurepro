@@ -69,7 +69,7 @@ export function PhotoUploadButton({
           />
           <label
             htmlFor={cameraInputId}
-            className={`${btnBase} border border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 ${loading ? "pointer-events-none opacity-50" : ""}`}
+            className={`${btnBase} border border-gold/30 bg-gold/10 text-gold hover:bg-gold/15 ${loading ? "pointer-events-none opacity-50" : ""}`}
           >
             {loading ? "Uploading..." : "Take Photo"}
           </label>
@@ -78,7 +78,7 @@ export function PhotoUploadButton({
 
       <label
         htmlFor={libraryInputId}
-        className={`${btnBase} border border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/15 ${loading ? "pointer-events-none opacity-50" : ""}`}
+        className={`${btnBase} border border-brand-purple/30 bg-brand-purple/10 text-brand-purple-light hover:bg-brand-purple/15 ${loading ? "pointer-events-none opacity-50" : ""}`}
       >
         {loading
           ? "Uploading..."

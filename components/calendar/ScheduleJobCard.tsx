@@ -45,25 +45,25 @@ export function ScheduleJobCard({
     <div
       className={`group relative rounded-2xl border p-4 transition-all duration-200 ${
         isNext
-          ? "border-amber-500/40 bg-amber-500/[0.04]"
-          : "border-zinc-800/80 bg-zinc-950 hover:border-zinc-700"
+          ? "border-[var(--brand-border-accent)] bg-gold/[0.04]"
+          : "border-[var(--brand-border)] bg-surface-raised hover:border-zinc-700"
       }`}
     >
       {isNext && (
-        <div className="absolute -top-2.5 left-4 rounded-full bg-amber-500 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-black">
+        <div className="absolute -top-2.5 left-4 rounded-full bg-gold px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-black">
           Next Up
         </div>
       )}
 
       <div className="flex items-start gap-3">
         {/* Time block */}
-        <div className="flex w-14 shrink-0 flex-col items-center rounded-xl border border-zinc-800/60 bg-black/60 py-2">
+        <div className="flex w-14 shrink-0 flex-col items-center rounded-xl border border-[var(--brand-border)] bg-surface py-2">
           {time ? (
             <>
-              <span className="text-sm font-bold tabular-nums text-amber-400 leading-tight">
+              <span className="text-sm font-bold tabular-nums text-gold leading-tight">
                 {time.split(" ")[0]}
               </span>
-              <span className="text-[9px] font-semibold uppercase text-amber-400/60">
+              <span className="text-[9px] font-semibold uppercase text-gold/60">
                 {time.split(" ")[1]}
               </span>
             </>
@@ -89,7 +89,7 @@ export function ScheduleJobCard({
               </p>
             </div>
             <div className="shrink-0 text-right">
-              <p className="text-sm font-bold tabular-nums text-amber-400">
+              <p className="text-sm font-bold tabular-nums text-gold">
                 {formatCurrency(job.recommended)}
               </p>
               <span
@@ -118,13 +118,13 @@ export function ScheduleJobCard({
             <button
               type="button"
               onClick={() => onReschedule(job)}
-              className="rounded-lg border border-zinc-700/60 bg-zinc-900/60 px-2.5 py-1.5 text-[10px] font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
+              className="rounded-lg border border-[var(--brand-border)] bg-surface px-2.5 py-1.5 text-[10px] font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
             >
               Reschedule
             </button>
             <Link
               href="/quotes"
-              className="rounded-lg border border-zinc-700/60 bg-zinc-900/60 px-2.5 py-1.5 text-[10px] font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
+              className="rounded-lg border border-[var(--brand-border)] bg-surface px-2.5 py-1.5 text-[10px] font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
             >
               Open Quote
             </Link>

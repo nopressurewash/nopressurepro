@@ -156,21 +156,21 @@ export function RatesPanel({ rates, onChange }: RatesPanelProps) {
         <button
           type="button"
           onClick={handleSave}
-          className="flex-1 rounded-2xl border border-amber-500/50 bg-amber-500/15 px-4 py-2.5 text-sm font-bold text-amber-400 transition-colors hover:bg-amber-500/20 active:scale-[0.99]"
+          className="flex-1 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-sm font-bold text-gold transition-colors hover:bg-gold/15 active:scale-[0.99]"
         >
           Save rates
         </button>
         <button
           type="button"
           onClick={handleReset}
-          className="flex-1 rounded-2xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100"
+          className="flex-1 rounded-2xl border border-[var(--brand-border)] bg-surface px-4 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100"
         >
           Reset to defaults
         </button>
       </div>
 
       {message && (
-        <p className="text-xs text-amber-400" role="status">
+        <p className="text-xs text-gold" role="status">
           {message}
         </p>
       )}
