@@ -189,7 +189,7 @@ export default function QuickQuotePage() {
               Measure driveway
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
             <TextField
               label="Driveway"
               inputMode="decimal"

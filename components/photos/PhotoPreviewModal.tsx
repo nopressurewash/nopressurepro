@@ -45,7 +45,7 @@ export function PhotoPreviewModal({
   if (!photo || !imageUrl) return null;
 
   return (
-    <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 px-3 pb-6 pt-16 sm:items-center sm:px-4">
+    <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 px-3 pb-4 pt-12 sm:items-center sm:px-4 sm:pb-6 sm:pt-16">
       <div className="animate-fade-in-up w-full max-w-3xl rounded-2xl border border-[var(--brand-border)] bg-surface-raised p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
           <div>

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import type { ReactNode, CSSProperties } from "react";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -18,10 +18,14 @@ const navItems = [
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
+  const navStyle: CSSProperties = {
+    paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4px)",
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-background text-zinc-100">
       <header className="border-b border-[var(--brand-border)] bg-[var(--brand-surface)]">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-2.5 sm:py-3">
           <Link href="/" className="flex items-center gap-3">
             <Image
               src="/branding/icon-512.png"
@@ -62,8 +66,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-[var(--brand-border)] bg-[var(--brand-surface)]/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-stretch justify-between px-1 py-1">
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-30 border-t border-[var(--brand-border)] bg-[var(--brand-surface)]/95 backdrop-blur-md"
+        style={navStyle}
+      >
+        <div className="mx-auto flex max-w-3xl items-stretch justify-between px-2 py-1.5">
           {navItems.map((item) => {
             const active =
               item.href === "/"
@@ -71,10 +78,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 : pathname.startsWith(item.href);
 
             return (
-              <Link
+                <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex flex-1 flex-col items-center justify-center rounded-xl px-1 py-2.5 text-[10px] font-semibold tracking-wide transition-all duration-200 ${
+                  className={`relative flex flex-1 flex-col items-center justify-center rounded-xl px-1.5 py-3 text-[10px] font-semibold tracking-wide transition-all duration-200 ${
                   active
                     ? "bg-gold/10 text-gold"
                     : "text-zinc-500 active:bg-zinc-800/50 active:text-zinc-300"

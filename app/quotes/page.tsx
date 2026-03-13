@@ -147,7 +147,7 @@ export default function SavedQuotesPage() {
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between gap-2 border-t border-[var(--brand-border)] pt-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--brand-border)] pt-3">
                   <div className="flex items-center gap-2">
                     <label className="text-[11px] font-medium text-zinc-500">
                       Status
@@ -166,7 +166,7 @@ export default function SavedQuotesPage() {
                       ))}
                     </select>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex flex-wrap items-center gap-1">
                     <button
                       type="button"
                       onClick={() => setEditingQuote(q)}
