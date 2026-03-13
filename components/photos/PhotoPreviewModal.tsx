@@ -46,7 +46,7 @@ export function PhotoPreviewModal({
 
   return (
     <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 px-3 pb-6 pt-16 sm:items-center sm:px-4">
-      <div className="animate-fade-in-up w-full max-w-3xl rounded-2xl border border-zinc-800 bg-zinc-950 p-4 sm:p-5">
+      <div className="animate-fade-in-up w-full max-w-3xl rounded-2xl border border-[var(--brand-border)] bg-surface-raised p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
@@ -59,13 +59,13 @@ export function PhotoPreviewModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+            className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
           >
             Close
           </button>
         </div>
 
-        <div className="mt-3 overflow-hidden rounded-xl border border-zinc-800 bg-black">
+        <div className="mt-3 overflow-hidden rounded-xl border border-[var(--brand-border)] bg-black">
           <img
             src={imageUrl}
             alt="Job photo preview"
@@ -83,12 +83,12 @@ export function PhotoPreviewModal({
                 value={captionDraft}
                 onChange={(event) => setCaptionDraft(event.target.value)}
                 placeholder="Add a short note for this photo"
-                className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 transition-all duration-200 focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20"
+                className="flex-1 rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15"
               />
               <button
                 type="button"
                 onClick={() => onSaveCaption(photo.id, captionDraft)}
-                className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2.5 text-xs font-semibold text-amber-400 transition-all duration-200 hover:bg-amber-500/15 active:scale-[0.97]"
+                className="rounded-xl border border-gold/30 bg-gold/10 px-4 py-2.5 text-xs font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97]"
               >
                 Save Caption
               </button>
@@ -109,8 +109,8 @@ export function PhotoPreviewModal({
                     onClick={() => onMoveCategory(photo.id, category)}
                     className={`${pillBase} ${
                       active
-                        ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
-                        : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
+                        ? "border-gold/30 bg-gold/10 text-gold"
+                        : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
                     }`}
                   >
                     {getCategoryLabel(category)}

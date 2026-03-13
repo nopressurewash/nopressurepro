@@ -82,7 +82,7 @@ export default function SavedQuotesPage() {
         </div>
 
         {quotes.length === 0 ? (
-          <Panel className="border-dashed border-zinc-700 py-8 text-center">
+          <Panel className="border-dashed border-zinc-700/60 py-8 text-center">
             <p className="text-base font-bold text-zinc-200">
               No saved quotes yet.
             </p>
@@ -108,7 +108,7 @@ export default function SavedQuotesPage() {
                     </p>
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="text-base font-bold tabular-nums text-amber-400">
+                    <p className="text-base font-bold tabular-nums text-gold">
                       {formatCurrency(q.recommended)}
                     </p>
                     <span
@@ -147,7 +147,7 @@ export default function SavedQuotesPage() {
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between gap-2 border-t border-zinc-800/50 pt-3">
+                <div className="flex items-center justify-between gap-2 border-t border-[var(--brand-border)] pt-3">
                   <div className="flex items-center gap-2">
                     <label className="text-[11px] font-medium text-zinc-500">
                       Status
@@ -157,7 +157,7 @@ export default function SavedQuotesPage() {
                       onChange={(e) =>
                         updateQuoteStatus(q.id, e.target.value as QuoteStatus)
                       }
-                      className="rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-[11px] text-zinc-200 outline-none transition-all duration-200 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20"
+                      className="rounded-lg border border-[var(--brand-border)] bg-surface px-2.5 py-1.5 text-[11px] text-zinc-200 outline-none transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15"
                     >
                       {QUOTE_STATUS_OPTIONS.map((status) => (
                         <option key={status} value={status}>
@@ -188,7 +188,7 @@ export default function SavedQuotesPage() {
                           current === q.id ? null : q.id,
                         )
                       }
-                      className={`${actionLink} text-amber-400 hover:bg-amber-500/10`}
+                      className={`${actionLink} text-gold hover:bg-gold/10`}
                     >
                       {expandedPhotoQuoteId === q.id
                         ? "Hide Photos"
@@ -197,7 +197,7 @@ export default function SavedQuotesPage() {
                     <button
                       type="button"
                       onClick={() => exportQuotePdf(q)}
-                      className={`${actionLink} text-purple-400 hover:bg-purple-500/10`}
+                      className={`${actionLink} text-brand-purple-light hover:bg-brand-purple/10`}
                     >
                       PDF
                     </button>
@@ -241,7 +241,7 @@ export default function SavedQuotesPage() {
       </section>
 
       {editSavedBanner && (
-        <div className="fixed left-1/2 top-16 z-50 -translate-x-1/2 animate-fade-in rounded-2xl border border-amber-500/40 bg-zinc-950 px-5 py-3 text-xs font-semibold text-amber-400 shadow-lg">
+        <div className="fixed left-1/2 top-16 z-50 -translate-x-1/2 animate-fade-in rounded-2xl border border-gold/30 bg-surface-raised px-5 py-3 text-xs font-semibold text-gold shadow-lg">
           {editSavedBanner}
         </div>
       )}

@@ -8,13 +8,30 @@
 }
 
 :root {
-  --background: #000000;
+  --background: #09090b;
   --foreground: #e4e4e7;
+
+  --brand-gold: #c8962c;
+  --brand-gold-light: #dbb464;
+  --brand-gold-bright: #e8c86c;
+  --brand-purple: #7c3aed;
+  --brand-purple-light: #a78bfa;
+  --brand-surface: #0c0c10;
+  --brand-surface-raised: #131318;
+  --brand-border: rgba(255, 255, 255, 0.06);
+  --brand-border-accent: rgba(200, 150, 44, 0.25);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-gold: var(--brand-gold);
+  --color-gold-light: var(--brand-gold-light);
+  --color-gold-bright: var(--brand-gold-bright);
+  --color-brand-purple: var(--brand-purple);
+  --color-brand-purple-light: var(--brand-purple-light);
+  --color-surface: var(--brand-surface);
+  --color-surface-raised: var(--brand-surface-raised);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -24,7 +41,7 @@ html {
 }
 
 body {
-  background: #000;
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -32,7 +49,7 @@ body {
 }
 
 ::selection {
-  background: rgba(250, 204, 21, 0.25);
+  background: rgba(200, 150, 44, 0.3);
   color: #fff;
 }
 

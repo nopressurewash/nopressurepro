@@ -31,7 +31,7 @@ export function ScheduleJobModal({
 
   return (
     <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 px-3 pb-6 pt-16 sm:items-center sm:px-4">
-      <div className="animate-fade-in-up w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
+      <div className="animate-fade-in-up w-full max-w-md rounded-2xl border border-[var(--brand-border)] bg-surface-raised p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
@@ -47,7 +47,7 @@ export function ScheduleJobModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+            className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
           >
             Close
           </button>
@@ -62,7 +62,7 @@ export function ScheduleJobModal({
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-all duration-200 focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20 [color-scheme:dark]"
+              className="w-full rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2.5 text-sm text-zinc-100 outline-none transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15 [color-scheme:dark]"
             />
           </div>
 
@@ -74,14 +74,14 @@ export function ScheduleJobModal({
               type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-all duration-200 focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20 [color-scheme:dark]"
+              className="w-full rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2.5 text-sm text-zinc-100 outline-none transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15 [color-scheme:dark]"
             />
           </div>
 
           <button
             type="button"
             onClick={handleSave}
-            className="w-full rounded-2xl border border-amber-500/50 bg-amber-500/15 px-4 py-3 text-sm font-bold text-amber-400 transition-all duration-200 hover:bg-amber-500/20 active:scale-[0.98]"
+            className="w-full rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98]"
           >
             {quote.scheduledDate ? "Update Schedule" : "Schedule Job"}
           </button>

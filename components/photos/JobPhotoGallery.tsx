@@ -46,8 +46,8 @@ function PhotoTile({
 
   if (!imageUrl) {
     return (
-      <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
-        <div className="aspect-square w-full animate-pulse bg-zinc-900" />
+      <div className="overflow-hidden rounded-xl border border-[var(--brand-border)] bg-surface-raised">
+        <div className="aspect-square w-full animate-pulse bg-surface" />
         <div className="px-2.5 py-2">
           <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-600">
             {getCategoryLabel(photo.category)}
@@ -61,7 +61,7 @@ function PhotoTile({
     <button
       type="button"
       onClick={onClick}
-      className="group overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 text-left transition-all duration-200 hover:border-zinc-700 active:scale-[0.98]"
+      className="group overflow-hidden rounded-xl border border-[var(--brand-border)] bg-surface-raised text-left transition-all duration-200 hover:border-zinc-700 active:scale-[0.98]"
     >
       <img
         src={imageUrl}
@@ -147,7 +147,7 @@ export function JobPhotoGallery({
   }, [photos, previewPhoto]);
 
   return (
-    <div className="space-y-3 rounded-xl border border-zinc-800/80 bg-zinc-950 p-3">
+    <div className="space-y-3 rounded-xl border border-[var(--brand-border)] bg-surface-raised p-3">
       <div className="flex items-start justify-between gap-2">
         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
           Job Photos
@@ -157,7 +157,7 @@ export function JobPhotoGallery({
             <button
               type="button"
               onClick={() => setShowComparison(true)}
-              className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[11px] font-semibold text-amber-400 transition-all duration-200 hover:bg-amber-500/15 active:scale-[0.97]"
+              className="rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-[11px] font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97]"
             >
               Compare
             </button>
@@ -179,8 +179,8 @@ export function JobPhotoGallery({
               onClick={() => setActiveCategory(category)}
               className={`rounded-xl border px-2 py-2 text-[11px] font-semibold uppercase tracking-wide transition-all duration-200 ${
                 active
-                  ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
-                  : "border-zinc-800 bg-zinc-900 text-zinc-500 hover:border-zinc-600 active:bg-zinc-800"
+                  ? "border-gold/30 bg-gold/10 text-gold"
+                  : "border-[var(--brand-border)] bg-surface text-zinc-500 hover:border-zinc-600 active:bg-zinc-800"
               }`}
             >
               {getCategoryLabel(category)} ({photosByCategory[category].length})
@@ -189,12 +189,12 @@ export function JobPhotoGallery({
         })}
       </div>
 
-      {error && <p className="text-xs font-medium text-amber-400">{error}</p>}
+      {error && <p className="text-xs font-medium text-gold">{error}</p>}
 
       {loading ? (
         <p className="py-4 text-center text-xs text-zinc-600">Loading photos...</p>
       ) : activePhotos.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-zinc-800 bg-black/30 px-3 py-6 text-center">
+        <div className="rounded-xl border border-dashed border-zinc-800/60 bg-surface px-3 py-6 text-center">
           <p className="text-sm font-semibold text-zinc-300">
             No {getCategoryLabel(activeCategory).toLowerCase()} photos yet.
           </p>

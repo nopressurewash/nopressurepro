@@ -168,7 +168,7 @@ export default function SettingsPage() {
               <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
                 Total quotes
               </p>
-              <p className="mt-1 text-base font-bold text-amber-400">
+              <p className="mt-1 text-base font-bold text-gold">
                 {quotes.length}
               </p>
             </div>
@@ -196,7 +196,7 @@ export default function SettingsPage() {
               type="button"
               onClick={handleExport}
               disabled={!loaded}
-              className="flex-1 rounded-2xl border border-amber-500/50 bg-amber-500/15 px-4 py-2.5 text-sm font-bold text-amber-400 transition-colors hover:bg-amber-500/20 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-sm font-bold text-gold transition-colors hover:bg-gold/15 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Export backup
             </button>
@@ -204,13 +204,13 @@ export default function SettingsPage() {
               type="button"
               onClick={triggerImport}
               disabled={importing}
-              className="flex-1 rounded-2xl border border-purple-500/40 bg-purple-500/10 px-4 py-2.5 text-sm font-semibold text-purple-300 transition-colors hover:bg-purple-500/15 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 rounded-2xl border border-brand-purple/30 bg-brand-purple/10 px-4 py-2.5 text-sm font-semibold text-brand-purple-light transition-colors hover:bg-brand-purple/15 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {importing ? "Importing…" : "Import backup"}
             </button>
           </div>
           {message && (
-            <p className="text-xs text-amber-400" role="status">
+            <p className="text-xs text-gold" role="status">
               {message}
             </p>
           )}

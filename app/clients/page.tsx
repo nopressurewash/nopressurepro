@@ -26,7 +26,7 @@ export default function ClientsPage() {
         </div>
 
         {sorted.length === 0 ? (
-          <Panel className="border-dashed border-zinc-700">
+          <Panel className="border-dashed border-zinc-700/60">
             <p className="text-sm font-semibold text-zinc-200">
               No clients yet.
             </p>
@@ -51,7 +51,7 @@ export default function ClientsPage() {
                       {client.suburb} · {client.phone || "No phone"}
                     </p>
                   </div>
-                  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-400">
+                  <span className="rounded-full border border-gold/25 bg-gold/[0.08] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-gold">
                     {client.clientType}
                   </span>
                 </div>

@@ -34,7 +34,7 @@ export function DayJobsModal({
 
   return (
     <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 px-3 pb-6 pt-16 sm:items-center sm:px-4">
-      <div className="animate-fade-in-up w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
+      <div className="animate-fade-in-up w-full max-w-lg rounded-2xl border border-[var(--brand-border)] bg-surface-raised p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
@@ -50,7 +50,7 @@ export function DayJobsModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+            className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
           >
             Close
           </button>

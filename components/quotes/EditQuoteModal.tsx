@@ -128,9 +128,9 @@ export function EditQuoteModal({
 
   return (
     <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 sm:items-center">
-      <div className="animate-fade-in-up flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-2xl border border-zinc-800 bg-zinc-950 sm:rounded-2xl">
+      <div className="animate-fade-in-up flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-2xl border border-[var(--brand-border)] bg-surface-raised sm:rounded-2xl">
         {/* Header — fixed */}
-        <div className="shrink-0 border-b border-zinc-800/60 px-5 pb-3.5 pt-5">
+        <div className="shrink-0 border-b border-[var(--brand-border)] px-5 pb-3.5 pt-5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
@@ -143,7 +143,7 @@ export function EditQuoteModal({
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+              className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
             >
               Cancel
             </button>
@@ -223,8 +223,8 @@ export function EditQuoteModal({
                         onClick={() => setStainLevel(level)}
                         className={`rounded-xl border px-2 py-2 capitalize font-medium transition-all duration-200 ${
                           active
-                            ? "border-amber-500/50 bg-amber-500/10 text-amber-400"
-                            : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
+                            ? "border-gold/40 bg-gold/10 text-gold"
+                            : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
                         }`}
                       >
                         {level}
@@ -249,7 +249,7 @@ export function EditQuoteModal({
                 className={`${toggleBase} ${
                   houseWash
                     ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-                    : "border-zinc-800 bg-zinc-900 text-zinc-400 active:bg-zinc-800"
+                    : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
                 }`}
               >
                 <span>House wash</span>
@@ -263,7 +263,7 @@ export function EditQuoteModal({
                 className={`${toggleBase} ${
                   roofWash
                     ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
-                    : "border-zinc-800 bg-zinc-900 text-zinc-400 active:bg-zinc-800"
+                    : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
                 }`}
               >
                 <span>Roof wash</span>
@@ -277,7 +277,7 @@ export function EditQuoteModal({
                 className={`${toggleBase} ${
                   wallsExtras
                     ? "border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-300"
-                    : "border-zinc-800 bg-zinc-900 text-zinc-400 active:bg-zinc-800"
+                    : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
                 }`}
               >
                 <span>Walls / extras</span>
@@ -289,8 +289,8 @@ export function EditQuoteModal({
           </div>
 
           {/* Live quote preview */}
-          <div className="space-y-3 rounded-2xl border border-zinc-800/60 bg-black/40 p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400">
+          <div className="space-y-3 rounded-2xl border border-[var(--brand-border)] bg-surface p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
               Quote bands
             </p>
             <div className="grid grid-cols-3 gap-3">
@@ -303,10 +303,10 @@ export function EditQuoteModal({
                 </p>
               </div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
                   Recommended
                 </p>
-                <p className="mt-1 text-lg font-bold tabular-nums text-amber-300">
+                <p className="mt-1 text-lg font-bold tabular-nums text-gold-light">
                   {formatCurrency(totals.recommended)}
                 </p>
               </div>
@@ -343,7 +343,7 @@ export function EditQuoteModal({
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as QuoteStatus)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-all duration-200 focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20"
+              className="w-full rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2.5 text-sm text-zinc-100 outline-none transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15"
             >
               {QUOTE_STATUS_OPTIONS.map((s) => (
                 <option key={s} value={s}>
@@ -355,9 +355,9 @@ export function EditQuoteModal({
         </div>
 
         {/* Footer — fixed */}
-        <div className="shrink-0 border-t border-zinc-800/60 px-5 pb-5 pt-4">
+        <div className="shrink-0 border-t border-[var(--brand-border)] px-5 pb-5 pt-4">
           {banner && (
-            <p className="mb-3 animate-fade-in text-xs font-medium text-amber-400">
+            <p className="mb-3 animate-fade-in text-xs font-medium text-gold">
               {banner}
             </p>
           )}
@@ -365,7 +365,7 @@ export function EditQuoteModal({
             type="button"
             onClick={handleSave}
             disabled={!isDirty}
-            className="w-full rounded-2xl border border-amber-500/50 bg-amber-500/15 px-4 py-3 text-sm font-bold text-amber-400 transition-all duration-200 hover:bg-amber-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+            className="w-full rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
           >
             Save Changes
           </button>

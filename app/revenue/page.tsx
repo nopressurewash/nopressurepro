@@ -135,11 +135,11 @@ export default function RevenuePage() {
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-purple-500/20 bg-purple-500/[0.05] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-purple-400">
+          <div className="rounded-2xl border border-brand-purple/20 bg-brand-purple/[0.05] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-purple-light">
               Avg revenue per hour
             </p>
-            <p className="mt-2 text-2xl font-bold text-purple-300">
+            <p className="mt-2 text-2xl font-bold text-brand-purple-light">
               {averagePerHour > 0 ? formatCurrency(averagePerHour) : "-"}
             </p>
             <p className="mt-1 text-[11px] text-zinc-500">
@@ -147,11 +147,11 @@ export default function RevenuePage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-amber-500/25 bg-amber-500/[0.06] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400">
+          <div className="rounded-2xl border border-[var(--brand-border-accent)] bg-gold/[0.05] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
               Top service type
             </p>
-            <p className="mt-2 text-lg font-bold text-amber-300">
+            <p className="mt-2 text-lg font-bold text-gold-light">
               {topService}
             </p>
             <p className="mt-1 text-[11px] text-zinc-500">
@@ -161,7 +161,7 @@ export default function RevenuePage() {
         </div>
 
         {quotes.filter((q) => isClosedRevenueStatus(q.status)).length === 0 && (
-          <Panel className="border-dashed border-zinc-700">
+          <Panel className="border-dashed border-zinc-700/60">
             <p className="text-sm font-semibold text-zinc-200">
               No closed revenue yet.
             </p>

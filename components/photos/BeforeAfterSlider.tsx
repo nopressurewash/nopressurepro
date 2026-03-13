@@ -70,7 +70,7 @@ export function BeforeAfterSlider({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(position)}
-        className="relative h-[42vh] min-h-[260px] overflow-hidden rounded-3xl border border-zinc-800 bg-black outline-none sm:h-[52vh]"
+        className="relative h-[42vh] min-h-[260px] overflow-hidden rounded-3xl border border-[var(--brand-border)] bg-black outline-none sm:h-[52vh]"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onKeyDown={handleKeyDown}
@@ -129,17 +129,17 @@ export function BeforeAfterSlider({
           className="pointer-events-none absolute inset-y-0 z-20"
           style={{ left: `calc(${position}% - 1px)` }}
         >
-          <div className="h-full w-0.5 bg-amber-300 shadow-[0_0_18px_rgba(250,204,21,0.75)]" />
+          <div className="h-full w-0.5 bg-gold-light shadow-[0_0_18px_rgba(200,150,44,0.6)]" />
         </div>
 
         <div
           className="pointer-events-none absolute top-1/2 z-30 -translate-y-1/2"
           style={{ left: `calc(${position}% - 22px)` }}
         >
-          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-amber-400/80 bg-black/85 shadow-[0_0_24px_rgba(250,204,21,0.45)]">
-            <div className="flex items-center gap-1 text-amber-200">
-              <span className="block h-3.5 w-px bg-amber-300" />
-              <span className="block h-3.5 w-px bg-amber-300" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/80 bg-black/85 shadow-[0_0_24px_rgba(200,150,44,0.4)]">
+            <div className="flex items-center gap-1 text-gold-light">
+              <span className="block h-3.5 w-px bg-gold-light" />
+              <span className="block h-3.5 w-px bg-gold-light" />
             </div>
           </div>
         </div>

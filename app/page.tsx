@@ -69,11 +69,11 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="animate-fade-in-up rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400">
+          <div className="animate-fade-in-up rounded-2xl border border-[var(--brand-border-accent)] bg-gold/[0.05] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
               Completed Revenue
             </p>
-            <p className="mt-2.5 text-2xl font-bold tabular-nums text-amber-300">
+            <p className="mt-2.5 text-2xl font-bold tabular-nums text-gold-light">
               {formatCurrency(totalCompletedRevenue)}
             </p>
             <p className="mt-1.5 text-[11px] text-zinc-500">
@@ -109,11 +109,11 @@ export default function DashboardPage() {
             </Panel>
           </div>
 
-          <div className="animate-fade-in-up animate-delay-150 rounded-2xl border border-purple-500/20 bg-purple-500/[0.05] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-purple-400">
+          <div className="animate-fade-in-up animate-delay-150 rounded-2xl border border-brand-purple/20 bg-brand-purple/[0.05] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-purple-light">
               Completion Rate
             </p>
-            <p className="mt-2.5 text-2xl font-bold tabular-nums text-purple-300">
+            <p className="mt-2.5 text-2xl font-bold tabular-nums text-brand-purple-light">
               {completionRate.toFixed(0)}%
             </p>
             <p className="mt-1.5 text-[11px] text-zinc-500">
@@ -122,11 +122,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="animate-fade-in-up animate-delay-150 rounded-2xl border border-purple-500/20 bg-purple-500/[0.05] p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-purple-400">
+        <div className="animate-fade-in-up animate-delay-150 rounded-2xl border border-brand-purple/20 bg-brand-purple/[0.05] p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-purple-light">
             Live Revenue / Hour
           </p>
-          <p className="mt-2.5 text-2xl font-bold tabular-nums text-purple-300">
+          <p className="mt-2.5 text-2xl font-bold tabular-nums text-brand-purple-light">
             {liveRevenuePerHour > 0 ? formatCurrency(liveRevenuePerHour) : "-"}
           </p>
           <p className="mt-1.5 text-[11px] text-zinc-500">
@@ -141,7 +141,7 @@ export default function DashboardPage() {
         )}
 
         {loaded && quotes.length === 0 && (
-          <div className="animate-fade-in-up animate-delay-150 rounded-2xl border border-dashed border-zinc-700 bg-zinc-950 p-6 text-center">
+          <div className="animate-fade-in-up animate-delay-150 rounded-2xl border border-dashed border-zinc-700/60 bg-surface-raised p-6 text-center">
             <p className="text-base font-bold text-zinc-200">
               Ready to quote your first job?
             </p>
@@ -151,7 +151,7 @@ export default function DashboardPage() {
             </p>
             <Link
               href="/quote"
-              className="mt-4 inline-flex rounded-xl border border-amber-500/50 bg-amber-500/15 px-5 py-2.5 text-sm font-bold text-amber-400 transition-all duration-200 hover:bg-amber-500/20 active:scale-[0.98]"
+              className="mt-4 inline-flex rounded-xl border border-gold/40 bg-gold/10 px-5 py-2.5 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98]"
             >
               Start a Quote
             </Link>

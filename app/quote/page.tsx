@@ -184,7 +184,7 @@ export default function QuickQuotePage() {
             <button
               type="button"
               onClick={() => setShowMeasureModal(true)}
-              className="rounded-xl border border-purple-500/40 bg-purple-500/10 px-3 py-2 text-[11px] font-semibold text-purple-300 transition-all duration-200 hover:bg-purple-500/15 active:scale-[0.98]"
+              className="rounded-xl border border-brand-purple/30 bg-brand-purple/10 px-3 py-2 text-[11px] font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
             >
               Measure driveway
             </button>
@@ -234,8 +234,8 @@ export default function QuickQuotePage() {
                       onClick={() => setStainLevel(level)}
                       className={`rounded-xl border px-2 py-2.5 capitalize font-medium transition-all duration-200 ${
                         active
-                          ? "border-amber-500/50 bg-amber-500/10 text-amber-400"
-                          : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
+                          ? "border-gold/40 bg-gold/10 text-gold"
+                          : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
                       }`}
                     >
                       {level}
@@ -262,7 +262,7 @@ export default function QuickQuotePage() {
               className={`${toggleBase} ${
                 houseWash
                   ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-                  : "border-zinc-800 bg-zinc-900 text-zinc-400 active:bg-zinc-800"
+                  : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
               }`}
             >
               <span>House wash</span>
@@ -276,7 +276,7 @@ export default function QuickQuotePage() {
               className={`${toggleBase} ${
                 roofWash
                   ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
-                  : "border-zinc-800 bg-zinc-900 text-zinc-400 active:bg-zinc-800"
+                  : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
               }`}
             >
               <span>Roof wash</span>
@@ -290,7 +290,7 @@ export default function QuickQuotePage() {
               className={`${toggleBase} ${
                 wallsExtras
                   ? "border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-300"
-                  : "border-zinc-800 bg-zinc-900 text-zinc-400 active:bg-zinc-800"
+                  : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
               }`}
             >
               <span>Walls / extras</span>
@@ -304,7 +304,7 @@ export default function QuickQuotePage() {
         {/* Quote bands */}
         <Panel className="space-y-4">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
               Quote bands
             </p>
             <p className="text-[11px] text-zinc-600">
@@ -324,10 +324,10 @@ export default function QuickQuotePage() {
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
                 Recommended
               </p>
-              <p className="mt-1.5 text-xl font-bold tabular-nums text-amber-300">
+              <p className="mt-1.5 text-xl font-bold tabular-nums text-gold-light">
                 {formatCurrency(totals.recommended)}
               </p>
               <p className="mt-1 text-[11px] text-zinc-600">
@@ -348,7 +348,7 @@ export default function QuickQuotePage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-zinc-800 bg-black/50 px-3 py-3">
+            <div className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-3">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Revenue / hour
               </p>
@@ -358,7 +358,7 @@ export default function QuickQuotePage() {
                   : "-"}
               </p>
             </div>
-            <div className="rounded-xl border border-zinc-800 bg-black/50 px-3 py-3">
+            <div className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-3">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Chem mix helper
               </p>
@@ -384,7 +384,7 @@ export default function QuickQuotePage() {
         <div className="space-y-3">
           <p className="text-xs text-zinc-500">
             New quotes save as{" "}
-            <span className="font-medium text-amber-400">
+            <span className="font-medium text-gold">
               {getQuoteStatusLabel("draft")}
             </span>
             .
@@ -393,7 +393,7 @@ export default function QuickQuotePage() {
             <button
               type="button"
               onClick={() => exportQuotePdf(buildDraftQuote())}
-              className="flex w-full items-center justify-center rounded-2xl border border-purple-500/40 bg-purple-500/10 px-4 py-3.5 text-sm font-semibold text-purple-300 transition-all duration-200 hover:bg-purple-500/15 active:scale-[0.98]"
+              className="flex w-full items-center justify-center rounded-2xl border border-brand-purple/30 bg-brand-purple/10 px-4 py-3.5 text-sm font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
             >
               Export PDF
             </button>
@@ -401,13 +401,13 @@ export default function QuickQuotePage() {
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="flex w-full items-center justify-center rounded-2xl border border-amber-500/50 bg-amber-500/15 px-4 py-3.5 text-sm font-bold text-amber-400 transition-all duration-200 hover:bg-amber-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3.5 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save quote to list"}
             </button>
           </div>
           {savedBanner && (
-            <p className="animate-fade-in text-xs font-medium text-amber-400">
+            <p className="animate-fade-in text-xs font-medium text-gold">
               {savedBanner}
             </p>
           )}
@@ -416,7 +416,7 @@ export default function QuickQuotePage() {
         {/* Measure modal */}
         {showMeasureModal && (
           <div className="animate-fade-in fixed inset-0 z-40 flex items-end justify-center bg-black/90 px-3 pb-6 pt-16 sm:items-center sm:px-4">
-            <div className="animate-fade-in-up w-full max-w-3xl rounded-2xl border border-zinc-800 bg-zinc-950 p-4 sm:p-5">
+            <div className="animate-fade-in-up w-full max-w-3xl rounded-2xl border border-[var(--brand-border)] bg-surface-raised p-4 sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
@@ -429,7 +429,7 @@ export default function QuickQuotePage() {
                 <button
                   type="button"
                   onClick={() => setShowMeasureModal(false)}
-                  className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.98]"
+                  className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.98]"
                 >
                   Close
                 </button>

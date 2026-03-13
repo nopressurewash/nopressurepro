@@ -78,14 +78,14 @@ export async function exportQuotePdf(quote: Quote) {
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   const colors = {
-    black: rgb(0.03, 0.03, 0.06),
-    gold: rgb(0.98, 0.8, 0.08),
-    goldSoft: rgb(0.95, 0.9, 0.65),
-    purple: rgb(0.28, 0.1, 0.42),
+    black: rgb(0.035, 0.035, 0.043),
+    gold: rgb(0.784, 0.588, 0.173),
+    goldSoft: rgb(0.859, 0.706, 0.392),
+    purple: rgb(0.486, 0.227, 0.929),
     white: rgb(0.98, 0.98, 0.99),
     body: rgb(0.17, 0.17, 0.21),
     muted: rgb(0.46, 0.46, 0.52),
-    border: rgb(0.88, 0.86, 0.75),
+    border: rgb(0.85, 0.82, 0.72),
     panel: rgb(0.97, 0.96, 0.93),
   };
 
