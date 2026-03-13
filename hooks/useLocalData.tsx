@@ -164,10 +164,16 @@ export function useLocalData() {
 
   const updateQuoteStatus = useCallback(
     (id: string, status: QuoteStatus) => {
+      const normalized = normalizeQuoteStatus(status);
+      const now = new Date().toISOString();
       setQuotes((prev) =>
-        prev.map((q) =>
-          q.id === id ? { ...q, status: normalizeQuoteStatus(status) } : q,
-        ),
+        prev.map((q) => {
+          if (q.id !== id) return q;
+          const next: Quote = { ...q, status: normalized };
+          if (normalized === "sent" && !q.sentAt) next.sentAt = now;
+          if (normalized === "approved" && !q.approvedAt) next.approvedAt = now;
+          return next;
+        }),
       );
     },
     [],
@@ -175,7 +181,7 @@ export function useLocalData() {
 
   const updateQuoteSchedule = useCallback(
     (id: string, scheduledDate: string, scheduledTime: string) => {
-      const preBookingStatuses: QuoteStatus[] = ["draft", "sent", "approved"];
+      const preBookingStatuses: QuoteStatus[] = ["draft", "sent", "approved", "follow_up"];
       setQuotes((prev) =>
         prev.map((q) => {
           if (q.id !== id) return q;

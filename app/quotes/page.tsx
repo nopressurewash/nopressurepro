@@ -50,6 +50,7 @@ export default function SavedQuotesPage() {
   const [schedulingQuote, setSchedulingQuote] = useState<Quote | null>(null);
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [editSavedBanner, setEditSavedBanner] = useState<string | null>(null);
+  const [invoiceConfirmQuote, setInvoiceConfirmQuote] = useState<Quote | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -139,6 +140,16 @@ export default function SavedQuotesPage() {
                 <div className="flex items-center justify-between gap-2 text-xs text-zinc-500">
                   <p>
                     {q.serviceType} · {formatDate(q.createdAt)}
+                    {q.sentAt && (
+                      <span className="ml-1.5 text-sky-400/80">
+                        · Sent {formatDate(q.sentAt)}
+                      </span>
+                    )}
+                    {q.approvedAt && (
+                      <span className="ml-1.5 text-brand-purple-light/80">
+                        · Approved {formatDate(q.approvedAt)}
+                      </span>
+                    )}
                   </p>
                   <p className="tabular-nums">
                     {q.estimatedHours > 0
@@ -150,6 +161,36 @@ export default function SavedQuotesPage() {
                       </span>
                     )}
                   </p>
+                </div>
+
+                {/* Approval progression quick actions */}
+                <div className="flex flex-wrap items-center gap-1.5 border-t border-[var(--brand-border)] pt-3">
+                  <span className="mr-1 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                    Progression
+                  </span>
+                  {(["sent", "approved", "follow_up", "lost"] as const).map((status) => {
+                    const isCurrent = q.status === status;
+                    return (
+                      <button
+                        key={status}
+                        type="button"
+                        onClick={() => updateQuoteStatus(q.id, status)}
+                        className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all duration-200 active:scale-[0.97] ${
+                          isCurrent
+                            ? status === "lost"
+                              ? "border border-rose-500/50 bg-rose-500/15 text-rose-400"
+                              : status === "sent"
+                                ? "border border-sky-500/50 bg-sky-500/15 text-sky-400"
+                                : status === "approved"
+                                  ? "border border-brand-purple/50 bg-brand-purple/15 text-brand-purple-light"
+                                  : "border border-amber-400/50 bg-amber-400/15 text-amber-300"
+                            : "border border-zinc-700/80 bg-surface text-zinc-500 hover:border-zinc-600 hover:text-zinc-300"
+                        }`}
+                      >
+                        {getQuoteStatusLabel(status)}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--brand-border)] pt-3">
@@ -209,6 +250,10 @@ export default function SavedQuotesPage() {
                     <button
                       type="button"
                       onClick={() => {
+                        if (q.status === "draft") {
+                          setInvoiceConfirmQuote(q);
+                          return;
+                        }
                         const invoice = buildInvoiceFromQuote(q, invoices);
                         addInvoice(invoice);
                         router.push("/invoices");
@@ -282,6 +327,41 @@ export default function SavedQuotesPage() {
           onSchedule={updateQuoteSchedule}
           onClose={() => setSchedulingQuote(null)}
         />
+      )}
+
+      {/* Draft → Invoice confirmation */}
+      {invoiceConfirmQuote && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 px-3 pb-24 pt-16 sm:items-center sm:p-4">
+          <div className="animate-fade-in-up w-full max-w-sm rounded-2xl border border-[var(--brand-border)] bg-surface-raised p-4 shadow-xl">
+            <p className="text-sm font-semibold text-zinc-100">
+              Quote still a draft
+            </p>
+            <p className="mt-2 text-xs text-zinc-500">
+              Mark as Sent or Approved first for a clearer audit trail. Create invoice anyway?
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setInvoiceConfirmQuote(null)}
+                className="flex-1 rounded-xl border border-[var(--brand-border)] bg-surface py-2.5 text-xs font-semibold text-zinc-300 transition-colors hover:bg-zinc-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const invoice = buildInvoiceFromQuote(invoiceConfirmQuote, invoices);
+                  addInvoice(invoice);
+                  setInvoiceConfirmQuote(null);
+                  router.push("/invoices");
+                }}
+                className="flex-1 rounded-xl border border-gold/40 bg-gold/10 py-2.5 text-xs font-bold text-gold transition-colors hover:bg-gold/15"
+              >
+                Create invoice
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </AppShell>
   );

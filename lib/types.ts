@@ -2,6 +2,7 @@ export type QuoteStatus =
   | "draft"
   | "sent"
   | "approved"
+  | "follow_up"
   | "booked"
   | "completed"
   | "paid"
@@ -43,6 +44,10 @@ export interface Quote {
   createdAt: string;
   scheduledDate?: string;
   scheduledTime?: string;
+  /** Set when status is first set to "sent" */
+  sentAt?: string;
+  /** Set when status is first set to "approved" */
+  approvedAt?: string;
 }
 
 export interface Client {
