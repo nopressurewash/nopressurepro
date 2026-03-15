@@ -27,6 +27,7 @@ export default function QuickQuotePage() {
   const [clientName, setClientName] = useState("");
   const [suburb, setSuburb] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [drivewaySqm, setDrivewaySqm] = useState<number>(0);
   const [pathsSqm, setPathsSqm] = useState<number>(0);
   const [patioSqm, setPatioSqm] = useState<number>(0);
@@ -76,6 +77,7 @@ export default function QuickQuotePage() {
       clientName: clientName.trim() || "Walk-in Quote",
       suburb: suburb.trim() || "Gold Coast",
       phone: phone.trim(),
+      email: email.trim() || undefined,
       drivewaySqm, pathsSqm, patioSqm,
       stainLevel, estimatedHours,
       includeHouseWash: houseWash,
@@ -109,6 +111,7 @@ export default function QuickQuotePage() {
         clientName: clientName.trim(),
         suburb: suburb.trim(),
         phone: phone.trim(),
+        email: email.trim() || undefined,
         drivewaySqm, pathsSqm, patioSqm,
         stainLevel, estimatedHours,
         includeHouseWash: houseWash,
@@ -168,12 +171,21 @@ export default function QuickQuotePage() {
               placeholder="e.g. Mermaid Waters"
             />
           </div>
-          <TextField
-            label="Phone"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Mobile for SMS follow-up"
-          />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <TextField
+              label="Phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Mobile for SMS follow-up"
+            />
+            <TextField
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="client@example.com"
+            />
+          </div>
         </Panel>
 
         {/* Surfaces section */}

@@ -26,6 +26,7 @@ export interface Quote {
   clientName: string;
   suburb: string;
   phone: string;
+  email?: string;
   drivewaySqm: number;
   pathsSqm: number;
   patioSqm: number;
