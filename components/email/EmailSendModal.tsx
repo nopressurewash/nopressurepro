@@ -74,7 +74,7 @@ export function EmailSendModal({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="animate-fade-in-up flex max-h-[88vh] w-full max-w-lg flex-col rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-h-[84vh]">
+      <div className="animate-fade-in-up flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-h-[86vh]">
         <div className="shrink-0 border-b border-[var(--brand-border)] px-5 pb-3.5 pt-5">
           <div className="flex items-start justify-between gap-3">
             <div>
