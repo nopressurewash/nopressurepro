@@ -76,3 +76,11 @@ export function parseNumericInput(value: string): number {
   const num = Number(value.replace(",", "."));
   return Number.isFinite(num) && num >= 0 ? num : 0;
 }
+
+const MAX_HOURS = 99;
+
+export function parseHoursInput(value: string): number {
+  const num = Number(value.replace(",", "."));
+  if (!Number.isFinite(num) || num < 0) return 0;
+  return Math.min(num, MAX_HOURS);
+}
