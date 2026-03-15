@@ -116,6 +116,26 @@ export async function getPhotosForQuote(
   });
 }
 
+export async function getAllPhotoRecords(): Promise<JobPhotoRecord[]> {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, "readonly");
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+      const records = (request.result as JobPhotoRecord[]).sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+      resolve(records);
+    };
+    request.onerror = () =>
+      reject(request.error ?? new Error("Failed to load job photos."));
+  });
+}
+
 export async function getPhotoCountsForQuoteIds(
   quoteIds: string[],
 ): Promise<Record<string, number>> {
