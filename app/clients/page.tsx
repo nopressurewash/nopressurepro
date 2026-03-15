@@ -1,17 +1,169 @@
 "use client";
 
+import { useState } from "react";
 import { AppShell } from "../../components/layout/AppShell";
 import { Panel } from "../../components/ui/Panel";
+import { TextField } from "../../components/ui/FormField";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
-import { Client } from "../../lib/types";
+import type { Client } from "../../lib/types";
+
+function EditClientModal({
+  client,
+  onSave,
+  onClose,
+}: {
+  client: Client;
+  onSave: (updated: Client) => void;
+  onClose: () => void;
+}) {
+  const [name, setName] = useState(client.name);
+  const [phone, setPhone] = useState(client.phone);
+  const [address, setAddress] = useState(client.address ?? "");
+  const [email, setEmail] = useState(client.email ?? "");
+  const [banner, setBanner] = useState<string | null>(null);
+
+  const isDirty =
+    name !== client.name ||
+    phone !== client.phone ||
+    address !== (client.address ?? "") ||
+    email !== (client.email ?? "");
+
+  function handleClose() {
+    if (isDirty) {
+      const ok = window.confirm("Discard unsaved changes?");
+      if (!ok) return;
+    }
+    onClose();
+  }
+
+  function handleSave() {
+    if (!name.trim()) {
+      setBanner("Client name is required.");
+      return;
+    }
+
+    onSave({
+      ...client,
+      name: name.trim(),
+      phone: phone.trim(),
+      address: address.trim() || undefined,
+      email: email.trim() || undefined,
+    });
+  }
+
+  return (
+    <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 sm:items-center">
+      <div className="animate-fade-in-up flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-2xl border border-[var(--brand-border)] bg-surface-raised sm:rounded-2xl">
+        {/* Header */}
+        <div className="shrink-0 border-b border-[var(--brand-border)] px-5 pb-3.5 pt-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                Edit Client
+              </p>
+              <p className="mt-1 text-sm font-bold text-zinc-100">
+                {client.name}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
+          <TextField
+            label="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Client name"
+          />
+          <TextField
+            label="Phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Mobile / landline"
+          />
+          <TextField
+            label="Address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Street address or suburb"
+          />
+          <TextField
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="client@example.com"
+          />
+
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+              Client type
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {(["Residential", "Commercial"] as const).map((type) => {
+                const active = client.clientType === type;
+                return (
+                  <span
+                    key={type}
+                    className={`rounded-xl border px-3 py-2.5 text-center text-xs font-medium ${
+                      active
+                        ? "border-gold/40 bg-gold/10 text-gold"
+                        : "border-[var(--brand-border)] bg-surface text-zinc-500"
+                    }`}
+                  >
+                    {type}
+                  </span>
+                );
+              })}
+            </div>
+            <p className="text-[10px] text-zinc-600">
+              Client type is set when the quote is created.
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="shrink-0 border-t border-[var(--brand-border)] px-5 pb-5 pt-4">
+          {banner && (
+            <p className="mb-3 animate-fade-in text-xs font-medium text-gold">
+              {banner}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!isDirty}
+            className="w-full rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ClientsPage() {
-  const { clients } = useLocalData();
+  const { clients, updateClient } = useLocalData();
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
 
   const sorted = [...clients].sort(
     (a: Client, b: Client) => b.totalValue - a.totalValue,
   );
+
+  function handleSaveClient(updated: Client) {
+    updateClient(updated);
+    setEditingClient(null);
+  }
 
   return (
     <AppShell>
@@ -43,17 +195,40 @@ export default function ClientsPage() {
                 className="space-y-2.5 p-3.5 text-sm"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-[13px] font-bold text-zinc-100">
                       {client.name}
                     </p>
                     <p className="mt-0.5 text-xs text-zinc-500">
                       {client.suburb} · {client.phone || "No phone"}
                     </p>
+                    {(client.email || client.address) && (
+                      <div className="mt-1 space-y-0.5">
+                        {client.email && (
+                          <p className="truncate text-[11px] text-zinc-500">
+                            {client.email}
+                          </p>
+                        )}
+                        {client.address && (
+                          <p className="truncate text-[11px] text-zinc-500">
+                            {client.address}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <span className="rounded-full border border-gold/25 bg-gold/[0.08] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-gold">
-                    {client.clientType}
-                  </span>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className="rounded-full border border-gold/25 bg-gold/[0.08] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-gold">
+                      {client.clientType}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setEditingClient(client)}
+                      className="rounded-xl border border-[var(--brand-border)] bg-surface px-2.5 py-1.5 text-[11px] font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+                    >
+                      Edit
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex items-end justify-between gap-2 text-xs">
@@ -87,6 +262,14 @@ export default function ClientsPage() {
           </div>
         )}
       </section>
+
+      {editingClient && (
+        <EditClientModal
+          client={editingClient}
+          onSave={handleSaveClient}
+          onClose={() => setEditingClient(null)}
+        />
+      )}
     </AppShell>
   );
 }
