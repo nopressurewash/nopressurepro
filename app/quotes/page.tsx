@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell } from "../../components/layout/AppShell";
 import { ScheduleJobModal } from "../../components/calendar/ScheduleJobModal";
+import { EmailSendModal } from "../../components/email/EmailSendModal";
 import { EditQuoteModal } from "../../components/quotes/EditQuoteModal";
 import { JobPhotoGallery } from "../../components/photos/JobPhotoGallery";
 import { Panel } from "../../components/ui/Panel";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
 import { buildInvoiceFromQuote } from "../../lib/invoiceUtils";
-import { findClientEmail, buildQuoteMailtoHref } from "../../lib/mailto";
+import { findClientEmail } from "../../lib/mailto";
 import { getPhotoCountsForQuoteIds } from "../../lib/photoStorage";
 import { exportQuotePdf } from "../../lib/pdf/exportQuotePdf";
 import {
@@ -18,7 +19,7 @@ import {
   getQuoteStatusLabel,
   QUOTE_STATUS_OPTIONS,
 } from "../../lib/quoteStatus";
-import type { Quote, QuoteStatus } from "../../lib/types";
+import type { Invoice, Quote, QuoteStatus } from "../../lib/types";
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -53,7 +54,11 @@ export default function SavedQuotesPage() {
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [editSavedBanner, setEditSavedBanner] = useState<string | null>(null);
   const [invoiceConfirmQuote, setInvoiceConfirmQuote] = useState<Quote | null>(null);
-  const [emailWarning, setEmailWarning] = useState<string | null>(null);
+  const [emailDraftTarget, setEmailDraftTarget] = useState<{
+    quote: Quote;
+    invoice?: Invoice;
+    clientEmail?: string;
+  } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -253,13 +258,11 @@ export default function SavedQuotesPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        const email = findClientEmail(clients, q.clientName, q.phone);
-                        if (!email) {
-                          setEmailWarning("No email on file for this client. Add one in the Clients tab.");
-                          setTimeout(() => setEmailWarning(null), 3000);
-                          return;
-                        }
-                        window.location.href = buildQuoteMailtoHref(q, email);
+                        setEmailDraftTarget({
+                          quote: q,
+                          invoice: invoices.find((inv) => inv.quoteId === q.id),
+                          clientEmail: findClientEmail(clients, q.clientName, q.phone),
+                        });
                       }}
                       className={`${actionLink} text-gold hover:bg-gold/10`}
                     >
@@ -325,12 +328,6 @@ export default function SavedQuotesPage() {
         </div>
       )}
 
-      {emailWarning && (
-        <div className="fixed left-1/2 top-16 z-50 -translate-x-1/2 animate-fade-in rounded-2xl border border-amber-500/30 bg-surface-raised px-5 py-3 text-xs font-semibold text-amber-300 shadow-lg">
-          {emailWarning}
-        </div>
-      )}
-
       {editingQuote && (
         <EditQuoteModal
           quote={editingQuote}
@@ -342,6 +339,16 @@ export default function SavedQuotesPage() {
             setTimeout(() => setEditSavedBanner(null), 2400);
           }}
           onClose={() => setEditingQuote(null)}
+        />
+      )}
+
+      {emailDraftTarget && (
+        <EmailSendModal
+          quote={emailDraftTarget.quote}
+          invoice={emailDraftTarget.invoice}
+          clientEmail={emailDraftTarget.clientEmail}
+          defaultType="quote"
+          onClose={() => setEmailDraftTarget(null)}
         />
       )}
 

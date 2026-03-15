@@ -3,17 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AppShell } from "../../components/layout/AppShell";
+import { EmailSendModal } from "../../components/email/EmailSendModal";
 import { Panel } from "../../components/ui/Panel";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
-import { findClientEmail, buildInvoiceMailtoHref } from "../../lib/mailto";
+import { findClientEmail } from "../../lib/mailto";
 import { exportInvoicePdf } from "../../lib/pdf/exportInvoicePdf";
 import {
   getInvoiceStatusClasses,
   getInvoiceStatusLabel,
   INVOICE_STATUS_OPTIONS,
 } from "../../lib/invoiceStatus";
-import type { Invoice, InvoiceStatus } from "../../lib/types";
+import type { Invoice, InvoiceStatus, Quote } from "../../lib/types";
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -29,9 +30,13 @@ const actionClass =
   "rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-all duration-200 active:scale-[0.97]";
 
 export default function InvoicesPage() {
-  const { invoices, clients, updateInvoiceStatus, deleteInvoice } = useLocalData();
+  const { invoices, quotes, clients, updateInvoiceStatus, deleteInvoice } = useLocalData();
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [emailWarning, setEmailWarning] = useState<string | null>(null);
+  const [emailDraftTarget, setEmailDraftTarget] = useState<{
+    invoice: Invoice;
+    quote?: Quote;
+    clientEmail?: string;
+  } | null>(null);
 
   function handleDelete(inv: Invoice) {
     if (deletingId === inv.id) {
@@ -137,13 +142,11 @@ export default function InvoicesPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        const email = findClientEmail(clients, inv.clientName, inv.phone);
-                        if (!email) {
-                          setEmailWarning("No email on file for this client. Add one in the Clients tab.");
-                          setTimeout(() => setEmailWarning(null), 3000);
-                          return;
-                        }
-                        window.location.href = buildInvoiceMailtoHref(inv, email);
+                        setEmailDraftTarget({
+                          invoice: inv,
+                          quote: quotes.find((quote) => quote.id === inv.quoteId),
+                          clientEmail: findClientEmail(clients, inv.clientName, inv.phone),
+                        });
                       }}
                       className={`${actionClass} text-gold hover:bg-gold/10`}
                     >
@@ -164,10 +167,14 @@ export default function InvoicesPage() {
         )}
       </section>
 
-      {emailWarning && (
-        <div className="fixed left-1/2 top-16 z-50 -translate-x-1/2 animate-fade-in rounded-2xl border border-amber-500/30 bg-surface-raised px-5 py-3 text-xs font-semibold text-amber-300 shadow-lg">
-          {emailWarning}
-        </div>
+      {emailDraftTarget && (
+        <EmailSendModal
+          quote={emailDraftTarget.quote}
+          invoice={emailDraftTarget.invoice}
+          clientEmail={emailDraftTarget.clientEmail}
+          defaultType="invoice"
+          onClose={() => setEmailDraftTarget(null)}
+        />
       )}
     </AppShell>
   );
