@@ -21,13 +21,15 @@ function EditClientModal({
   const [phone, setPhone] = useState(client.phone);
   const [address, setAddress] = useState(client.address ?? "");
   const [email, setEmail] = useState(client.email ?? "");
+  const [clientType, setClientType] = useState(client.clientType);
   const [banner, setBanner] = useState<string | null>(null);
 
   const isDirty =
     name !== client.name ||
     phone !== client.phone ||
     address !== (client.address ?? "") ||
-    email !== (client.email ?? "");
+    email !== (client.email ?? "") ||
+    clientType !== client.clientType;
 
   function handleClose() {
     if (isDirty) {
@@ -49,12 +51,13 @@ function EditClientModal({
       phone: phone.trim(),
       address: address.trim() || undefined,
       email: email.trim() || undefined,
+      clientType,
     });
   }
 
   return (
-    <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 sm:items-center">
-      <div className="animate-fade-in-up flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-2xl border border-[var(--brand-border)] bg-surface-raised sm:rounded-2xl">
+    <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 px-3 pb-0 pt-14 sm:items-center sm:px-4 sm:py-8">
+      <div className="animate-fade-in-up flex max-h-[85vh] w-full max-w-lg flex-col rounded-t-2xl border border-[var(--brand-border)] bg-surface-raised sm:max-h-[90vh] sm:rounded-2xl">
         {/* Header */}
         <div className="shrink-0 border-b border-[var(--brand-border)] px-5 pb-3.5 pt-5">
           <div className="flex items-start justify-between gap-3">
@@ -110,24 +113,23 @@ function EditClientModal({
             </label>
             <div className="grid grid-cols-2 gap-2">
               {(["Residential", "Commercial"] as const).map((type) => {
-                const active = client.clientType === type;
+                const active = clientType === type;
                 return (
-                  <span
+                  <button
                     key={type}
-                    className={`rounded-xl border px-3 py-2.5 text-center text-xs font-medium ${
+                    type="button"
+                    onClick={() => setClientType(type)}
+                    className={`rounded-xl border px-3 py-2.5 text-center text-xs font-medium transition-all duration-200 ${
                       active
                         ? "border-gold/40 bg-gold/10 text-gold"
-                        : "border-[var(--brand-border)] bg-surface text-zinc-500"
+                        : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
                     }`}
                   >
                     {type}
-                  </span>
+                  </button>
                 );
               })}
             </div>
-            <p className="text-[10px] text-zinc-600">
-              Client type is set when the quote is created.
-            </p>
           </div>
         </div>
 
