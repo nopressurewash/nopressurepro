@@ -62,13 +62,12 @@ function EditClientModal({
 
   return (
     <div
-      className="animate-fade-in fixed inset-0 z-50 overflow-y-auto bg-black/90"
+      className="animate-fade-in fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/90 px-3 pb-6 pt-[8vh] sm:px-4 sm:pb-10 sm:pt-[10vh]"
       onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
     >
-      <div className="flex min-h-full items-start justify-center px-4 pb-10 pt-[6vh] sm:px-6 sm:pt-[8vh]">
-        <div className="animate-fade-in-up w-full max-w-xl rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-w-3xl">
+      <div className="animate-fade-in-up flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-h-[86vh]">
           {/* Header */}
-          <div className="border-b border-[var(--brand-border)] px-6 pb-4 pt-5">
+          <div className="shrink-0 border-b border-[var(--brand-border)] px-6 pb-4 pt-5">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
@@ -89,7 +88,7 @@ function EditClientModal({
           </div>
 
           {/* Body */}
-          <div className="space-y-5 px-6 py-6">
+          <div className="flex-1 space-y-5 overflow-y-auto px-6 py-6">
             <TextField
               label="Name"
               value={name}
@@ -143,7 +142,7 @@ function EditClientModal({
           </div>
 
           {/* Footer */}
-          <div className="border-t border-[var(--brand-border)] px-6 pb-6 pt-5">
+          <div className="shrink-0 border-t border-[var(--brand-border)] px-6 pb-6 pt-5">
             {banner && (
               <p className="mb-3 animate-fade-in text-xs font-medium text-gold">
                 {banner}
@@ -158,7 +157,6 @@ function EditClientModal({
               Save Changes
             </button>
           </div>
-        </div>
       </div>
     </div>
   );
