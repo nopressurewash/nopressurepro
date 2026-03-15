@@ -251,6 +251,38 @@ export function useLocalData() {
     setInvoices((prev) => prev.filter((inv) => inv.id !== id));
   }, []);
 
+  const updateClient = useCallback(
+    (updated: Client) => {
+      setClients((prev) => {
+        const old = prev.find((c) => c.id === updated.id);
+        if (!old) return prev;
+
+        const nameChanged = old.name !== updated.name;
+        const phoneChanged = old.phone !== updated.phone;
+
+        if (nameChanged || phoneChanged) {
+          setQuotes((prevQuotes) =>
+            prevQuotes.map((q) =>
+              q.clientName === old.name && q.phone === old.phone
+                ? { ...q, clientName: updated.name, phone: updated.phone }
+                : q,
+            ),
+          );
+          setInvoices((prevInvoices) =>
+            prevInvoices.map((inv) =>
+              inv.clientName === old.name && inv.phone === old.phone
+                ? { ...inv, clientName: updated.name, phone: updated.phone }
+                : inv,
+            ),
+          );
+        }
+
+        return prev.map((c) => (c.id === updated.id ? updated : c));
+      });
+    },
+    [],
+  );
+
   const overwriteAll = useCallback(
     (payload: {
       quotes: Quote[];
@@ -280,6 +312,7 @@ export function useLocalData() {
     updateQuoteStatus,
     updateQuoteSchedule,
     updateRates,
+    updateClient,
     addInvoice,
     updateInvoiceStatus,
     deleteInvoice,

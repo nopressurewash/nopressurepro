@@ -55,6 +55,8 @@ export interface Client {
   name: string;
   suburb: string;
   phone: string;
+  email?: string;
+  address?: string;
   totalJobs: number;
   totalValue: number;
   clientType: "Residential" | "Commercial";
