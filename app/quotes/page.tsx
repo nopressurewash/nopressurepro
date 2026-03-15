@@ -10,6 +10,7 @@ import { Panel } from "../../components/ui/Panel";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
 import { buildInvoiceFromQuote } from "../../lib/invoiceUtils";
+import { findClientEmail, buildQuoteMailtoHref } from "../../lib/mailto";
 import { getPhotoCountsForQuoteIds } from "../../lib/photoStorage";
 import { exportQuotePdf } from "../../lib/pdf/exportQuotePdf";
 import {
@@ -34,6 +35,7 @@ const actionLink =
 export default function SavedQuotesPage() {
   const {
     quotes,
+    clients,
     rates,
     invoices,
     addInvoice,
@@ -51,6 +53,7 @@ export default function SavedQuotesPage() {
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [editSavedBanner, setEditSavedBanner] = useState<string | null>(null);
   const [invoiceConfirmQuote, setInvoiceConfirmQuote] = useState<Quote | null>(null);
+  const [emailWarning, setEmailWarning] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -250,6 +253,21 @@ export default function SavedQuotesPage() {
                     <button
                       type="button"
                       onClick={() => {
+                        const email = findClientEmail(clients, q.clientName, q.phone);
+                        if (!email) {
+                          setEmailWarning("No email on file for this client. Add one in the Clients tab.");
+                          setTimeout(() => setEmailWarning(null), 3000);
+                          return;
+                        }
+                        window.location.href = buildQuoteMailtoHref(q, email);
+                      }}
+                      className={`${actionLink} text-gold hover:bg-gold/10`}
+                    >
+                      Email
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
                         if (q.status === "draft") {
                           setInvoiceConfirmQuote(q);
                           return;
@@ -304,6 +322,12 @@ export default function SavedQuotesPage() {
       {editSavedBanner && (
         <div className="fixed left-1/2 top-16 z-50 -translate-x-1/2 animate-fade-in rounded-2xl border border-gold/30 bg-surface-raised px-5 py-3 text-xs font-semibold text-gold shadow-lg">
           {editSavedBanner}
+        </div>
+      )}
+
+      {emailWarning && (
+        <div className="fixed left-1/2 top-16 z-50 -translate-x-1/2 animate-fade-in rounded-2xl border border-amber-500/30 bg-surface-raised px-5 py-3 text-xs font-semibold text-amber-300 shadow-lg">
+          {emailWarning}
         </div>
       )}
 
