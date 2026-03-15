@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { TextField, TextAreaField } from "../ui/FormField";
+import { useSpeechToText } from "../../hooks/useSpeechToText";
 import { formatCurrency } from "../../lib/format";
 import {
   buildServiceType,
@@ -43,6 +44,8 @@ export function EditQuoteModal({
   const [roofWash, setRoofWash] = useState(quote.includeRoofWash);
   const [wallsExtras, setWallsExtras] = useState(quote.includeWallsExtras);
   const [notes, setNotes] = useState(quote.notes);
+  const { speechStatus, speechMessage, handleVoiceInput } =
+    useSpeechToText(setNotes);
   const [status, setStatus] = useState<QuoteStatus>(quote.status);
   const [banner, setBanner] = useState<string | null>(null);
 
@@ -332,13 +335,46 @@ export function EditQuoteModal({
           </div>
 
           {/* Notes */}
-          <TextAreaField
-            label="Job notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            rows={3}
-            placeholder="Access, special requests, upsell ideas…"
-          />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                  Voice input
+                </p>
+                <p
+                  className={`mt-1 text-[11px] ${
+                    speechStatus === "listening"
+                      ? "text-gold"
+                      : speechMessage
+                        ? "text-amber-300"
+                        : "text-zinc-500"
+                  }`}
+                >
+                  {speechStatus === "listening"
+                    ? "Listening..."
+                    : speechMessage ?? (speechStatus === "stopped" ? "Stopped" : "Idle")}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleVoiceInput}
+                className={`rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
+                  speechStatus === "listening"
+                    ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
+                    : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/15"
+                }`}
+              >
+                {speechStatus === "listening" ? "Stop Mic" : "Use Mic"}
+              </button>
+            </div>
+            <TextAreaField
+              label="Job notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              placeholder="Access, special requests, upsell ideas…"
+            />
+          </div>
 
           {/* Status */}
           <div className="space-y-1.5">
