@@ -3,16 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AppShell } from "../../components/layout/AppShell";
+import { EmailSendModal } from "../../components/email/EmailSendModal";
 import { Panel } from "../../components/ui/Panel";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
+import { findClientEmail } from "../../lib/mailto";
 import { exportInvoicePdf } from "../../lib/pdf/exportInvoicePdf";
 import {
   getInvoiceStatusClasses,
   getInvoiceStatusLabel,
   INVOICE_STATUS_OPTIONS,
 } from "../../lib/invoiceStatus";
-import type { Invoice, InvoiceStatus } from "../../lib/types";
+import type { Invoice, InvoiceStatus, Quote } from "../../lib/types";
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -28,8 +30,13 @@ const actionClass =
   "rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-all duration-200 active:scale-[0.97]";
 
 export default function InvoicesPage() {
-  const { invoices, updateInvoiceStatus, deleteInvoice } = useLocalData();
+  const { invoices, quotes, clients, updateInvoiceStatus, deleteInvoice } = useLocalData();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [emailDraftTarget, setEmailDraftTarget] = useState<{
+    invoice: Invoice;
+    quote?: Quote;
+    clientEmail?: string;
+  } | null>(null);
 
   function handleDelete(inv: Invoice) {
     if (deletingId === inv.id) {
@@ -134,6 +141,19 @@ export default function InvoicesPage() {
                     </button>
                     <button
                       type="button"
+                      onClick={() => {
+                        setEmailDraftTarget({
+                          invoice: inv,
+                          quote: quotes.find((quote) => quote.id === inv.quoteId),
+                          clientEmail: findClientEmail(clients, inv.clientName, inv.phone),
+                        });
+                      }}
+                      className={`${actionClass} text-gold hover:bg-gold/10`}
+                    >
+                      Email
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => handleDelete(inv)}
                       className={`${actionClass} text-zinc-500 hover:bg-rose-500/10 hover:text-rose-400`}
                     >
@@ -146,6 +166,16 @@ export default function InvoicesPage() {
           </div>
         )}
       </section>
+
+      {emailDraftTarget && (
+        <EmailSendModal
+          quote={emailDraftTarget.quote}
+          invoice={emailDraftTarget.invoice}
+          clientEmail={emailDraftTarget.clientEmail}
+          defaultType="invoice"
+          onClose={() => setEmailDraftTarget(null)}
+        />
+      )}
     </AppShell>
   );
 }

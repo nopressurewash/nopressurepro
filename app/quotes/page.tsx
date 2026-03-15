@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell } from "../../components/layout/AppShell";
 import { ScheduleJobModal } from "../../components/calendar/ScheduleJobModal";
+import { EmailSendModal } from "../../components/email/EmailSendModal";
 import { EditQuoteModal } from "../../components/quotes/EditQuoteModal";
 import { JobPhotoGallery } from "../../components/photos/JobPhotoGallery";
 import { Panel } from "../../components/ui/Panel";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
 import { buildInvoiceFromQuote } from "../../lib/invoiceUtils";
+import { findClientEmail } from "../../lib/mailto";
 import { getPhotoCountsForQuoteIds } from "../../lib/photoStorage";
 import { exportQuotePdf } from "../../lib/pdf/exportQuotePdf";
 import {
@@ -17,7 +19,7 @@ import {
   getQuoteStatusLabel,
   QUOTE_STATUS_OPTIONS,
 } from "../../lib/quoteStatus";
-import type { Quote, QuoteStatus } from "../../lib/types";
+import type { Invoice, Quote, QuoteStatus } from "../../lib/types";
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -34,6 +36,7 @@ const actionLink =
 export default function SavedQuotesPage() {
   const {
     quotes,
+    clients,
     rates,
     invoices,
     addInvoice,
@@ -51,6 +54,11 @@ export default function SavedQuotesPage() {
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [editSavedBanner, setEditSavedBanner] = useState<string | null>(null);
   const [invoiceConfirmQuote, setInvoiceConfirmQuote] = useState<Quote | null>(null);
+  const [emailDraftTarget, setEmailDraftTarget] = useState<{
+    quote: Quote;
+    invoice?: Invoice;
+    clientEmail?: string;
+  } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -250,6 +258,19 @@ export default function SavedQuotesPage() {
                     <button
                       type="button"
                       onClick={() => {
+                        setEmailDraftTarget({
+                          quote: q,
+                          invoice: invoices.find((inv) => inv.quoteId === q.id),
+                          clientEmail: findClientEmail(clients, q.clientName, q.phone),
+                        });
+                      }}
+                      className={`${actionLink} text-gold hover:bg-gold/10`}
+                    >
+                      Email
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
                         if (q.status === "draft") {
                           setInvoiceConfirmQuote(q);
                           return;
@@ -318,6 +339,16 @@ export default function SavedQuotesPage() {
             setTimeout(() => setEditSavedBanner(null), 2400);
           }}
           onClose={() => setEditingQuote(null)}
+        />
+      )}
+
+      {emailDraftTarget && (
+        <EmailSendModal
+          quote={emailDraftTarget.quote}
+          invoice={emailDraftTarget.invoice}
+          clientEmail={emailDraftTarget.clientEmail}
+          defaultType="quote"
+          onClose={() => setEmailDraftTarget(null)}
         />
       )}
 
