@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AppShell } from "../../components/layout/AppShell";
 import { Panel } from "../../components/ui/Panel";
 import { TextField } from "../../components/ui/FormField";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
-import type { Client } from "../../lib/types";
+import {
+  getQuoteStatusLabel,
+  getQuoteStatusClasses,
+  isActivePipelineStatus,
+} from "../../lib/quoteStatus";
+import type { Client, Quote, Invoice } from "../../lib/types";
 
 function EditClientModal({
   client,
@@ -159,8 +164,152 @@ function EditClientModal({
   );
 }
 
+function isJobPaid(quote: Quote, invoices: Invoice[]): boolean {
+  if (quote.status === "paid") return true;
+  return invoices.some(
+    (inv) => inv.quoteId === quote.id && inv.status === "paid",
+  );
+}
+
+function formatShortDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString("en-AU", {
+      day: "numeric",
+      month: "short",
+      year: "2-digit",
+    });
+  } catch {
+    return "—";
+  }
+}
+
+function ClientJobHistory({
+  client,
+  quotes,
+  invoices,
+}: {
+  client: Client;
+  quotes: Quote[];
+  invoices: Invoice[];
+}) {
+  const [open, setOpen] = useState(false);
+
+  const clientQuotes = useMemo(
+    () =>
+      quotes
+        .filter((q) => q.clientName === client.name && q.phone === client.phone)
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        ),
+    [quotes, client.name, client.phone],
+  );
+
+  const active = useMemo(
+    () => clientQuotes.filter((q) => isActivePipelineStatus(q.status)),
+    [clientQuotes],
+  );
+  const previous = useMemo(
+    () => clientQuotes.filter((q) => !isActivePipelineStatus(q.status)),
+    [clientQuotes],
+  );
+
+  if (clientQuotes.length === 0) return null;
+
+  return (
+    <div className="border-t border-[var(--brand-border)] pt-2.5">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-2 rounded-lg px-1 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500 transition-colors hover:text-zinc-300"
+      >
+        <span>Job History ({clientQuotes.length})</span>
+        <span className="text-[10px]">{open ? "▲" : "▼"}</span>
+      </button>
+
+      {open && (
+        <div className="mt-2 space-y-3">
+          {active.length > 0 && (
+            <JobGroup
+              label="Current"
+              jobs={active}
+              invoices={invoices}
+              showPaid={false}
+            />
+          )}
+          {previous.length > 0 && (
+            <JobGroup
+              label="Previous"
+              jobs={previous}
+              invoices={invoices}
+              showPaid
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function JobGroup({
+  label,
+  jobs,
+  invoices,
+  showPaid,
+}: {
+  label: string;
+  jobs: Quote[];
+  invoices: Invoice[];
+  showPaid: boolean;
+}) {
+  return (
+    <div>
+      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
+        {label}
+      </p>
+      <div className="space-y-1.5">
+        {jobs.map((q) => {
+          const paid = showPaid ? isJobPaid(q, invoices) : null;
+          return (
+            <div
+              key={q.id}
+              className="flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2"
+            >
+              <span className="flex-1 truncate text-xs font-medium text-zinc-200">
+                {q.serviceType || "Job"}
+              </span>
+              <span className="text-xs font-semibold tabular-nums text-zinc-300">
+                {formatCurrency(q.recommended)}
+              </span>
+              <span className="text-[10px] tabular-nums text-zinc-600">
+                {formatShortDate(q.createdAt)}
+              </span>
+              <span
+                className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold leading-tight ${getQuoteStatusClasses(q.status)}`}
+              >
+                {getQuoteStatusLabel(q.status)}
+              </span>
+              {paid !== null && (
+                <span
+                  className={`rounded-full border px-2 py-0.5 text-[10px] font-bold leading-tight ${
+                    paid
+                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                      : "border-amber-500/40 bg-amber-500/10 text-amber-300"
+                  }`}
+                >
+                  {paid ? "Paid" : "Unpaid"}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function ClientsPage() {
-  const { clients, updateClient } = useLocalData();
+  const { clients, quotes, invoices, updateClient } = useLocalData();
   const [editingClient, setEditingClient] = useState<Client | null>(null);
 
   const sorted = [...clients].sort(
@@ -264,6 +413,12 @@ export default function ClientsPage() {
                     </span>
                   </p>
                 </div>
+
+                <ClientJobHistory
+                  client={client}
+                  quotes={quotes}
+                  invoices={invoices}
+                />
               </Panel>
             ))}
           </div>
