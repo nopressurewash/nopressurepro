@@ -5,9 +5,11 @@ import { AppShell } from "../../components/layout/AppShell";
 import { Panel } from "../../components/ui/Panel";
 import { TextAreaField, TextField } from "../../components/ui/FormField";
 import { AreaMeasureMap } from "../../components/map/AreaMeasureMap";
+import { JobPhotoGallery } from "../../components/photos/JobPhotoGallery";
 import { useSpeechToText } from "../../hooks/useSpeechToText";
 import { useLocalData } from "../../hooks/useLocalData";
 import { formatCurrency } from "../../lib/format";
+import { reassignPhotoRecordsToQuote } from "../../lib/photoStorage";
 import { exportQuotePdf } from "../../lib/pdf/exportQuotePdf";
 import {
   buildServiceType,
@@ -21,6 +23,14 @@ import { Quote } from "../../lib/types";
 
 const toggleBase =
   "flex items-center justify-between rounded-xl border px-3 py-3 text-xs font-medium transition-all duration-200";
+
+function createDraftPhotoQuoteId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return `draft-${crypto.randomUUID()}`;
+  }
+
+  return `draft-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
 export default function QuickQuotePage() {
   const { rates, addQuote } = useLocalData();
@@ -43,6 +53,9 @@ export default function QuickQuotePage() {
   const [saving, setSaving] = useState(false);
   const [savedBanner, setSavedBanner] = useState<string | null>(null);
   const [showMeasureModal, setShowMeasureModal] = useState(false);
+  const [draftPhotoQuoteId, setDraftPhotoQuoteId] = useState(
+    createDraftPhotoQuoteId,
+  );
 
   const totals = useMemo(
     () =>
@@ -136,7 +149,13 @@ export default function QuickQuotePage() {
       }) as any;
 
       addQuote(quote);
-      setSavedBanner("Quote saved to your list.");
+      try {
+        await reassignPhotoRecordsToQuote(draftPhotoQuoteId, id);
+        setDraftPhotoQuoteId(createDraftPhotoQuoteId());
+        setSavedBanner("Quote saved to your list.");
+      } catch {
+        setSavedBanner("Quote saved, but photos could not be linked.");
+      }
     } finally {
       setSaving(false);
       setTimeout(() => setSavedBanner(null), 2800);
@@ -430,6 +449,9 @@ export default function QuickQuotePage() {
             placeholder="Access, water, nearby cars, power, gutters, special requests, upsell ideas&hellip;"
           />
         </Panel>
+
+        {/* Job Photos */}
+        <JobPhotoGallery quoteId={draftPhotoQuoteId} />
 
         {/* Actions */}
         <div className="space-y-3">
