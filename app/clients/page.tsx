@@ -13,6 +13,8 @@ import {
 } from "../../lib/quoteStatus";
 import type { Client, Quote, Invoice } from "../../lib/types";
 
+type ClientFilter = "all" | "current" | "previous" | "paid" | "unpaid";
+
 function EditClientModal({
   client,
   onSave,
@@ -183,6 +185,54 @@ function formatShortDate(iso: string): string {
   }
 }
 
+function getClientQuotes(client: Client, quotes: Quote[]): Quote[] {
+  return quotes.filter(
+    (q) => q.clientName === client.name && q.phone === client.phone,
+  );
+}
+
+function matchesClientSearch(client: Client, searchTerm: string): boolean {
+  if (!searchTerm) return true;
+
+  const haystack = [
+    client.name,
+    client.phone,
+    client.suburb,
+    client.address,
+    client.email,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(searchTerm);
+}
+
+function matchesClientFilter(
+  client: Client,
+  filter: ClientFilter,
+  quotes: Quote[],
+  invoices: Invoice[],
+): boolean {
+  if (filter === "all") return true;
+
+  const clientQuotes = getClientQuotes(client, quotes);
+
+  if (filter === "current") {
+    return clientQuotes.some((q) => isActivePipelineStatus(q.status));
+  }
+
+  if (filter === "previous") {
+    return clientQuotes.some((q) => !isActivePipelineStatus(q.status));
+  }
+
+  if (filter === "paid") {
+    return clientQuotes.some((q) => isJobPaid(q, invoices));
+  }
+
+  return clientQuotes.some((q) => !isJobPaid(q, invoices));
+}
+
 function ClientJobHistory({
   client,
   quotes,
@@ -311,10 +361,27 @@ function JobGroup({
 export default function ClientsPage() {
   const { clients, quotes, invoices, updateClient } = useLocalData();
   const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<ClientFilter>("all");
 
-  const sorted = [...clients].sort(
-    (a: Client, b: Client) => b.totalValue - a.totalValue,
-  );
+  const filteredClients = [...clients]
+    .filter(
+      (client) =>
+        matchesClientSearch(client, search.trim().toLowerCase()) &&
+        matchesClientFilter(client, filter, quotes, invoices),
+    )
+    .sort(
+      (a: Client, b: Client) => b.totalValue - a.totalValue,
+    );
+
+  const hasClientRecords = clients.length > 0;
+  const filterOptions: Array<{ value: ClientFilter; label: string }> = [
+    { value: "all", label: "All" },
+    { value: "current", label: "With current jobs" },
+    { value: "previous", label: "With previous jobs" },
+    { value: "paid", label: "Paid" },
+    { value: "unpaid", label: "Unpaid" },
+  ];
 
   function handleSaveClient(updated: Client) {
     updateClient(updated);
@@ -333,7 +400,37 @@ export default function ClientsPage() {
           </p>
         </div>
 
-        {sorted.length === 0 ? (
+        {hasClientRecords && (
+          <Panel className="space-y-3 p-3.5">
+            <TextField
+              label="Search clients"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name, phone, suburb, address, or email"
+            />
+            <div className="flex flex-wrap gap-1.5">
+              {filterOptions.map((option) => {
+                const active = filter === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setFilter(option.value)}
+                    className={`rounded-xl border px-3 py-2 text-[11px] font-semibold transition-all duration-200 active:scale-[0.97] ${
+                      active
+                        ? "border-gold/40 bg-gold/10 text-gold"
+                        : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </Panel>
+        )}
+
+        {!hasClientRecords ? (
           <Panel className="border-dashed border-zinc-700/60">
             <p className="text-sm font-semibold text-zinc-200">
               No clients yet.
@@ -343,9 +440,18 @@ export default function ClientsPage() {
               will automatically create a client card here.
             </p>
           </Panel>
+        ) : filteredClients.length === 0 ? (
+          <Panel className="border-dashed border-zinc-700/60">
+            <p className="text-sm font-semibold text-zinc-200">
+              No matching clients.
+            </p>
+            <p className="mt-1.5 text-xs text-zinc-500">
+              Try a different search term or clear the current filter.
+            </p>
+          </Panel>
         ) : (
           <div className="space-y-3">
-            {sorted.map((client) => (
+            {filteredClients.map((client) => (
               <Panel
                 key={client.id}
                 className="space-y-2.5 p-3.5 text-sm"
