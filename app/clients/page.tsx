@@ -56,8 +56,8 @@ function EditClientModal({
   }
 
   return (
-    <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 px-3 pb-0 pt-14 sm:items-center sm:px-4 sm:py-8">
-      <div className="animate-fade-in-up flex max-h-[85vh] w-full max-w-lg flex-col rounded-t-2xl border border-[var(--brand-border)] bg-surface-raised sm:max-h-[90vh] sm:rounded-2xl">
+    <div className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 sm:p-6">
+      <div className="animate-fade-in-up flex max-h-[calc(100vh-2rem)] w-full max-w-lg flex-col rounded-2xl border border-[var(--brand-border)] bg-surface-raised sm:max-h-[calc(100vh-3rem)]">
         {/* Header */}
         <div className="shrink-0 border-b border-[var(--brand-border)] px-5 pb-3.5 pt-5">
           <div className="flex items-start justify-between gap-3">
