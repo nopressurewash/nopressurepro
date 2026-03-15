@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import type { Client, Invoice, InvoiceStatus, Quote, Rates, QuoteStatus } from "../lib/types";
+import type {
+  CalendarDayNotesMap,
+  Client,
+  Invoice,
+  InvoiceStatus,
+  Quote,
+  Rates,
+  QuoteStatus,
+} from "../lib/types";
 import { DEFAULT_RATES } from "../lib/pricing/defaultRates";
 import { RATES_KEY, normalizeRates } from "../lib/pricing/pricingStorage";
 import { normalizeQuoteStatus } from "../lib/quoteStatus";
@@ -9,6 +17,7 @@ import { normalizeQuoteStatus } from "../lib/quoteStatus";
 const QUOTES_KEY = "npp_quotes_v1";
 const CLIENTS_KEY = "npp_clients_v1";
 const INVOICES_KEY = "npp_invoices_v1";
+const DAY_NOTES_KEY = "npp_day_notes_v1";
 
 function safeParse<T>(value: string | null, fallback: T): T {
   if (!value) return fallback;
@@ -119,6 +128,7 @@ export function useLocalData() {
   const [clients, setClients] = useState<Client[]>([]);
   const [rates, setRates] = useState<Rates>(DEFAULT_RATES);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [dayNotes, setDayNotes] = useState<CalendarDayNotesMap>({});
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -141,11 +151,16 @@ export function useLocalData() {
       window.localStorage.getItem(INVOICES_KEY),
       [],
     );
+    const storedDayNotes = safeParse<CalendarDayNotesMap>(
+      window.localStorage.getItem(DAY_NOTES_KEY),
+      {},
+    );
 
     setQuotes(storedQuotes);
     setClients(storedClients);
     setRates(storedRates);
     setInvoices(storedInvoices);
+    setDayNotes(storedDayNotes);
     setLoaded(true);
   }, []);
 
@@ -168,6 +183,11 @@ export function useLocalData() {
     if (!loaded || typeof window === "undefined") return;
     persist(INVOICES_KEY, invoices);
   }, [invoices, loaded]);
+
+  useEffect(() => {
+    if (!loaded || typeof window === "undefined") return;
+    persist(DAY_NOTES_KEY, dayNotes);
+  }, [dayNotes, loaded]);
 
   const addQuote = useCallback(
     (quote: Quote) => {
@@ -285,6 +305,25 @@ export function useLocalData() {
     [],
   );
 
+  const saveDayNote = useCallback((dateKey: string, note: string) => {
+    const trimmed = note.trim();
+    setDayNotes((prev) => {
+      if (!trimmed) {
+        const next = { ...prev };
+        delete next[dateKey];
+        return next;
+      }
+
+      return {
+        ...prev,
+        [dateKey]: {
+          note: trimmed,
+          updatedAt: new Date().toISOString(),
+        },
+      };
+    });
+  }, []);
+
   const overwriteAll = useCallback(
     (payload: {
       quotes: Quote[];
@@ -308,6 +347,7 @@ export function useLocalData() {
     clients,
     rates,
     invoices,
+    dayNotes,
     addQuote,
     updateQuote,
     deleteQuote,
@@ -315,6 +355,7 @@ export function useLocalData() {
     updateQuoteSchedule,
     updateRates,
     updateClient,
+    saveDayNote,
     addInvoice,
     updateInvoiceStatus,
     deleteInvoice,

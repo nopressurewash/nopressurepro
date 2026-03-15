@@ -1,6 +1,6 @@
 "use client";
 
-import type { Quote } from "../../lib/types";
+import type { CalendarDayNote, Quote } from "../../lib/types";
 
 interface CalendarDayCellProps {
   day: number;
@@ -8,6 +8,7 @@ interface CalendarDayCellProps {
   isToday: boolean;
   isCurrentMonth: boolean;
   jobs: Quote[];
+  dayNote?: CalendarDayNote;
   onClick: () => void;
 }
 
@@ -16,9 +17,11 @@ export function CalendarDayCell({
   isToday,
   isCurrentMonth,
   jobs,
+  dayNote,
   onClick,
 }: CalendarDayCellProps) {
   const hasJobs = jobs.length > 0;
+  const hasNote = Boolean(dayNote?.note);
 
   return (
     <button
@@ -32,17 +35,22 @@ export function CalendarDayCell({
             : "border-[var(--brand-border)] bg-surface hover:border-zinc-700"
       } ${!isCurrentMonth ? "opacity-40" : ""}`}
     >
-      <span
-        className={`text-[11px] font-bold tabular-nums ${
-          isToday
-            ? "text-gold"
-            : isCurrentMonth
-              ? "text-zinc-300"
-              : "text-zinc-600"
-        }`}
-      >
-        {day}
-      </span>
+      <div className="flex items-center gap-1">
+        <span
+          className={`text-[11px] font-bold tabular-nums ${
+            isToday
+              ? "text-gold"
+              : isCurrentMonth
+                ? "text-zinc-300"
+                : "text-zinc-600"
+          }`}
+        >
+          {day}
+        </span>
+        {hasNote && (
+          <span className="h-1.5 w-1.5 rounded-full bg-brand-purple-light/80" />
+        )}
+      </div>
 
       {hasJobs && (
         <div className="mt-auto space-y-0.5">

@@ -1,13 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Quote } from "../../lib/types";
+import type { CalendarDayNotesMap, Quote } from "../../lib/types";
 import { CalendarDayCell } from "./CalendarDayCell";
 import { DayJobsModal } from "./DayJobsModal";
 
 interface JobCalendarProps {
   jobsByDate: Map<string, Quote[]>;
   getJobsForDate: (dateKey: string) => Quote[];
+  dayNotes: CalendarDayNotesMap;
+  onSaveDayNote: (dateKey: string, note: string) => void;
   onMarkCompleted: (id: string) => void;
   onReschedule: (job: Quote) => void;
 }
@@ -72,6 +74,8 @@ function buildCalendarDays(year: number, month: number): CalendarDay[] {
 
 export function JobCalendar({
   getJobsForDate,
+  dayNotes,
+  onSaveDayNote,
   onMarkCompleted,
   onReschedule,
 }: JobCalendarProps) {
@@ -162,6 +166,7 @@ export function JobCalendar({
             isToday={d.isToday}
             isCurrentMonth={d.isCurrentMonth}
             jobs={getJobsForDate(d.dateKey)}
+            dayNote={dayNotes[d.dateKey]}
             onClick={() => setSelectedDateKey(d.dateKey)}
           />
         ))}
@@ -171,6 +176,8 @@ export function JobCalendar({
         <DayJobsModal
           dateKey={selectedDateKey}
           jobs={selectedDayJobs}
+          dayNote={dayNotes[selectedDateKey]}
+          onSaveDayNote={onSaveDayNote}
           onClose={() => setSelectedDateKey(null)}
           onMarkCompleted={onMarkCompleted}
           onReschedule={onReschedule}
