@@ -38,6 +38,7 @@ function upsertClientForQuote(prevClients: Client[], quote: Quote): Client[] {
   if (existing) {
     const updated: Client = {
       ...existing,
+      email: quote.email || existing.email,
       totalJobs: existing.totalJobs + 1,
       totalValue: existing.totalValue + value,
     };
@@ -50,6 +51,7 @@ function upsertClientForQuote(prevClients: Client[], quote: Quote): Client[] {
     name: quote.clientName,
     suburb: quote.suburb,
     phone: quote.phone,
+    email: quote.email,
     totalJobs: 1,
     totalValue: value,
     clientType: "Residential",
