@@ -74,6 +74,13 @@ export interface JobPhotoRecord {
   caption?: string;
 }
 
+export interface CalendarDayNote {
+  note: string;
+  updatedAt: string;
+}
+
+export type CalendarDayNotesMap = Record<string, CalendarDayNote>;
+
 export type InvoiceStatus = "draft" | "sent" | "paid" | "overdue";
 
 export interface InvoiceLineItem {

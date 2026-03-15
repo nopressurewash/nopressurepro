@@ -21,7 +21,8 @@ const TABS: { id: ScheduleTab; label: string }[] = [
 ];
 
 export default function SchedulePage() {
-  const { quotes, updateQuoteStatus, updateQuoteSchedule } = useLocalData();
+  const { quotes, dayNotes, saveDayNote, updateQuoteStatus, updateQuoteSchedule } =
+    useLocalData();
   const { scheduledJobs, jobsByDate, getJobsForDate } =
     useScheduledJobs(quotes);
 
@@ -98,6 +99,8 @@ export default function SchedulePage() {
             <JobCalendar
               jobsByDate={jobsByDate}
               getJobsForDate={getJobsForDate}
+              dayNotes={dayNotes}
+              onSaveDayNote={saveDayNote}
               onMarkCompleted={handleMarkCompleted}
               onReschedule={handleReschedule}
             />
