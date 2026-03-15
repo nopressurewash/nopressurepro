@@ -58,6 +58,32 @@ function upsertClientForQuote(prevClients: Client[], quote: Quote): Client[] {
   return [...prevClients, newClient];
 }
 
+function recalcClientAfterDelete(
+  prevClients: Client[],
+  deletedQuote: Quote,
+  remainingQuotes: Quote[],
+): Client[] {
+  const match = prevClients.find(
+    (c) => c.phone === deletedQuote.phone && c.name === deletedQuote.clientName,
+  );
+  if (!match) return prevClients;
+
+  const clientQuotes = remainingQuotes.filter(
+    (q) => q.phone === match.phone && q.clientName === match.name,
+  );
+
+  if (clientQuotes.length === 0) {
+    return prevClients.filter((c) => c.id !== match.id);
+  }
+
+  const totalJobs = clientQuotes.length;
+  const totalValue = clientQuotes.reduce((sum, q) => sum + q.recommended, 0);
+
+  return prevClients.map((c) =>
+    c.id === match.id ? { ...c, totalJobs, totalValue } : c,
+  );
+}
+
 function rebuildClients(prevClients: Client[], editedQuote: Quote): Client[] {
   const existingById = prevClients.find((c) => c.id === editedQuote.id);
   if (existingById) {
@@ -159,7 +185,16 @@ export function useLocalData() {
   }, []);
 
   const deleteQuote = useCallback((id: string) => {
-    setQuotes((prev) => prev.filter((q) => q.id !== id));
+    setQuotes((prev) => {
+      const deleted = prev.find((q) => q.id === id);
+      const remaining = prev.filter((q) => q.id !== id);
+      if (deleted) {
+        setClients((prevClients) =>
+          recalcClientAfterDelete(prevClients, deleted, remaining),
+        );
+      }
+      return remaining;
+    });
   }, []);
 
   const updateQuoteStatus = useCallback(
