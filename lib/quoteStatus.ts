@@ -4,6 +4,7 @@ export const QUOTE_STATUS_OPTIONS: QuoteStatus[] = [
   "draft",
   "sent",
   "approved",
+  "follow_up",
   "booked",
   "completed",
   "paid",
@@ -15,6 +16,7 @@ export function normalizeQuoteStatus(value: string | undefined | null): QuoteSta
     case "draft":
     case "sent":
     case "approved":
+    case "follow_up":
     case "booked":
     case "completed":
     case "paid":
@@ -26,8 +28,8 @@ export function normalizeQuoteStatus(value: string | undefined | null): QuoteSta
       return "booked";
     case "won":
       return "completed";
-    case "lost":
-      return "lost";
+    case "followup":
+      return "follow_up";
     default:
       return "draft";
   }
@@ -41,6 +43,8 @@ export function getQuoteStatusLabel(status: QuoteStatus): string {
       return "Sent";
     case "approved":
       return "Approved";
+    case "follow_up":
+      return "Follow Up";
     case "booked":
       return "Booked";
     case "completed":
@@ -52,6 +56,12 @@ export function getQuoteStatusLabel(status: QuoteStatus): string {
   }
 }
 
+/** Active pipeline: not yet won or lost */
+export function isActivePipelineStatus(status: QuoteStatus): boolean {
+  return ["draft", "sent", "approved", "follow_up", "booked"].includes(status);
+}
+
+/** Won / closed revenue */
 export function getQuoteStatusClasses(status: QuoteStatus): string {
   switch (status) {
     case "draft":
@@ -60,6 +70,8 @@ export function getQuoteStatusClasses(status: QuoteStatus): string {
       return "border-sky-500/40 bg-sky-500/10 text-sky-400";
     case "approved":
       return "border-[var(--brand-purple)]/40 bg-[var(--brand-purple)]/10 text-[var(--brand-purple-light)]";
+    case "follow_up":
+      return "border-amber-400/40 bg-amber-400/10 text-amber-300";
     case "booked":
       return "border-[var(--brand-gold)]/40 bg-[var(--brand-gold)]/10 text-[var(--brand-gold)]";
     case "completed":
@@ -76,6 +88,6 @@ export function isClosedRevenueStatus(status: QuoteStatus): boolean {
 }
 
 export function isPipelineRevenueStatus(status: QuoteStatus): boolean {
-  return status === "sent" || status === "approved" || status === "booked";
+  return status === "sent" || status === "approved" || status === "follow_up" || status === "booked";
 }
 

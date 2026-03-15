@@ -2,6 +2,7 @@ export type QuoteStatus =
   | "draft"
   | "sent"
   | "approved"
+  | "follow_up"
   | "booked"
   | "completed"
   | "paid"
@@ -43,6 +44,10 @@ export interface Quote {
   createdAt: string;
   scheduledDate?: string;
   scheduledTime?: string;
+  /** Set when status is first set to "sent" */
+  sentAt?: string;
+  /** Set when status is first set to "approved" */
+  approvedAt?: string;
 }
 
 export interface Client {
@@ -64,5 +69,30 @@ export interface JobPhotoRecord {
   createdAt: string;
   blob: Blob;
   caption?: string;
+}
+
+export type InvoiceStatus = "draft" | "sent" | "paid" | "overdue";
+
+export interface InvoiceLineItem {
+  description: string;
+  amount: number;
+}
+
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  quoteId: string;
+  clientName: string;
+  suburb: string;
+  phone: string;
+  serviceType: string;
+  lineItems: InvoiceLineItem[];
+  amount: number;
+  status: InvoiceStatus;
+  issueDate: string;
+  dueDate: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
 }
 

@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import type { Client, Quote, Rates, QuoteStatus } from "../lib/types";
+import type { Client, Invoice, InvoiceStatus, Quote, Rates, QuoteStatus } from "../lib/types";
 import { DEFAULT_RATES } from "../lib/pricing/defaultRates";
 import { RATES_KEY, normalizeRates } from "../lib/pricing/pricingStorage";
 import { normalizeQuoteStatus } from "../lib/quoteStatus";
 
 const QUOTES_KEY = "npp_quotes_v1";
 const CLIENTS_KEY = "npp_clients_v1";
+const INVOICES_KEY = "npp_invoices_v1";
 
 function safeParse<T>(value: string | null, fallback: T): T {
   if (!value) return fallback;
@@ -57,6 +58,32 @@ function upsertClientForQuote(prevClients: Client[], quote: Quote): Client[] {
   return [...prevClients, newClient];
 }
 
+function recalcClientAfterDelete(
+  prevClients: Client[],
+  deletedQuote: Quote,
+  remainingQuotes: Quote[],
+): Client[] {
+  const match = prevClients.find(
+    (c) => c.phone === deletedQuote.phone && c.name === deletedQuote.clientName,
+  );
+  if (!match) return prevClients;
+
+  const clientQuotes = remainingQuotes.filter(
+    (q) => q.phone === match.phone && q.clientName === match.name,
+  );
+
+  if (clientQuotes.length === 0) {
+    return prevClients.filter((c) => c.id !== match.id);
+  }
+
+  const totalJobs = clientQuotes.length;
+  const totalValue = clientQuotes.reduce((sum, q) => sum + q.recommended, 0);
+
+  return prevClients.map((c) =>
+    c.id === match.id ? { ...c, totalJobs, totalValue } : c,
+  );
+}
+
 function rebuildClients(prevClients: Client[], editedQuote: Quote): Client[] {
   const existingById = prevClients.find((c) => c.id === editedQuote.id);
   if (existingById) {
@@ -89,6 +116,7 @@ export function useLocalData() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [rates, setRates] = useState<Rates>(DEFAULT_RATES);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -107,10 +135,15 @@ export function useLocalData() {
       null,
     );
     const storedRates = normalizeRates(rawRates ?? null);
+    const storedInvoices = safeParse<Invoice[]>(
+      window.localStorage.getItem(INVOICES_KEY),
+      [],
+    );
 
     setQuotes(storedQuotes);
     setClients(storedClients);
     setRates(storedRates);
+    setInvoices(storedInvoices);
     setLoaded(true);
   }, []);
 
@@ -128,6 +161,11 @@ export function useLocalData() {
     if (!loaded || typeof window === "undefined") return;
     persist(RATES_KEY, rates);
   }, [rates, loaded]);
+
+  useEffect(() => {
+    if (!loaded || typeof window === "undefined") return;
+    persist(INVOICES_KEY, invoices);
+  }, [invoices, loaded]);
 
   const addQuote = useCallback(
     (quote: Quote) => {
@@ -147,15 +185,30 @@ export function useLocalData() {
   }, []);
 
   const deleteQuote = useCallback((id: string) => {
-    setQuotes((prev) => prev.filter((q) => q.id !== id));
+    setQuotes((prev) => {
+      const deleted = prev.find((q) => q.id === id);
+      const remaining = prev.filter((q) => q.id !== id);
+      if (deleted) {
+        setClients((prevClients) =>
+          recalcClientAfterDelete(prevClients, deleted, remaining),
+        );
+      }
+      return remaining;
+    });
   }, []);
 
   const updateQuoteStatus = useCallback(
     (id: string, status: QuoteStatus) => {
+      const normalized = normalizeQuoteStatus(status);
+      const now = new Date().toISOString();
       setQuotes((prev) =>
-        prev.map((q) =>
-          q.id === id ? { ...q, status: normalizeQuoteStatus(status) } : q,
-        ),
+        prev.map((q) => {
+          if (q.id !== id) return q;
+          const next: Quote = { ...q, status: normalized };
+          if (normalized === "sent" && !q.sentAt) next.sentAt = now;
+          if (normalized === "approved" && !q.approvedAt) next.approvedAt = now;
+          return next;
+        }),
       );
     },
     [],
@@ -163,7 +216,7 @@ export function useLocalData() {
 
   const updateQuoteSchedule = useCallback(
     (id: string, scheduledDate: string, scheduledTime: string) => {
-      const preBookingStatuses: QuoteStatus[] = ["draft", "sent", "approved"];
+      const preBookingStatuses: QuoteStatus[] = ["draft", "sent", "approved", "follow_up"];
       setQuotes((prev) =>
         prev.map((q) => {
           if (q.id !== id) return q;
@@ -181,11 +234,36 @@ export function useLocalData() {
     setRates(nextRates);
   }, []);
 
+  const addInvoice = useCallback((invoice: Invoice) => {
+    setInvoices((prev) => [invoice, ...prev]);
+  }, []);
+
+  const updateInvoiceStatus = useCallback((id: string, status: InvoiceStatus) => {
+    const now = new Date().toISOString();
+    setInvoices((prev) =>
+      prev.map((inv) =>
+        inv.id === id ? { ...inv, status, updatedAt: now } : inv,
+      ),
+    );
+  }, []);
+
+  const deleteInvoice = useCallback((id: string) => {
+    setInvoices((prev) => prev.filter((inv) => inv.id !== id));
+  }, []);
+
   const overwriteAll = useCallback(
-    (payload: { quotes: Quote[]; clients: Client[]; rates: Partial<Rates> }) => {
+    (payload: {
+      quotes: Quote[];
+      clients: Client[];
+      rates: Partial<Rates>;
+      invoices?: Invoice[];
+    }) => {
       setQuotes((payload.quotes ?? []).map(normalizeQuote));
       setClients(payload.clients ?? []);
       setRates(normalizeRates(payload.rates));
+      if (payload.invoices !== undefined) {
+        setInvoices(payload.invoices);
+      }
     },
     [],
   );
@@ -195,12 +273,16 @@ export function useLocalData() {
     quotes,
     clients,
     rates,
+    invoices,
     addQuote,
     updateQuote,
     deleteQuote,
     updateQuoteStatus,
     updateQuoteSchedule,
     updateRates,
+    addInvoice,
+    updateInvoiceStatus,
+    deleteInvoice,
     overwriteAll,
   };
 }
