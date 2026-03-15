@@ -62,10 +62,10 @@ function EditClientModal({
 
   return (
     <div
-      className="animate-fade-in fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/90 px-3 pb-6 pt-[8vh] sm:px-4 sm:pb-10 sm:pt-[10vh]"
+      className="animate-fade-in fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/90 px-4 pb-6 pt-10 sm:px-6 sm:pb-8 sm:pt-12"
       onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
     >
-      <div className="animate-fade-in-up flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-h-[86vh]">
+      <div className="animate-fade-in-up flex max-h-[calc(100vh-5rem)] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-h-[calc(100vh-6rem)]">
           {/* Header */}
           <div className="shrink-0 border-b border-[var(--brand-border)] px-6 pb-4 pt-5">
             <div className="flex items-start justify-between gap-3">
