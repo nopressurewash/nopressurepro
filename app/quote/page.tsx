@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "../../components/layout/AppShell";
 import { Panel } from "../../components/ui/Panel";
 import { TextAreaField, TextField } from "../../components/ui/FormField";
@@ -21,8 +21,59 @@ import { Quote } from "../../lib/types";
 const toggleBase =
   "flex items-center justify-between rounded-xl border px-3 py-3 text-xs font-medium transition-all duration-200";
 
+interface SpeechRecognitionAlternativeLike {
+  transcript: string;
+}
+
+interface SpeechRecognitionResultLike {
+  isFinal: boolean;
+  length: number;
+  [index: number]: SpeechRecognitionAlternativeLike;
+}
+
+interface SpeechRecognitionEventLike extends Event {
+  resultIndex: number;
+  results: ArrayLike<SpeechRecognitionResultLike>;
+}
+
+interface SpeechRecognitionErrorEventLike extends Event {
+  error?: string;
+}
+
+interface SpeechRecognitionLike extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  maxAlternatives: number;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+}
+
+interface SpeechRecognitionConstructorLike {
+  new (): SpeechRecognitionLike;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionConstructorLike;
+    webkitSpeechRecognition?: SpeechRecognitionConstructorLike;
+  }
+}
+
+function appendTranscript(existing: string, nextChunk: string): string {
+  const next = nextChunk.trim();
+  if (!next) return existing;
+  const trimmedExisting = existing.trimEnd();
+  if (!trimmedExisting) return next;
+  return `${trimmedExisting}\n${next}`;
+}
+
 export default function QuickQuotePage() {
   const { rates, addQuote } = useLocalData();
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
   const [clientName, setClientName] = useState("");
   const [suburb, setSuburb] = useState("");
@@ -37,6 +88,8 @@ export default function QuickQuotePage() {
   const [roofWash, setRoofWash] = useState(false);
   const [wallsExtras, setWallsExtras] = useState(false);
   const [notes, setNotes] = useState("");
+  const [speechStatus, setSpeechStatus] = useState<"idle" | "listening" | "stopped">("idle");
+  const [speechMessage, setSpeechMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedBanner, setSavedBanner] = useState<string | null>(null);
   const [showMeasureModal, setShowMeasureModal] = useState(false);
@@ -69,6 +122,68 @@ export default function QuickQuotePage() {
     setter: (v: number) => void,
   ): void {
     setter(parseNumericInput(value));
+  }
+
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.stop();
+    };
+  }, []);
+
+  function handleVoiceNotes() {
+    if (speechStatus === "listening") {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    if (typeof window === "undefined") return;
+
+    const SpeechRecognition =
+      window.SpeechRecognition ?? window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setSpeechMessage("Voice input is not supported in this browser.");
+      setSpeechStatus("stopped");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    recognition.lang = "en-AU";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event) => {
+      let transcript = "";
+      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+        const result = event.results[index];
+        if (result?.isFinal) {
+          transcript += result[0]?.transcript ?? "";
+        }
+      }
+      if (transcript.trim()) {
+        setNotes((prev) => appendTranscript(prev, transcript));
+        setSpeechMessage(null);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        setSpeechMessage("Microphone access was blocked. Allow mic access to dictate notes.");
+      } else {
+        setSpeechMessage("Voice input could not capture speech. Try again.");
+      }
+      setSpeechStatus("stopped");
+    };
+
+    recognition.onend = () => {
+      setSpeechStatus("stopped");
+    };
+
+    setSpeechMessage(null);
+    setSpeechStatus("listening");
+    recognition.start();
   }
 
   function buildDraftQuote(): Quote {
@@ -388,6 +503,37 @@ export default function QuickQuotePage() {
 
         {/* Notes */}
         <Panel className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                Voice input
+              </p>
+              <p
+                className={`mt-1 text-[11px] ${
+                  speechStatus === "listening"
+                    ? "text-gold"
+                    : speechMessage
+                      ? "text-amber-300"
+                      : "text-zinc-500"
+                }`}
+              >
+                {speechStatus === "listening"
+                  ? "Listening..."
+                  : speechMessage ?? (speechStatus === "stopped" ? "Stopped" : "Idle")}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleVoiceNotes}
+              className={`rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
+                speechStatus === "listening"
+                  ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
+                  : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/15"
+              }`}
+            >
+              {speechStatus === "listening" ? "Stop Mic" : "Use Mic"}
+            </button>
+          </div>
           <TextAreaField
             label="Job notes"
             value={notes}
