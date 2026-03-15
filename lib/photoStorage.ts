@@ -194,6 +194,25 @@ export async function updatePhotoRecord(
   });
 }
 
+export async function reassignPhotoRecordsToQuote(
+  fromQuoteId: string,
+  toQuoteId: string,
+): Promise<void> {
+  if (!fromQuoteId || !toQuoteId || fromQuoteId === toQuoteId) return;
+
+  const photos = await getPhotosForQuote(fromQuoteId);
+  if (photos.length === 0) return;
+
+  await Promise.all(
+    photos.map((photo) =>
+      updatePhotoRecord({
+        ...photo,
+        quoteId: toQuoteId,
+      }),
+    ),
+  );
+}
+
 export async function deletePhotoRecord(id: string): Promise<void> {
   const db = await openDatabase();
 
