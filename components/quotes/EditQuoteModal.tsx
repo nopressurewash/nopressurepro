@@ -7,6 +7,7 @@ import {
   buildServiceType,
   calculateQuoteTotals,
   parseNumericInput,
+  parseHoursInput,
 } from "../../lib/quoteCalc";
 import {
   getQuoteStatusLabel,
@@ -235,9 +236,13 @@ export function EditQuoteModal({
               </div>
               <TextField
                 label="Estimated hours"
+                type="number"
+                step="0.25"
+                min="0.25"
+                max="99"
                 inputMode="decimal"
                 value={estimatedHours || ""}
-                onChange={(e) => handleNumericChange(e.target.value, setEstimatedHours)}
+                onChange={(e) => setEstimatedHours(parseHoursInput(e.target.value))}
                 placeholder="3"
               />
             </div>

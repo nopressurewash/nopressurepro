@@ -12,6 +12,7 @@ import {
   buildServiceType,
   calculateQuoteTotals,
   parseNumericInput,
+  parseHoursInput,
 } from "../../lib/quoteCalc";
 import { getQuoteStatusLabel } from "../../lib/quoteStatus";
 import type { StainLevel } from "../../lib/types";
@@ -246,10 +247,14 @@ export default function QuickQuotePage() {
             </div>
             <TextField
               label="Estimated hours"
+              type="number"
+              step="0.25"
+              min="0.25"
+              max="99"
               inputMode="decimal"
               value={estimatedHours || ""}
               onChange={(e) =>
-                handleNumericChange(e.target.value, setEstimatedHours)
+                setEstimatedHours(parseHoursInput(e.target.value))
               }
               placeholder="3"
             />
