@@ -95,6 +95,7 @@ create table if not exists rates (
   house_wash numeric(12,2) not null,
   roof_wash numeric(12,2) not null,
   walls_extras numeric(12,2) not null,
+  unique (business_id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
