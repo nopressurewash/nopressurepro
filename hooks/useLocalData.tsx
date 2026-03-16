@@ -26,6 +26,12 @@ import {
   importLocalScheduleNotesIfMissing,
   saveScheduleNote,
 } from "../lib/data/scheduleNotesRepo";
+import {
+  deleteClient,
+  getClients,
+  importLocalClientsIfMissing,
+  saveClient,
+} from "../lib/data/clientsRepo";
 
 const QUOTES_KEY = "npp_quotes_v1";
 const CLIENTS_KEY = "npp_clients_v1";
@@ -81,30 +87,41 @@ function upsertClientForQuote(prevClients: Client[], quote: Quote): Client[] {
   return [...prevClients, newClient];
 }
 
+type ClientRecalcResult = {
+  clients: Client[];
+  removedClientId?: string;
+};
+
 function recalcClientAfterDelete(
   prevClients: Client[],
   deletedQuote: Quote,
   remainingQuotes: Quote[],
-): Client[] {
+): ClientRecalcResult {
   const match = prevClients.find(
     (c) => c.phone === deletedQuote.phone && c.name === deletedQuote.clientName,
   );
-  if (!match) return prevClients;
+  if (!match) return { clients: prevClients };
 
   const clientQuotes = remainingQuotes.filter(
     (q) => q.phone === match.phone && q.clientName === match.name,
   );
 
   if (clientQuotes.length === 0) {
-    return prevClients.filter((c) => c.id !== match.id);
+    return {
+      clients: prevClients.filter((c) => c.id !== match.id),
+      removedClientId: match.id,
+    };
   }
 
   const totalJobs = clientQuotes.length;
   const totalValue = clientQuotes.reduce((sum, q) => sum + q.recommended, 0);
 
-  return prevClients.map((c) =>
-    c.id === match.id ? { ...c, totalJobs, totalValue } : c,
-  );
+  return {
+    clients: prevClients.map((c) =>
+      c.id === match.id ? { ...c, totalJobs, totalValue } : c,
+    ),
+    removedClientId: undefined,
+  };
 }
 
 function rebuildClients(prevClients: Client[], editedQuote: Quote): Client[] {
@@ -143,6 +160,7 @@ export function useLocalData() {
   const [dayNotes, setDayNotes] = useState<CalendarDayNotesMap>({});
   const [loaded, setLoaded] = useState(false);
   const [remoteRatesLoaded, setRemoteRatesLoaded] = useState(false);
+  const [remoteClientsLoaded, setRemoteClientsLoaded] = useState(false);
   const { businessId } = useAuth();
 
   useEffect(() => {
@@ -211,6 +229,71 @@ export function useLocalData() {
       cancelled = true;
     };
   }, [businessId]);
+
+  useEffect(() => {
+    if (!businessId) return;
+
+    let cancelled = false;
+
+    const loadRemoteClients = async () => {
+      try {
+        const remote = await getClients(businessId);
+        if (!cancelled && remote && remote.length > 0) {
+          setClients(remote);
+          setRemoteClientsLoaded(true);
+          return;
+        }
+
+        if (typeof window === "undefined") return;
+
+        const storedClients = safeParse<Client[]>(
+          window.localStorage.getItem(CLIENTS_KEY),
+          [],
+        );
+
+        await importLocalClientsIfMissing(businessId, storedClients);
+
+        if (cancelled) return;
+        const fallback = await getClients(businessId);
+        if (fallback) {
+          setClients(fallback);
+        }
+        setRemoteClientsLoaded(true);
+      } catch (error) {
+        console.error("Failed to load Supabase clients", error);
+      }
+    };
+
+    void loadRemoteClients();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId]);
+
+  useEffect(() => {
+    if (!businessId || !remoteClientsLoaded) return;
+
+    let cancelled = false;
+
+    const syncClients = async () => {
+      try {
+        await Promise.all(
+          clients.map((client) => saveClient(businessId, client)),
+        );
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to persist Supabase clients", error);
+        }
+      }
+    };
+
+    void syncClients();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId, clients, remoteClientsLoaded]);
 
   useEffect(() => {
     if (!businessId) return;
@@ -292,18 +375,36 @@ export function useLocalData() {
     setClients((prev) => rebuildClients(prev, normalized));
   }, []);
 
-  const deleteQuote = useCallback((id: string) => {
-    setQuotes((prev) => {
-      const deleted = prev.find((q) => q.id === id);
-      const remaining = prev.filter((q) => q.id !== id);
-      if (deleted) {
-        setClients((prevClients) =>
-          recalcClientAfterDelete(prevClients, deleted, remaining),
-        );
-      }
-      return remaining;
-    });
-  }, []);
+  const removeClient = useCallback(
+    (clientId: string) => {
+      if (!businessId) return;
+      void deleteClient(businessId, clientId).catch((error) => {
+        console.error("Failed to delete Supabase client", error);
+      });
+    },
+    [businessId],
+  );
+
+  const deleteQuote = useCallback(
+    (id: string) => {
+      setQuotes((prev) => {
+        const deleted = prev.find((q) => q.id === id);
+        const remaining = prev.filter((q) => q.id !== id);
+        if (deleted) {
+          setClients((prevClients) => {
+            const { clients: updatedClients, removedClientId } =
+              recalcClientAfterDelete(prevClients, deleted, remaining);
+            if (removedClientId) {
+              removeClient(removedClientId);
+            }
+            return updatedClients;
+          });
+        }
+        return remaining;
+      });
+    },
+    [removeClient],
+  );
 
   const updateQuoteStatus = useCallback(
     (id: string, status: QuoteStatus) => {

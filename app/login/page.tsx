@@ -10,11 +10,25 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
     supabaseClient.auth.getSession().then(({ data }) => {
-      if (data.session) {
+      if (isMounted && data.session) {
         router.replace("/dashboard");
       }
     });
+
+    const { data: listener } = supabaseClient.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.user) {
+          router.replace("/dashboard");
+        }
+      },
+    );
+
+    return () => {
+      isMounted = false;
+      listener.subscription.unsubscribe();
+    };
   }, [router]);
 
   return (
