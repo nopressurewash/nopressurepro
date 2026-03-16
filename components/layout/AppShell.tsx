@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode, CSSProperties } from "react";
+import { useAuth } from "../auth/AuthProvider";
+import { UserMenu } from "../auth/UserMenu";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -19,6 +21,7 @@ const navItems = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const { email, signOut } = useAuth();
 
   const navStyle: CSSProperties = {
     paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4px)",
@@ -56,8 +59,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               </p>
             </div>
           </Link>
-          <div className="rounded-full border border-gold/30 bg-gold/[0.08] px-3 py-[3px] text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
-            V1
+          <div className="flex items-center gap-3">
+            <div className="rounded-full border border-gold/30 bg-gold/[0.08] px-3 py-[3px] text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
+              V1
+            </div>
+            <UserMenu email={email} onLogout={signOut} />
           </div>
         </div>
       </header>
