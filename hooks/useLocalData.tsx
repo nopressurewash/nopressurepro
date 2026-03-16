@@ -19,11 +19,17 @@ import {
   importLocalRatesIfMissing,
   saveRates,
 } from "../lib/data/ratesRepo";
+import {
+  DAY_NOTES_KEY,
+  deleteScheduleNote,
+  getScheduleNotes,
+  importLocalScheduleNotesIfMissing,
+  saveScheduleNote,
+} from "../lib/data/scheduleNotesRepo";
 
 const QUOTES_KEY = "npp_quotes_v1";
 const CLIENTS_KEY = "npp_clients_v1";
 const INVOICES_KEY = "npp_invoices_v1";
-const DAY_NOTES_KEY = "npp_day_notes_v1";
 
 function safeParse<T>(value: string | null, fallback: T): T {
   if (!value) return fallback;
@@ -207,6 +213,44 @@ export function useLocalData() {
   }, [businessId]);
 
   useEffect(() => {
+    if (!businessId) return;
+
+    let cancelled = false;
+
+    const loadRemoteDayNotes = async () => {
+      try {
+        const remote = await getScheduleNotes(businessId);
+        if (!cancelled && remote) {
+          setDayNotes(remote);
+          return;
+        }
+
+        if (typeof window === "undefined") return;
+        const storedNotes = safeParse<CalendarDayNotesMap>(
+          window.localStorage.getItem(DAY_NOTES_KEY),
+          {},
+        );
+
+        await importLocalScheduleNotesIfMissing(businessId, storedNotes);
+
+        if (cancelled) return;
+        const fallback = await getScheduleNotes(businessId);
+        if (fallback) {
+          setDayNotes(fallback);
+        }
+      } catch (error) {
+        console.error("Failed to load Supabase schedule notes", error);
+      }
+    };
+
+    void loadRemoteDayNotes();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId]);
+
+  useEffect(() => {
     if (!loaded || typeof window === "undefined") return;
     persist(QUOTES_KEY, quotes);
   }, [quotes, loaded]);
@@ -354,24 +398,45 @@ export function useLocalData() {
     [],
   );
 
-  const saveDayNote = useCallback((dateKey: string, note: string) => {
-    const trimmed = note.trim();
-    setDayNotes((prev) => {
-      if (!trimmed) {
-        const next = { ...prev };
-        delete next[dateKey];
-        return next;
-      }
+  const saveDayNote = useCallback(
+    (dateKey: string, note: string) => {
+      const trimmed = note.trim();
+      const updatedAt = new Date().toISOString();
 
-      return {
-        ...prev,
-        [dateKey]: {
-          note: trimmed,
-          updatedAt: new Date().toISOString(),
-        },
+      setDayNotes((prev) => {
+        if (!trimmed) {
+          const next = { ...prev };
+          delete next[dateKey];
+          return next;
+        }
+
+        return {
+          ...prev,
+          [dateKey]: {
+            note: trimmed,
+            updatedAt,
+          },
+        };
+      });
+
+      if (!businessId) return;
+
+      const persistNote = async () => {
+        try {
+          if (!trimmed) {
+            await deleteScheduleNote(businessId, dateKey);
+            return;
+          }
+          await saveScheduleNote(businessId, dateKey, trimmed, updatedAt);
+        } catch (error) {
+          console.error("Failed to persist Supabase schedule note", dateKey, error);
+        }
       };
-    });
-  }, []);
+
+      void persistNote();
+    },
+    [businessId],
+  );
 
   const overwriteAll = useCallback(
     (payload: {

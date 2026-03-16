@@ -84,6 +84,8 @@ create table if not exists schedule_notes (
   date_key text not null,
   note text,
   updated_at timestamptz not null default now()
+  ,
+  unique (business_id, date_key)
 );
 
 create table if not exists rates (
