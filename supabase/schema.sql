@@ -58,6 +58,7 @@ create table if not exists quotes (
   scheduled_time text,
   notes text,
   created_at timestamptz not null default now(),
+  payload jsonb not null default '{}',
   updated_at timestamptz not null default now()
 );
 
