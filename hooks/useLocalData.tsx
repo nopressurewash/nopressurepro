@@ -10,14 +10,26 @@ import type {
   Rates,
   QuoteStatus,
 } from "../lib/types";
+import { useAuth } from "../components/auth/AuthProvider";
 import { DEFAULT_RATES } from "../lib/pricing/defaultRates";
 import { RATES_KEY, normalizeRates } from "../lib/pricing/pricingStorage";
 import { normalizeQuoteStatus } from "../lib/quoteStatus";
+import {
+  getRates,
+  importLocalRatesIfMissing,
+  saveRates,
+} from "../lib/data/ratesRepo";
+import {
+  DAY_NOTES_KEY,
+  deleteScheduleNote,
+  getScheduleNotes,
+  importLocalScheduleNotesIfMissing,
+  saveScheduleNote,
+} from "../lib/data/scheduleNotesRepo";
 
 const QUOTES_KEY = "npp_quotes_v1";
 const CLIENTS_KEY = "npp_clients_v1";
 const INVOICES_KEY = "npp_invoices_v1";
-const DAY_NOTES_KEY = "npp_day_notes_v1";
 
 function safeParse<T>(value: string | null, fallback: T): T {
   if (!value) return fallback;
@@ -130,6 +142,8 @@ export function useLocalData() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [dayNotes, setDayNotes] = useState<CalendarDayNotesMap>({});
   const [loaded, setLoaded] = useState(false);
+  const [remoteRatesLoaded, setRemoteRatesLoaded] = useState(false);
+  const { businessId } = useAuth();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -163,6 +177,78 @@ export function useLocalData() {
     setDayNotes(storedDayNotes);
     setLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (!businessId) return;
+
+    let cancelled = false;
+
+    const loadRemoteRates = async () => {
+      try {
+        const remote = await getRates(businessId);
+        if (!cancelled && remote) {
+          setRates(remote);
+          setRemoteRatesLoaded(true);
+          return;
+        }
+
+        await importLocalRatesIfMissing(businessId);
+
+        if (cancelled) return;
+        const fallback = await getRates(businessId);
+        if (fallback) {
+          setRates(fallback);
+        }
+        setRemoteRatesLoaded(true);
+      } catch (error) {
+        console.error("Failed to load Supabase rates", error);
+      }
+    };
+
+    void loadRemoteRates();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId]);
+
+  useEffect(() => {
+    if (!businessId) return;
+
+    let cancelled = false;
+
+    const loadRemoteDayNotes = async () => {
+      try {
+        const remote = await getScheduleNotes(businessId);
+        if (!cancelled && remote) {
+          setDayNotes(remote);
+          return;
+        }
+
+        if (typeof window === "undefined") return;
+        const storedNotes = safeParse<CalendarDayNotesMap>(
+          window.localStorage.getItem(DAY_NOTES_KEY),
+          {},
+        );
+
+        await importLocalScheduleNotesIfMissing(businessId, storedNotes);
+
+        if (cancelled) return;
+        const fallback = await getScheduleNotes(businessId);
+        if (fallback) {
+          setDayNotes(fallback);
+        }
+      } catch (error) {
+        console.error("Failed to load Supabase schedule notes", error);
+      }
+    };
+
+    void loadRemoteDayNotes();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId]);
 
   useEffect(() => {
     if (!loaded || typeof window === "undefined") return;
@@ -252,9 +338,16 @@ export function useLocalData() {
     [],
   );
 
-  const updateRates = useCallback((nextRates: Rates) => {
-    setRates(nextRates);
-  }, []);
+  const updateRates = useCallback(
+    (nextRates: Rates) => {
+      setRates(nextRates);
+      if (!businessId) return;
+      void saveRates(businessId, nextRates).catch((error) => {
+        console.error("Failed to persist Supabase rates", error);
+      });
+    },
+    [businessId],
+  );
 
   const addInvoice = useCallback((invoice: Invoice) => {
     setInvoices((prev) => [invoice, ...prev]);
@@ -305,24 +398,45 @@ export function useLocalData() {
     [],
   );
 
-  const saveDayNote = useCallback((dateKey: string, note: string) => {
-    const trimmed = note.trim();
-    setDayNotes((prev) => {
-      if (!trimmed) {
-        const next = { ...prev };
-        delete next[dateKey];
-        return next;
-      }
+  const saveDayNote = useCallback(
+    (dateKey: string, note: string) => {
+      const trimmed = note.trim();
+      const updatedAt = new Date().toISOString();
 
-      return {
-        ...prev,
-        [dateKey]: {
-          note: trimmed,
-          updatedAt: new Date().toISOString(),
-        },
+      setDayNotes((prev) => {
+        if (!trimmed) {
+          const next = { ...prev };
+          delete next[dateKey];
+          return next;
+        }
+
+        return {
+          ...prev,
+          [dateKey]: {
+            note: trimmed,
+            updatedAt,
+          },
+        };
+      });
+
+      if (!businessId) return;
+
+      const persistNote = async () => {
+        try {
+          if (!trimmed) {
+            await deleteScheduleNote(businessId, dateKey);
+            return;
+          }
+          await saveScheduleNote(businessId, dateKey, trimmed, updatedAt);
+        } catch (error) {
+          console.error("Failed to persist Supabase schedule note", dateKey, error);
+        }
       };
-    });
-  }, []);
+
+      void persistNote();
+    },
+    [businessId],
+  );
 
   const overwriteAll = useCallback(
     (payload: {
