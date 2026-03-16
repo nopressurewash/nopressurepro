@@ -1,13 +1,13 @@
 import { supabaseClient } from "./supabaseClient";
 
-export async function bootstrapWorkspace(userId: string) {
+export async function bootstrapWorkspace(userId: string, email: string | null) {
   if (!userId) {
     throw new Error("Missing Supabase user ID.");
   }
 
   const profileResult = await supabaseClient
     .from("profiles")
-    .select("id")
+    .select("id, email")
     .eq("id", userId)
     .single();
 
@@ -18,10 +18,19 @@ export async function bootstrapWorkspace(userId: string) {
   if (!profileResult.data) {
     const insertResult = await supabaseClient
       .from("profiles")
-      .insert({ id: userId, email: "" });
+      .insert({ id: userId, email: email ?? "" });
 
     if (insertResult.error) {
       throw insertResult.error;
+    }
+  } else if (email && profileResult.data.email !== email) {
+    const updateResult = await supabaseClient
+      .from("profiles")
+      .update({ email })
+      .eq("id", userId);
+
+    if (updateResult.error) {
+      throw updateResult.error;
     }
   }
 

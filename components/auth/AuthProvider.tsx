@@ -42,7 +42,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       }
       if (data.session?.user) {
-        const { businessId } = await bootstrapWorkspace(data.session.user.id);
+        const { businessId } = await bootstrapWorkspace(
+          data.session.user.id,
+          data.session.user.email ?? null,
+        );
         setBusinessId(businessId);
       }
     })();
@@ -53,7 +56,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setBusinessId(null);
         if (sess?.user) {
           try {
-            const { businessId } = await bootstrapWorkspace(sess.user.id);
+            const { businessId } = await bootstrapWorkspace(
+              sess.user.id,
+              sess.user.email ?? null,
+            );
             setBusinessId(businessId);
           } catch (error) {
             console.error("Workspace bootstrap failed", error);
