@@ -1,7 +1,14 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 import { supabaseClient } from "../../lib/supabaseClient";
 import { bootstrapWorkspace } from "../../lib/bootstrapWorkspace";
@@ -52,6 +59,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: listener } =
       supabaseClient.auth.onAuthStateChange(async (_event, sess) => {
+        if (_event === "SIGNED_OUT") {
+          router.replace("/login");
+        }
+
         setSession(sess);
         setBusinessId(null);
         if (sess?.user) {
@@ -81,18 +92,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isLoading, pathname, router, session]);
 
+  const signOut = useCallback(async () => {
+    await supabaseClient.auth.signOut();
+    setSession(null);
+    setBusinessId(null);
+    router.replace("/login");
+  }, [router]);
+
   const value = useMemo(
     () => ({
       isLoading,
       userId: session?.user?.id ?? null,
       email: session?.user?.email ?? null,
       businessId,
-      signOut: async () => {
-        await supabaseClient.auth.signOut();
-        setBusinessId(null);
-      },
+      signOut,
     }),
-    [isLoading, session, businessId],
+    [isLoading, session, businessId, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
