@@ -10,9 +10,15 @@ import type {
   Rates,
   QuoteStatus,
 } from "../lib/types";
+import { useAuth } from "../components/auth/AuthProvider";
 import { DEFAULT_RATES } from "../lib/pricing/defaultRates";
 import { RATES_KEY, normalizeRates } from "../lib/pricing/pricingStorage";
 import { normalizeQuoteStatus } from "../lib/quoteStatus";
+import {
+  getRates,
+  importLocalRatesIfMissing,
+  saveRates,
+} from "../lib/data/ratesRepo";
 
 const QUOTES_KEY = "npp_quotes_v1";
 const CLIENTS_KEY = "npp_clients_v1";
@@ -130,6 +136,8 @@ export function useLocalData() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [dayNotes, setDayNotes] = useState<CalendarDayNotesMap>({});
   const [loaded, setLoaded] = useState(false);
+  const [remoteRatesLoaded, setRemoteRatesLoaded] = useState(false);
+  const { businessId } = useAuth();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -163,6 +171,40 @@ export function useLocalData() {
     setDayNotes(storedDayNotes);
     setLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (!businessId) return;
+
+    let cancelled = false;
+
+    const loadRemoteRates = async () => {
+      try {
+        const remote = await getRates(businessId);
+        if (!cancelled && remote) {
+          setRates(remote);
+          setRemoteRatesLoaded(true);
+          return;
+        }
+
+        await importLocalRatesIfMissing(businessId);
+
+        if (cancelled) return;
+        const fallback = await getRates(businessId);
+        if (fallback) {
+          setRates(fallback);
+        }
+        setRemoteRatesLoaded(true);
+      } catch (error) {
+        console.error("Failed to load Supabase rates", error);
+      }
+    };
+
+    void loadRemoteRates();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId]);
 
   useEffect(() => {
     if (!loaded || typeof window === "undefined") return;
@@ -252,9 +294,16 @@ export function useLocalData() {
     [],
   );
 
-  const updateRates = useCallback((nextRates: Rates) => {
-    setRates(nextRates);
-  }, []);
+  const updateRates = useCallback(
+    (nextRates: Rates) => {
+      setRates(nextRates);
+      if (!businessId) return;
+      void saveRates(businessId, nextRates).catch((error) => {
+        console.error("Failed to persist Supabase rates", error);
+      });
+    },
+    [businessId],
+  );
 
   const addInvoice = useCallback((invoice: Invoice) => {
     setInvoices((prev) => [invoice, ...prev]);
