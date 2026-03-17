@@ -76,6 +76,7 @@ create table if not exists invoices (
   due_date date,
   notes text,
   created_at timestamptz not null default now(),
+  payload jsonb not null default '{}',
   updated_at timestamptz not null default now()
 );
 
