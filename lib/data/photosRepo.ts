@@ -193,6 +193,29 @@ export async function updatePhotoRecord(
     return false;
   }
 
+  const remoteQuoteId = toRemoteUuid(photo.quoteId);
+  const { data: quoteRow, error: quoteError } = await supabaseClient
+    .from("quotes")
+    .select("id")
+    .eq("business_id", businessId)
+    .eq("id", remoteQuoteId)
+    .maybeSingle();
+
+  if (quoteError) {
+    console.error("Supabase quote lookup failed before photo update", quoteError);
+    return false;
+  }
+
+  if (!quoteRow) {
+    console.info("[photos] skipped remote metadata sync: quote is local-only", {
+      businessId,
+      photoId: photo.id,
+      quoteId: photo.quoteId,
+      remoteQuoteId,
+    });
+    return false;
+  }
+
   const remoteId = toRemoteUuid(photo.id);
   const { data: existingRow } = await supabaseClient
     .from("quote_photos")
@@ -210,7 +233,7 @@ export async function updatePhotoRecord(
     {
       id: remoteId,
       business_id: businessId,
-      quote_id: toRemoteUuid(photo.quoteId),
+      quote_id: remoteQuoteId,
       category: photo.category,
       created_at: photo.createdAt,
       caption: photo.caption ?? null,
