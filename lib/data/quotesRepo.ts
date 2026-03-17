@@ -82,19 +82,32 @@ export async function saveQuote(businessId: string, quote: Quote): Promise<void>
 export async function deleteQuote(
   businessId: string,
   quoteId: string,
-): Promise<void> {
-  if (!businessId || !quoteId) return;
+) : Promise<boolean> {
+  if (!businessId || !quoteId) return false;
+
+  const remoteId = toRemoteUuid(quoteId);
+  console.info("[quotes] delete request", { businessId, quoteId, remoteId });
 
   const { error } = await supabaseClient
     .from("quotes")
     .delete()
     .eq("business_id", businessId)
-    .eq("id", toRemoteUuid(quoteId));
+    .eq("id", remoteId);
 
   if (error) {
-    console.error("Supabase quote delete failed", error);
+    console.error(
+      "[quotes] Supabase quote delete failed",
+      error.message,
+      error.details,
+      error.hint,
+      error.code,
+      { businessId, quoteId, remoteId },
+    );
     throw error;
   }
+
+  console.info("[quotes] delete success", { businessId, quoteId, remoteId });
+  return true;
 }
 
 export async function importLocalQuotesIfMissing(
