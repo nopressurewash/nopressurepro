@@ -53,6 +53,7 @@ export default function SavedQuotesPage() {
   const [schedulingQuote, setSchedulingQuote] = useState<Quote | null>(null);
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [editSavedBanner, setEditSavedBanner] = useState<string | null>(null);
+  const [deleteBlockedBanner, setDeleteBlockedBanner] = useState<string | null>(null);
   const [invoiceConfirmQuote, setInvoiceConfirmQuote] = useState<Quote | null>(null);
   const [emailDraftTarget, setEmailDraftTarget] = useState<{
     quote: Quote;
@@ -285,7 +286,17 @@ export default function SavedQuotesPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => deleteQuote(q.id)}
+                      onClick={() => {
+                        const linkedInvoice = invoices.find((inv) => inv.quoteId === q.id);
+                        if (linkedInvoice) {
+                          setDeleteBlockedBanner(
+                            `Cannot delete quote: linked invoice ${linkedInvoice.invoiceNumber || linkedInvoice.id} exists.`,
+                          );
+                          setTimeout(() => setDeleteBlockedBanner(null), 3000);
+                          return;
+                        }
+                        deleteQuote(q.id);
+                      }}
                       className={`${actionLink} text-zinc-500 hover:bg-rose-500/10 hover:text-rose-400`}
                     >
                       Delete
@@ -325,6 +336,12 @@ export default function SavedQuotesPage() {
       {editSavedBanner && (
         <div className="fixed left-1/2 top-16 z-50 -translate-x-1/2 animate-fade-in rounded-2xl border border-gold/30 bg-surface-raised px-5 py-3 text-xs font-semibold text-gold shadow-lg">
           {editSavedBanner}
+        </div>
+      )}
+
+      {deleteBlockedBanner && (
+        <div className="fixed left-1/2 top-28 z-50 -translate-x-1/2 animate-fade-in rounded-2xl border border-amber-400/30 bg-surface-raised px-5 py-3 text-xs font-semibold text-amber-300 shadow-lg">
+          {deleteBlockedBanner}
         </div>
       )}
 

@@ -57,7 +57,6 @@ export async function saveRates(businessId: string, rates: Rates): Promise<void>
     walls_extras: rates.wallsExtras,
   };
 
-  console.info("[rates] saveRates upsert request", { businessId, payload });
   const { error } = await supabaseClient
     .from("rates")
     .upsert(payload, { onConflict: "business_id" });
@@ -72,8 +71,6 @@ export async function saveRates(businessId: string, rates: Rates): Promise<void>
     );
     throw error;
   }
-
-  console.info("[rates] saveRates upsert success", { businessId });
 }
 
 export async function importLocalRatesIfMissing(businessId: string): Promise<void> {
