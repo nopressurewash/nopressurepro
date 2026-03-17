@@ -91,8 +91,47 @@ export async function getPhotosByQuoteId(
 export async function savePhotoRecord(
   businessId: string,
   photo: JobPhotoRecord,
-): Promise<void> {
-  if (!businessId) return;
+): Promise<boolean> {
+  if (!businessId) return false;
+  if (!photo.quoteId) {
+    console.info("[photos] skipped remote sync: missing remoteQuoteId", {
+      photoId: photo.id,
+      quoteId: photo.quoteId,
+    });
+    return false;
+  }
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData.session?.user) {
+    console.info("[photos] skipped remote sync: missing authenticated session", {
+      photoId: photo.id,
+      quoteId: photo.quoteId,
+    });
+    return false;
+  }
+
+  const remoteQuoteId = toRemoteUuid(photo.quoteId);
+  const { data: quoteRow, error: quoteError } = await supabaseClient
+    .from("quotes")
+    .select("id")
+    .eq("business_id", businessId)
+    .eq("id", remoteQuoteId)
+    .maybeSingle();
+
+  if (quoteError) {
+    console.error("Supabase quote lookup failed before photo sync", quoteError);
+    return false;
+  }
+
+  if (!quoteRow) {
+    console.info("[photos] skipped remote sync: quote is local-only", {
+      businessId,
+      photoId: photo.id,
+      quoteId: photo.quoteId,
+      remoteQuoteId,
+    });
+    return false;
+  }
 
   const uploaded = await uploadPhotoFile(
     businessId,
@@ -105,7 +144,7 @@ export async function savePhotoRecord(
     {
       id: toRemoteUuid(photo.id),
       business_id: businessId,
-      quote_id: toRemoteUuid(photo.quoteId),
+      quote_id: remoteQuoteId,
       category: photo.category,
       created_at: photo.createdAt,
       caption: photo.caption ?? null,
@@ -123,13 +162,23 @@ export async function savePhotoRecord(
     console.error("Supabase photo save failed", error);
     throw error;
   }
+  return true;
 }
 
 export async function updatePhotoRecord(
   businessId: string,
   photo: JobPhotoRecord,
-): Promise<void> {
-  if (!businessId) return;
+): Promise<boolean> {
+  if (!businessId || !photo.quoteId) return false;
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData.session?.user) {
+    console.info("[photos] skipped remote update: missing authenticated session", {
+      photoId: photo.id,
+      quoteId: photo.quoteId,
+    });
+    return false;
+  }
 
   const remoteId = toRemoteUuid(photo.id);
   const { data: existingRow } = await supabaseClient
@@ -166,13 +215,22 @@ export async function updatePhotoRecord(
     console.error("Supabase photo update failed", error);
     throw error;
   }
+  return true;
 }
 
 export async function deletePhotoRecord(
   businessId: string,
   photoId: string,
-): Promise<void> {
-  if (!businessId || !photoId) return;
+): Promise<boolean> {
+  if (!businessId || !photoId) return false;
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  if (!sessionData.session?.user) {
+    console.info("[photos] skipped remote delete: missing authenticated session", {
+      photoId,
+    });
+    return false;
+  }
 
   const remoteId = toRemoteUuid(photoId);
   const { data: existingRow } = await supabaseClient
@@ -205,6 +263,7 @@ export async function deletePhotoRecord(
   if (path) {
     await deletePhotoFile(path);
   }
+  return true;
 }
 
 export async function importLocalPhotosIfMissing(
