@@ -181,13 +181,7 @@ export function useJobPhotos(quoteId: string) {
           prev.map((photo) => (photo.id === id ? updated : photo)),
         );
         if (businessId) {
-          const synced = await updateRemotePhotoRecord(businessId, updated);
-          if (!synced) {
-            console.info("[photos] skipped remote category sync: quote is local-only", {
-              photoId: id,
-              quoteId: updated.quoteId,
-            });
-          }
+          await updateRemotePhotoRecord(businessId, updated);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Could not move photo.");
@@ -213,13 +207,7 @@ export function useJobPhotos(quoteId: string) {
           prev.map((photo) => (photo.id === id ? updated : photo)),
         );
         if (businessId) {
-          const synced = await updateRemotePhotoRecord(businessId, updated);
-          if (!synced) {
-            console.info("[photos] skipped remote caption sync: quote is local-only", {
-              photoId: id,
-              quoteId: updated.quoteId,
-            });
-          }
+          await updateRemotePhotoRecord(businessId, updated);
         }
       } catch (err) {
         setError(

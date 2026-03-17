@@ -88,7 +88,6 @@ export function RatesPanel({ rates, onChange, canSave = true }: RatesPanelProps)
       roofWash: parseDraftValue("roofWash"),
       wallsExtras: parseDraftValue("wallsExtras"),
     };
-    console.info("[rates] Save clicked", nextRates);
     setLastSaved(nextRates);
     setDraft(ratesToDraft(nextRates));
     const ok = await onChange(nextRates);
@@ -99,7 +98,6 @@ export function RatesPanel({ rates, onChange, canSave = true }: RatesPanelProps)
     if (!canSave) return;
     setLastSaved(DEFAULT_RATES);
     setDraft(ratesToDraft(DEFAULT_RATES));
-    console.info("[rates] Reset clicked", DEFAULT_RATES);
     const ok = await onChange(DEFAULT_RATES);
     showMessage(ok ? "Rates reset to defaults." : "Rates save failed.");
   }

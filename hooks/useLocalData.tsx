@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type {
   CalendarDayNotesMap,
   Client,
@@ -176,7 +176,6 @@ export function useLocalData() {
   const [remoteQuotesLoaded, setRemoteQuotesLoaded] = useState(false);
   const [remoteInvoicesLoaded, setRemoteInvoicesLoaded] = useState(false);
   const { businessId } = useAuth();
-  const recentlyDeletedQuoteIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!businessId) {
@@ -227,7 +226,6 @@ export function useLocalData() {
       try {
         const remote = await getRates(businessId);
         if (!cancelled && remote) {
-          console.info("[rates] loaded remote rates", { businessId, remote });
           setRates(remote);
           setRemoteRatesLoaded(true);
           return;
@@ -238,10 +236,6 @@ export function useLocalData() {
         if (cancelled) return;
         const fallback = await getRates(businessId);
         if (fallback) {
-          console.info("[rates] loaded fallback remote rates", {
-            businessId,
-            fallback,
-          });
           setRates(fallback);
         }
         setRemoteRatesLoaded(true);
@@ -310,15 +304,6 @@ export function useLocalData() {
       try {
         const remote = await getQuotes(businessId);
         if (!cancelled && remote && remote.length > 0) {
-          const resurrected = remote
-            .map((q) => q.id)
-            .filter((id) => recentlyDeletedQuoteIdsRef.current.has(id));
-          if (resurrected.length > 0) {
-            console.warn("[quotes] deleted quotes reloaded from remote", {
-              businessId,
-              resurrected,
-            });
-          }
           setQuotes(remote);
           setRemoteQuotesLoaded(true);
           return;
@@ -339,15 +324,6 @@ export function useLocalData() {
         if (cancelled) return;
         const fallback = await getQuotes(businessId);
         if (fallback) {
-          const resurrected = fallback
-            .map((q) => q.id)
-            .filter((id) => recentlyDeletedQuoteIdsRef.current.has(id));
-          if (resurrected.length > 0) {
-            console.warn("[quotes] deleted quotes reloaded after import", {
-              businessId,
-              resurrected,
-            });
-          }
           setQuotes(fallback);
         }
         setRemoteQuotesLoaded(true);
@@ -566,26 +542,16 @@ export function useLocalData() {
 
   const removeQuote = useCallback(
     (quoteId: string) => {
-      if (!businessId) {
-        console.warn("[quotes] delete skipped: missing businessId", { quoteId });
-        return;
-      }
-      void deleteQuoteRecord(businessId, quoteId)
-        .then((ok) => {
-          if (ok) {
-            recentlyDeletedQuoteIdsRef.current.add(quoteId);
-          }
-        })
-        .catch((error) => {
-          console.error("Failed to delete Supabase quote", error);
-        });
+      if (!businessId) return;
+      void deleteQuoteRecord(businessId, quoteId).catch((error) => {
+        console.error("Failed to delete Supabase quote", error);
+      });
     },
     [businessId],
   );
 
   const deleteQuote = useCallback(
     (id: string) => {
-      console.info("[quotes] delete handler called", { id, businessId });
       setQuotes((prev) => {
         const deleted = prev.find((q) => q.id === id);
         const remaining = prev.filter((q) => q.id !== id);
@@ -641,10 +607,8 @@ export function useLocalData() {
 
   const updateRates = useCallback(
     async (nextRates: Rates): Promise<boolean> => {
-      console.info("[rates] updateRates called", { businessId, nextRates });
       setRates(nextRates);
       if (!businessId) {
-        console.warn("[rates] updateRates skipped: missing businessId");
         return false;
       }
       try {

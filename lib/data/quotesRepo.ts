@@ -86,7 +86,6 @@ export async function deleteQuote(
   if (!businessId || !quoteId) return false;
 
   const remoteId = toRemoteUuid(quoteId);
-  console.info("[quotes] delete request", { businessId, quoteId, remoteId });
 
   const { error } = await supabaseClient
     .from("quotes")
@@ -105,8 +104,6 @@ export async function deleteQuote(
     );
     throw error;
   }
-
-  console.info("[quotes] delete success", { businessId, quoteId, remoteId });
   return true;
 }
 

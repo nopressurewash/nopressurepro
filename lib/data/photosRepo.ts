@@ -97,19 +97,11 @@ export async function savePhotoRecord(
 ): Promise<boolean> {
   if (!businessId) return false;
   if (!photo.quoteId) {
-    console.info("[photos] skipped remote sync: missing remoteQuoteId", {
-      photoId: photo.id,
-      quoteId: photo.quoteId,
-    });
     return false;
   }
 
   const { data: sessionData } = await supabaseClient.auth.getSession();
   if (!sessionData.session?.user) {
-    console.info("[photos] skipped remote sync: missing authenticated session", {
-      photoId: photo.id,
-      quoteId: photo.quoteId,
-    });
     return false;
   }
 
@@ -127,12 +119,6 @@ export async function savePhotoRecord(
   }
 
   if (!quoteRow) {
-    console.info("[photos] skipped remote sync: quote is local-only", {
-      businessId,
-      photoId: photo.id,
-      quoteId: photo.quoteId,
-      remoteQuoteId,
-    });
     return false;
   }
 
@@ -145,12 +131,6 @@ export async function savePhotoRecord(
       photo.id,
       photo.blob,
     );
-  } else {
-    console.info("[photos] metadata-only import (no storage upload)", {
-      businessId,
-      photoId: photo.id,
-      quoteId: photo.quoteId,
-    });
   }
 
   const { error } = await supabaseClient.from("quote_photos").upsert(
@@ -186,10 +166,6 @@ export async function updatePhotoRecord(
 
   const { data: sessionData } = await supabaseClient.auth.getSession();
   if (!sessionData.session?.user) {
-    console.info("[photos] skipped remote update: missing authenticated session", {
-      photoId: photo.id,
-      quoteId: photo.quoteId,
-    });
     return false;
   }
 
@@ -207,12 +183,6 @@ export async function updatePhotoRecord(
   }
 
   if (!quoteRow) {
-    console.info("[photos] skipped remote metadata sync: quote is local-only", {
-      businessId,
-      photoId: photo.id,
-      quoteId: photo.quoteId,
-      remoteQuoteId,
-    });
     return false;
   }
 
@@ -262,9 +232,6 @@ export async function deletePhotoRecord(
 
   const { data: sessionData } = await supabaseClient.auth.getSession();
   if (!sessionData.session?.user) {
-    console.info("[photos] skipped remote delete: missing authenticated session", {
-      photoId,
-    });
     return false;
   }
 
@@ -314,16 +281,9 @@ export async function importLocalPhotosIfMissing(
   await Promise.all(
     localPhotos.map(async (photo) => {
       try {
-        const saved = await savePhotoRecord(businessId, photo, {
+        await savePhotoRecord(businessId, photo, {
           uploadFile: false,
         });
-        if (!saved) {
-          console.info("[photos] skipped local photo metadata import", {
-            businessId,
-            photoId: photo.id,
-            quoteId: photo.quoteId,
-          });
-        }
       } catch (error) {
         console.error("Failed to import photo metadata", photo.id, error);
       }
