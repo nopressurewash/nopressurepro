@@ -91,6 +91,9 @@ export async function getPhotosByQuoteId(
 export async function savePhotoRecord(
   businessId: string,
   photo: JobPhotoRecord,
+  options?: {
+    uploadFile?: boolean;
+  },
 ): Promise<boolean> {
   if (!businessId) return false;
   if (!photo.quoteId) {
@@ -133,12 +136,22 @@ export async function savePhotoRecord(
     return false;
   }
 
-  const uploaded = await uploadPhotoFile(
-    businessId,
-    photo.quoteId,
-    photo.id,
-    photo.blob,
-  );
+  const shouldUploadFile = options?.uploadFile ?? true;
+  let uploaded: { bucket: string; path: string } | null = null;
+  if (shouldUploadFile) {
+    uploaded = await uploadPhotoFile(
+      businessId,
+      photo.quoteId,
+      photo.id,
+      photo.blob,
+    );
+  } else {
+    console.info("[photos] metadata-only import (no storage upload)", {
+      businessId,
+      photoId: photo.id,
+      quoteId: photo.quoteId,
+    });
+  }
 
   const { error } = await supabaseClient.from("quote_photos").upsert(
     {
@@ -151,8 +164,8 @@ export async function savePhotoRecord(
       metadata: {
         localId: photo.id,
         localQuoteId: photo.quoteId,
-        storageBucket: uploaded.bucket,
-        storagePath: uploaded.path,
+        storageBucket: uploaded?.bucket ?? null,
+        storagePath: uploaded?.path ?? null,
       },
     },
     { onConflict: "id" },
@@ -278,7 +291,16 @@ export async function importLocalPhotosIfMissing(
   await Promise.all(
     localPhotos.map(async (photo) => {
       try {
-        await savePhotoRecord(businessId, photo);
+        const saved = await savePhotoRecord(businessId, photo, {
+          uploadFile: false,
+        });
+        if (!saved) {
+          console.info("[photos] skipped local photo metadata import", {
+            businessId,
+            photoId: photo.id,
+            quoteId: photo.quoteId,
+          });
+        }
       } catch (error) {
         console.error("Failed to import photo metadata", photo.id, error);
       }
