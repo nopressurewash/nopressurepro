@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import type {
   CalendarDayNotesMap,
   Client,
@@ -169,6 +169,7 @@ export function useLocalData() {
   const [remoteClientsLoaded, setRemoteClientsLoaded] = useState(false);
   const [remoteQuotesLoaded, setRemoteQuotesLoaded] = useState(false);
   const { businessId } = useAuth();
+  const recentlyDeletedQuoteIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!businessId) {
@@ -257,6 +258,15 @@ export function useLocalData() {
       try {
         const remote = await getQuotes(businessId);
         if (!cancelled && remote && remote.length > 0) {
+          const resurrected = remote
+            .map((q) => q.id)
+            .filter((id) => recentlyDeletedQuoteIdsRef.current.has(id));
+          if (resurrected.length > 0) {
+            console.warn("[quotes] deleted quotes reloaded from remote", {
+              businessId,
+              resurrected,
+            });
+          }
           setQuotes(remote);
           setRemoteQuotesLoaded(true);
           return;
@@ -277,6 +287,15 @@ export function useLocalData() {
         if (cancelled) return;
         const fallback = await getQuotes(businessId);
         if (fallback) {
+          const resurrected = fallback
+            .map((q) => q.id)
+            .filter((id) => recentlyDeletedQuoteIdsRef.current.has(id));
+          if (resurrected.length > 0) {
+            console.warn("[quotes] deleted quotes reloaded after import", {
+              businessId,
+              resurrected,
+            });
+          }
           setQuotes(fallback);
         }
         setRemoteQuotesLoaded(true);
@@ -471,16 +490,26 @@ export function useLocalData() {
 
   const removeQuote = useCallback(
     (quoteId: string) => {
-      if (!businessId || !remoteQuotesLoaded) return;
-      void deleteQuoteRecord(businessId, quoteId).catch((error) => {
-        console.error("Failed to delete Supabase quote", error);
-      });
+      if (!businessId) {
+        console.warn("[quotes] delete skipped: missing businessId", { quoteId });
+        return;
+      }
+      void deleteQuoteRecord(businessId, quoteId)
+        .then((ok) => {
+          if (ok) {
+            recentlyDeletedQuoteIdsRef.current.add(quoteId);
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to delete Supabase quote", error);
+        });
     },
-    [businessId, remoteQuotesLoaded],
+    [businessId],
   );
 
   const deleteQuote = useCallback(
     (id: string) => {
+      console.info("[quotes] delete handler called", { id, businessId });
       setQuotes((prev) => {
         const deleted = prev.find((q) => q.id === id);
         const remaining = prev.filter((q) => q.id !== id);
