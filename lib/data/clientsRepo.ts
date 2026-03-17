@@ -65,7 +65,7 @@ export async function saveClient(
     address: client.address ?? null,
     total_jobs: client.totalJobs,
     total_value: client.totalValue,
-    client_type: client.clientType,
+    client_type: client.clientType ?? "Residential",
   };
 
   const { error } = await supabaseClient
@@ -73,7 +73,13 @@ export async function saveClient(
     .upsert(payload, { onConflict: "id" });
 
   if (error) {
-    console.error("Supabase client save failed", error);
+    console.error(
+      "Supabase client save failed",
+      error.message,
+      error.details,
+      error.hint,
+      error.code,
+    );
     throw error;
   }
 }

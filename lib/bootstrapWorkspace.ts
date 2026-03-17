@@ -43,6 +43,16 @@ export async function bootstrapWorkspace(userId: string, email: string | null) {
   let businessId = businessResult.data?.id;
 
   if (!businessId) {
+    const membershipResult = await supabaseClient
+      .from("business_members")
+      .select("business_id")
+      .eq("profile_id", userId)
+      .single();
+
+    businessId = membershipResult.data?.business_id ?? null;
+  }
+
+  if (!businessId) {
     const createBusiness = await supabaseClient
       .from("businesses")
       .insert({ name: "My Business", owner_profile_id: userId })

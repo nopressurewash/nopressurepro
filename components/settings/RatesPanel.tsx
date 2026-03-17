@@ -8,7 +8,8 @@ import { DEFAULT_RATES } from "../../lib/pricing/defaultRates";
 
 interface RatesPanelProps {
   rates: Rates;
-  onChange: (next: Rates) => void;
+  onChange: (next: Rates) => Promise<boolean> | boolean;
+  canSave?: boolean;
 }
 
 type RateKey = keyof Rates;
@@ -39,7 +40,7 @@ function ratesToDraft(rates: Rates): Record<RateKey, string> {
   };
 }
 
-export function RatesPanel({ rates, onChange }: RatesPanelProps) {
+export function RatesPanel({ rates, onChange, canSave = true }: RatesPanelProps) {
   const [draft, setDraft] = useState<Record<RateKey, string>>(
     () => ratesToDraft(rates),
   );
@@ -77,7 +78,8 @@ export function RatesPanel({ rates, onChange }: RatesPanelProps) {
     return num;
   }
 
-  function handleSave() {
+  async function handleSave() {
+    if (!canSave) return;
     const nextRates: Rates = {
       driveway: parseDraftValue("driveway"),
       paths: parseDraftValue("paths"),
@@ -86,17 +88,20 @@ export function RatesPanel({ rates, onChange }: RatesPanelProps) {
       roofWash: parseDraftValue("roofWash"),
       wallsExtras: parseDraftValue("wallsExtras"),
     };
+    console.info("[rates] Save clicked", nextRates);
     setLastSaved(nextRates);
     setDraft(ratesToDraft(nextRates));
-    onChange(nextRates);
-    showMessage("Rates updated.");
+    const ok = await onChange(nextRates);
+    showMessage(ok ? "Rates updated." : "Rates save failed.");
   }
 
-  function handleReset() {
+  async function handleReset() {
+    if (!canSave) return;
     setLastSaved(DEFAULT_RATES);
     setDraft(ratesToDraft(DEFAULT_RATES));
-    onChange(DEFAULT_RATES);
-    showMessage("Rates reset to defaults.");
+    console.info("[rates] Reset clicked", DEFAULT_RATES);
+    const ok = await onChange(DEFAULT_RATES);
+    showMessage(ok ? "Rates reset to defaults." : "Rates save failed.");
   }
 
   return (
@@ -156,6 +161,7 @@ export function RatesPanel({ rates, onChange }: RatesPanelProps) {
         <button
           type="button"
           onClick={handleSave}
+          disabled={!canSave}
           className="flex-1 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-sm font-bold text-gold transition-colors hover:bg-gold/15 active:scale-[0.99]"
         >
           Save rates
@@ -163,6 +169,7 @@ export function RatesPanel({ rates, onChange }: RatesPanelProps) {
         <button
           type="button"
           onClick={handleReset}
+          disabled={!canSave}
           className="flex-1 rounded-2xl border border-[var(--brand-border)] bg-surface px-4 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100"
         >
           Reset to defaults
@@ -172,6 +179,11 @@ export function RatesPanel({ rates, onChange }: RatesPanelProps) {
       {message && (
         <p className="text-xs text-gold" role="status">
           {message}
+        </p>
+      )}
+      {!canSave && (
+        <p className="text-xs text-zinc-500" role="status">
+          Waiting for workspace to load...
         </p>
       )}
     </Panel>

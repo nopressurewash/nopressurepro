@@ -32,6 +32,12 @@ import {
   importLocalClientsIfMissing,
   saveClient,
 } from "../lib/data/clientsRepo";
+import {
+  getQuotes,
+  importLocalQuotesIfMissing,
+  saveQuote,
+  deleteQuote as deleteQuoteRecord,
+} from "../lib/data/quotesRepo";
 
 const QUOTES_KEY = "npp_quotes_v1";
 const CLIENTS_KEY = "npp_clients_v1";
@@ -161,7 +167,14 @@ export function useLocalData() {
   const [loaded, setLoaded] = useState(false);
   const [remoteRatesLoaded, setRemoteRatesLoaded] = useState(false);
   const [remoteClientsLoaded, setRemoteClientsLoaded] = useState(false);
+  const [remoteQuotesLoaded, setRemoteQuotesLoaded] = useState(false);
   const { businessId } = useAuth();
+
+  useEffect(() => {
+    if (!businessId) {
+      setRemoteQuotesLoaded(false);
+    }
+  }, [businessId]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -205,6 +218,7 @@ export function useLocalData() {
       try {
         const remote = await getRates(businessId);
         if (!cancelled && remote) {
+          console.info("[rates] loaded remote rates", { businessId, remote });
           setRates(remote);
           setRemoteRatesLoaded(true);
           return;
@@ -215,6 +229,10 @@ export function useLocalData() {
         if (cancelled) return;
         const fallback = await getRates(businessId);
         if (fallback) {
+          console.info("[rates] loaded fallback remote rates", {
+            businessId,
+            fallback,
+          });
           setRates(fallback);
         }
         setRemoteRatesLoaded(true);
@@ -224,6 +242,50 @@ export function useLocalData() {
     };
 
     void loadRemoteRates();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId]);
+
+  useEffect(() => {
+    if (!businessId) return;
+
+    let cancelled = false;
+
+    const loadRemoteQuotes = async () => {
+      try {
+        const remote = await getQuotes(businessId);
+        if (!cancelled && remote && remote.length > 0) {
+          setQuotes(remote);
+          setRemoteQuotesLoaded(true);
+          return;
+        }
+
+        if (typeof window === "undefined") {
+          setRemoteQuotesLoaded(true);
+          return;
+        }
+
+        const storedQuotes = safeParse<Quote[]>(
+          window.localStorage.getItem(QUOTES_KEY),
+          [],
+        );
+
+        await importLocalQuotesIfMissing(businessId, storedQuotes);
+
+        if (cancelled) return;
+        const fallback = await getQuotes(businessId);
+        if (fallback) {
+          setQuotes(fallback);
+        }
+        setRemoteQuotesLoaded(true);
+      } catch (error) {
+        console.error("Failed to load Supabase quotes", error);
+      }
+    };
+
+    void loadRemoteQuotes();
 
     return () => {
       cancelled = true;
@@ -294,6 +356,28 @@ export function useLocalData() {
       cancelled = true;
     };
   }, [businessId, clients, remoteClientsLoaded]);
+
+  useEffect(() => {
+    if (!businessId || !remoteQuotesLoaded) return;
+
+    let cancelled = false;
+
+    const syncQuotes = async () => {
+      try {
+        await Promise.all(quotes.map((quote) => saveQuote(businessId, quote)));
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to persist Supabase quotes", error);
+        }
+      }
+    };
+
+    void syncQuotes();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId, quotes, remoteQuotesLoaded]);
 
   useEffect(() => {
     if (!businessId) return;
@@ -385,6 +469,16 @@ export function useLocalData() {
     [businessId],
   );
 
+  const removeQuote = useCallback(
+    (quoteId: string) => {
+      if (!businessId || !remoteQuotesLoaded) return;
+      void deleteQuoteRecord(businessId, quoteId).catch((error) => {
+        console.error("Failed to delete Supabase quote", error);
+      });
+    },
+    [businessId, remoteQuotesLoaded],
+  );
+
   const deleteQuote = useCallback(
     (id: string) => {
       setQuotes((prev) => {
@@ -399,6 +493,7 @@ export function useLocalData() {
             }
             return updatedClients;
           });
+          removeQuote(deleted.id);
         }
         return remaining;
       });
@@ -440,12 +535,20 @@ export function useLocalData() {
   );
 
   const updateRates = useCallback(
-    (nextRates: Rates) => {
+    async (nextRates: Rates): Promise<boolean> => {
+      console.info("[rates] updateRates called", { businessId, nextRates });
       setRates(nextRates);
-      if (!businessId) return;
-      void saveRates(businessId, nextRates).catch((error) => {
-        console.error("Failed to persist Supabase rates", error);
-      });
+      if (!businessId) {
+        console.warn("[rates] updateRates skipped: missing businessId");
+        return false;
+      }
+      try {
+        await saveRates(businessId, nextRates);
+        return true;
+      } catch (error) {
+        console.error("[rates] Failed to persist Supabase rates", error);
+        return false;
+      }
     },
     [businessId],
   );
