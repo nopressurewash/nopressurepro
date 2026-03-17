@@ -2,6 +2,7 @@
 
 import { supabaseClient } from "../supabaseClient";
 import type { Quote } from "../types";
+import { toRemoteUuid } from "./remoteId";
 
 const QUOTES_COLUMNS = `
   id,
@@ -47,7 +48,7 @@ export async function saveQuote(businessId: string, quote: Quote): Promise<void>
   const payload = { ...quote };
   const { error } = await supabaseClient.from("quotes").upsert(
     {
-      id: quote.id,
+      id: toRemoteUuid(quote.id),
       business_id: businessId,
       client_name: quote.clientName,
       suburb: quote.suburb,
@@ -67,7 +68,13 @@ export async function saveQuote(businessId: string, quote: Quote): Promise<void>
   );
 
   if (error) {
-    console.error("Supabase quote save failed", error);
+    console.error(
+      "Supabase quote save failed",
+      error.message,
+      error.details,
+      error.hint,
+      error.code,
+    );
     throw error;
   }
 }
@@ -82,7 +89,7 @@ export async function deleteQuote(
     .from("quotes")
     .delete()
     .eq("business_id", businessId)
-    .eq("id", quoteId);
+    .eq("id", toRemoteUuid(quoteId));
 
   if (error) {
     console.error("Supabase quote delete failed", error);

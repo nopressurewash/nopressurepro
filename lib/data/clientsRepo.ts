@@ -2,6 +2,7 @@
 
 import { supabaseClient } from "../supabaseClient";
 import type { Client } from "../types";
+import { toRemoteUuid } from "./remoteId";
 
 const CLIENTS_COLUMNS = `
   id,
@@ -56,7 +57,7 @@ export async function saveClient(
   if (!businessId) return;
 
   const payload = {
-    id: client.id,
+    id: toRemoteUuid(client.id),
     business_id: businessId,
     name: client.name,
     suburb: client.suburb,
@@ -94,7 +95,7 @@ export async function deleteClient(
     .from("clients")
     .delete()
     .eq("business_id", businessId)
-    .eq("id", clientId);
+    .eq("id", toRemoteUuid(clientId));
 
   if (error) {
     console.error("Supabase client delete failed", error);
