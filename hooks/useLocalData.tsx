@@ -218,6 +218,7 @@ export function useLocalData() {
       try {
         const remote = await getRates(businessId);
         if (!cancelled && remote) {
+          console.info("[rates] loaded remote rates", { businessId, remote });
           setRates(remote);
           setRemoteRatesLoaded(true);
           return;
@@ -228,6 +229,10 @@ export function useLocalData() {
         if (cancelled) return;
         const fallback = await getRates(businessId);
         if (fallback) {
+          console.info("[rates] loaded fallback remote rates", {
+            businessId,
+            fallback,
+          });
           setRates(fallback);
         }
         setRemoteRatesLoaded(true);
@@ -530,12 +535,20 @@ export function useLocalData() {
   );
 
   const updateRates = useCallback(
-    (nextRates: Rates) => {
+    async (nextRates: Rates): Promise<boolean> => {
+      console.info("[rates] updateRates called", { businessId, nextRates });
       setRates(nextRates);
-      if (!businessId) return;
-      void saveRates(businessId, nextRates).catch((error) => {
-        console.error("Failed to persist Supabase rates", error);
-      });
+      if (!businessId) {
+        console.warn("[rates] updateRates skipped: missing businessId");
+        return false;
+      }
+      try {
+        await saveRates(businessId, nextRates);
+        return true;
+      } catch (error) {
+        console.error("[rates] Failed to persist Supabase rates", error);
+        return false;
+      }
     },
     [businessId],
   );

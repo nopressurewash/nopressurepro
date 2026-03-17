@@ -8,7 +8,7 @@ import { DEFAULT_RATES } from "../../lib/pricing/defaultRates";
 
 interface RatesPanelProps {
   rates: Rates;
-  onChange: (next: Rates) => void;
+  onChange: (next: Rates) => Promise<boolean> | boolean;
 }
 
 type RateKey = keyof Rates;
@@ -77,7 +77,7 @@ export function RatesPanel({ rates, onChange }: RatesPanelProps) {
     return num;
   }
 
-  function handleSave() {
+  async function handleSave() {
     const nextRates: Rates = {
       driveway: parseDraftValue("driveway"),
       paths: parseDraftValue("paths"),
@@ -86,17 +86,19 @@ export function RatesPanel({ rates, onChange }: RatesPanelProps) {
       roofWash: parseDraftValue("roofWash"),
       wallsExtras: parseDraftValue("wallsExtras"),
     };
+    console.info("[rates] Save clicked", nextRates);
     setLastSaved(nextRates);
     setDraft(ratesToDraft(nextRates));
-    onChange(nextRates);
-    showMessage("Rates updated.");
+    const ok = await onChange(nextRates);
+    showMessage(ok ? "Rates updated." : "Rates save failed.");
   }
 
-  function handleReset() {
+  async function handleReset() {
     setLastSaved(DEFAULT_RATES);
     setDraft(ratesToDraft(DEFAULT_RATES));
-    onChange(DEFAULT_RATES);
-    showMessage("Rates reset to defaults.");
+    console.info("[rates] Reset clicked", DEFAULT_RATES);
+    const ok = await onChange(DEFAULT_RATES);
+    showMessage(ok ? "Rates reset to defaults." : "Rates save failed.");
   }
 
   return (

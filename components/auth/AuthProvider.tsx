@@ -60,11 +60,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: listener } =
       supabaseClient.auth.onAuthStateChange(async (_event, sess) => {
         if (_event === "SIGNED_OUT") {
+          setSession(null);
+          setBusinessId(null);
           router.replace("/login");
+          return;
         }
 
         setSession(sess);
-        setBusinessId(null);
         if (sess?.user) {
           try {
             const { businessId } = await bootstrapWorkspace(
