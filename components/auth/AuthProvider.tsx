@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import type { ReactNode } from "react";
@@ -37,8 +38,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<any>(null);
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const bootstrapInFlightRef = useRef<Promise<void> | null>(null);
+  const bootstrapUserIdRef = useRef<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+
+  const ensureWorkspace = useCallback(
+    async (user: { id: string; email?: string | null }) => {
+      if (
+        bootstrapInFlightRef.current &&
+        bootstrapUserIdRef.current === user.id
+      ) {
+        return bootstrapInFlightRef.current;
+      }
+
+      bootstrapUserIdRef.current = user.id;
+      const task = (async () => {
+        try {
+          const { businessId } = await bootstrapWorkspace(
+            user.id,
+            user.email ?? null,
+          );
+          setBusinessId(businessId);
+        } catch (error) {
+          console.error("Workspace bootstrap failed", error);
+        }
+      })();
+
+      bootstrapInFlightRef.current = task;
+      await task;
+      if (bootstrapInFlightRef.current === task) {
+        bootstrapInFlightRef.current = null;
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -49,17 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(data.session);
 
       if (data.session?.user) {
-        try {
-          const { businessId } = await bootstrapWorkspace(
-            data.session.user.id,
-            data.session.user.email ?? null,
-          );
-          if (isMounted) {
-            setBusinessId(businessId);
-          }
-        } catch (error) {
-          console.error("Workspace bootstrap failed", error);
-        }
+        await ensureWorkspace(data.session.user);
       }
 
       if (isMounted) {
@@ -68,25 +92,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
 
     const { data: listener } =
-      supabaseClient.auth.onAuthStateChange(async (_event, sess) => {
+      supabaseClient.auth.onAuthStateChange((_event, sess) => {
         if (_event === "SIGNED_OUT") {
           setSession(null);
           setBusinessId(null);
+          bootstrapInFlightRef.current = null;
+          bootstrapUserIdRef.current = null;
           router.replace("/login");
           return;
         }
 
         setSession(sess);
         if (sess?.user) {
-          try {
-            const { businessId } = await bootstrapWorkspace(
-              sess.user.id,
-              sess.user.email ?? null,
-            );
-            setBusinessId(businessId);
-          } catch (error) {
-            console.error("Workspace bootstrap failed", error);
-          }
+          void ensureWorkspace(sess.user);
         }
       });
 
@@ -94,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isMounted = false;
       listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [ensureWorkspace, router]);
 
   useEffect(() => {
     if (isLoading) return;
