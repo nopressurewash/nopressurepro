@@ -6,6 +6,7 @@ import { PhotoPreviewModal } from "../../components/photos/PhotoPreviewModal";
 import { Panel } from "../../components/ui/Panel";
 import { TextField } from "../../components/ui/FormField";
 import { useObjectUrl } from "../../hooks/useObjectUrl";
+import { useAuth } from "../../components/auth/AuthProvider";
 import { useLocalData } from "../../hooks/useLocalData";
 import {
   deletePhotoRecord,
@@ -13,6 +14,12 @@ import {
   updatePhotoRecord,
 } from "../../lib/photoStorage";
 import type { JobPhotoCategory, JobPhotoRecord, Quote } from "../../lib/types";
+import {
+  deletePhotoRecord as deleteRemotePhotoRecord,
+  getPhotos,
+  importLocalPhotosIfMissing,
+  updatePhotoRecord as updateRemotePhotoRecord,
+} from "../../lib/data/photosRepo";
 
 type GalleryFilter = "all" | JobPhotoCategory;
 
@@ -88,6 +95,7 @@ function GalleryTile({
 }
 
 export default function GalleryPage() {
+  const { businessId } = useAuth();
   const { quotes } = useLocalData();
   const [photos, setPhotos] = useState<JobPhotoRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,9 +111,35 @@ export default function GalleryPage() {
       try {
         setLoading(true);
         setError(null);
-        const nextPhotos = await getAllPhotoRecords();
+        const localPhotos = await getAllPhotoRecords();
+        if (!businessId) {
+          if (active) {
+            setPhotos(localPhotos);
+          }
+          return;
+        }
+
+        const remotePhotos = await getPhotos(businessId);
+        if (remotePhotos && remotePhotos.length > 0) {
+          const remoteIds = new Set(remotePhotos.map((photo) => photo.id));
+          if (active) {
+            setPhotos(localPhotos.filter((photo) => remoteIds.has(photo.id)));
+          }
+          return;
+        }
+
+        await importLocalPhotosIfMissing(businessId, localPhotos);
+        const imported = await getPhotos(businessId);
+        if (imported && imported.length > 0) {
+          const importedIds = new Set(imported.map((photo) => photo.id));
+          if (active) {
+            setPhotos(localPhotos.filter((photo) => importedIds.has(photo.id)));
+          }
+          return;
+        }
+
         if (active) {
-          setPhotos(nextPhotos);
+          setPhotos(localPhotos);
         }
       } catch (err) {
         if (active) {
@@ -125,7 +159,7 @@ export default function GalleryPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [businessId]);
 
   const quoteById = useMemo(
     () => new Map(quotes.map((quote) => [quote.id, quote])),
@@ -158,6 +192,9 @@ export default function GalleryPage() {
 
   async function handleDelete(id: string) {
     await deletePhotoRecord(id);
+    if (businessId) {
+      await deleteRemotePhotoRecord(businessId, id);
+    }
     setPhotos((prev) => prev.filter((photo) => photo.id !== id));
   }
 
@@ -167,6 +204,9 @@ export default function GalleryPage() {
 
     const updated = { ...existing, category };
     await updatePhotoRecord(updated);
+    if (businessId) {
+      await updateRemotePhotoRecord(businessId, updated);
+    }
     setPhotos((prev) =>
       prev.map((photo) => (photo.id === id ? updated : photo)),
     );
@@ -182,6 +222,9 @@ export default function GalleryPage() {
       caption: caption.trim() || undefined,
     };
     await updatePhotoRecord(updated);
+    if (businessId) {
+      await updateRemotePhotoRecord(businessId, updated);
+    }
     setPhotos((prev) =>
       prev.map((photo) => (photo.id === id ? updated : photo)),
     );

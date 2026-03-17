@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { JobPhotoCategory, JobPhotoRecord } from "../lib/types";
+import { useAuth } from "../components/auth/AuthProvider";
 import {
   addPhotoRecord,
   compressImage,
@@ -9,8 +10,16 @@ import {
   getPhotosForQuote,
   updatePhotoRecord,
 } from "../lib/photoStorage";
+import {
+  deletePhotoRecord as deleteRemotePhotoRecord,
+  getPhotosByQuoteId,
+  importLocalPhotosIfMissing,
+  savePhotoRecord,
+  updatePhotoRecord as updateRemotePhotoRecord,
+} from "../lib/data/photosRepo";
 
 export function useJobPhotos(quoteId: string) {
+  const { businessId } = useAuth();
   const [photos, setPhotos] = useState<JobPhotoRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -26,8 +35,28 @@ export function useJobPhotos(quoteId: string) {
     try {
       setLoading(true);
       setError(null);
-      const nextPhotos = await getPhotosForQuote(quoteId);
-      setPhotos(nextPhotos);
+      const localPhotos = await getPhotosForQuote(quoteId);
+      if (!businessId) {
+        setPhotos(localPhotos);
+        return;
+      }
+
+      const remotePhotos = await getPhotosByQuoteId(businessId, quoteId);
+      if (remotePhotos && remotePhotos.length > 0) {
+        const remoteIds = new Set(remotePhotos.map((photo) => photo.id));
+        setPhotos(localPhotos.filter((photo) => remoteIds.has(photo.id)));
+        return;
+      }
+
+      await importLocalPhotosIfMissing(businessId, localPhotos);
+      const imported = await getPhotosByQuoteId(businessId, quoteId);
+      if (imported && imported.length > 0) {
+        const importedIds = new Set(imported.map((photo) => photo.id));
+        setPhotos(localPhotos.filter((photo) => importedIds.has(photo.id)));
+        return;
+      }
+
+      setPhotos(localPhotos);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Could not load job photos.",
@@ -35,7 +64,7 @@ export function useJobPhotos(quoteId: string) {
     } finally {
       setLoading(false);
     }
-  }, [quoteId]);
+  }, [quoteId, businessId]);
 
   useEffect(() => {
     void loadPhotos();
@@ -66,6 +95,14 @@ export function useJobPhotos(quoteId: string) {
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           ),
         );
+
+        if (businessId) {
+          await Promise.all(
+            created.map(async (photo) => {
+              await savePhotoRecord(businessId, photo);
+            }),
+          );
+        }
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Could not add selected photos.",
@@ -74,7 +111,7 @@ export function useJobPhotos(quoteId: string) {
         setUploading(false);
       }
     },
-    [quoteId],
+    [quoteId, businessId],
   );
 
   const deletePhoto = useCallback(async (id: string) => {
@@ -82,10 +119,13 @@ export function useJobPhotos(quoteId: string) {
       setError(null);
       await deletePhotoRecord(id);
       setPhotos((prev) => prev.filter((photo) => photo.id !== id));
+      if (businessId) {
+        await deleteRemotePhotoRecord(businessId, id);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not delete photo.");
     }
-  }, []);
+  }, [businessId]);
 
   const movePhoto = useCallback(
     async (id: string, category: JobPhotoCategory) => {
@@ -103,11 +143,14 @@ export function useJobPhotos(quoteId: string) {
         setPhotos((prev) =>
           prev.map((photo) => (photo.id === id ? updated : photo)),
         );
+        if (businessId) {
+          await updateRemotePhotoRecord(businessId, updated);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Could not move photo.");
       }
     },
-    [photos],
+    [photos, businessId],
   );
 
   const updateCaption = useCallback(
@@ -126,13 +169,16 @@ export function useJobPhotos(quoteId: string) {
         setPhotos((prev) =>
           prev.map((photo) => (photo.id === id ? updated : photo)),
         );
+        if (businessId) {
+          await updateRemotePhotoRecord(businessId, updated);
+        }
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Could not save photo caption.",
         );
       }
     },
-    [photos],
+    [photos, businessId],
   );
 
   return {
