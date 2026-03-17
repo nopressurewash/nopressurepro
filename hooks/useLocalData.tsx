@@ -38,6 +38,12 @@ import {
   saveQuote,
   deleteQuote as deleteQuoteRecord,
 } from "../lib/data/quotesRepo";
+import {
+  deleteInvoice as deleteInvoiceRecord,
+  getInvoices,
+  importLocalInvoicesIfMissing,
+  saveInvoice,
+} from "../lib/data/invoicesRepo";
 
 const QUOTES_KEY = "npp_quotes_v1";
 const CLIENTS_KEY = "npp_clients_v1";
@@ -168,12 +174,14 @@ export function useLocalData() {
   const [remoteRatesLoaded, setRemoteRatesLoaded] = useState(false);
   const [remoteClientsLoaded, setRemoteClientsLoaded] = useState(false);
   const [remoteQuotesLoaded, setRemoteQuotesLoaded] = useState(false);
+  const [remoteInvoicesLoaded, setRemoteInvoicesLoaded] = useState(false);
   const { businessId } = useAuth();
   const recentlyDeletedQuoteIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!businessId) {
       setRemoteQuotesLoaded(false);
+      setRemoteInvoicesLoaded(false);
     }
   }, [businessId]);
 
@@ -243,6 +251,50 @@ export function useLocalData() {
     };
 
     void loadRemoteRates();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId]);
+
+  useEffect(() => {
+    if (!businessId) return;
+
+    let cancelled = false;
+
+    const loadRemoteInvoices = async () => {
+      try {
+        const remote = await getInvoices(businessId);
+        if (!cancelled && remote && remote.length > 0) {
+          setInvoices(remote);
+          setRemoteInvoicesLoaded(true);
+          return;
+        }
+
+        if (typeof window === "undefined") {
+          setRemoteInvoicesLoaded(true);
+          return;
+        }
+
+        const storedInvoices = safeParse<Invoice[]>(
+          window.localStorage.getItem(INVOICES_KEY),
+          [],
+        );
+
+        await importLocalInvoicesIfMissing(businessId, storedInvoices);
+
+        if (cancelled) return;
+        const fallback = await getInvoices(businessId);
+        if (fallback) {
+          setInvoices(fallback);
+        }
+        setRemoteInvoicesLoaded(true);
+      } catch (error) {
+        console.error("Failed to load Supabase invoices", error);
+      }
+    };
+
+    void loadRemoteInvoices();
 
     return () => {
       cancelled = true;
@@ -397,6 +449,30 @@ export function useLocalData() {
       cancelled = true;
     };
   }, [businessId, quotes, remoteQuotesLoaded]);
+
+  useEffect(() => {
+    if (!businessId || !remoteInvoicesLoaded) return;
+
+    let cancelled = false;
+
+    const syncInvoices = async () => {
+      try {
+        await Promise.all(
+          invoices.map((invoice) => saveInvoice(businessId, invoice)),
+        );
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to persist Supabase invoices", error);
+        }
+      }
+    };
+
+    void syncInvoices();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId, invoices, remoteInvoicesLoaded]);
 
   useEffect(() => {
     if (!businessId) return;
@@ -597,7 +673,11 @@ export function useLocalData() {
 
   const deleteInvoice = useCallback((id: string) => {
     setInvoices((prev) => prev.filter((inv) => inv.id !== id));
-  }, []);
+    if (!businessId) return;
+    void deleteInvoiceRecord(businessId, id).catch((error) => {
+      console.error("Failed to delete Supabase invoice", error);
+    });
+  }, [businessId]);
 
   const updateClient = useCallback(
     (updated: Client) => {
