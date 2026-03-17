@@ -5,6 +5,7 @@ import { AppShell } from "../../components/layout/AppShell";
 import { Panel } from "../../components/ui/Panel";
 import { RatesPanel } from "../../components/settings/RatesPanel";
 import { useLocalData } from "../../hooks/useLocalData";
+import { useAuth } from "../../components/auth/AuthProvider";
 
 const BACKUP_KEY = "npp_last_backup_at";
 
@@ -33,6 +34,7 @@ function formatDateTime(value: string | null) {
 export default function SettingsPage() {
   const { quotes, clients, rates, invoices, overwriteAll, updateRates, loaded } =
     useLocalData();
+  const { businessId } = useAuth();
   const [lastBackup, setLastBackup] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
@@ -234,7 +236,7 @@ export default function SettingsPage() {
           />
         </Panel>
 
-        <RatesPanel rates={rates} onChange={updateRates} />
+        <RatesPanel rates={rates} onChange={updateRates} canSave={Boolean(businessId)} />
       </section>
     </AppShell>
   );

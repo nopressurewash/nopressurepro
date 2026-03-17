@@ -44,16 +44,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
     (async () => {
       const { data } = await supabaseClient.auth.getSession();
-      if (isMounted) {
-        setSession(data.session);
-        setIsLoading(false);
-      }
+      if (!isMounted) return;
+
+      setSession(data.session);
+
       if (data.session?.user) {
-        const { businessId } = await bootstrapWorkspace(
-          data.session.user.id,
-          data.session.user.email ?? null,
-        );
-        setBusinessId(businessId);
+        try {
+          const { businessId } = await bootstrapWorkspace(
+            data.session.user.id,
+            data.session.user.email ?? null,
+          );
+          if (isMounted) {
+            setBusinessId(businessId);
+          }
+        } catch (error) {
+          console.error("Workspace bootstrap failed", error);
+        }
+      }
+
+      if (isMounted) {
+        setIsLoading(false);
       }
     })();
 
