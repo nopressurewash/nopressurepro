@@ -69,13 +69,13 @@ export function EmailSendModal({
 
   return (
     <div
-      className="animate-fade-in fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/90 px-3 pb-6 pt-[8vh] sm:px-4 sm:pb-10 sm:pt-[10vh]"
+      className="animate-fade-in fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/90 px-3 pb-6 pt-[8vh] sm:px-6 sm:pb-12 sm:pt-[10vh]"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="animate-fade-in-up flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-h-[86vh]">
-        <div className="shrink-0 border-b border-[var(--brand-border)] px-5 pb-3.5 pt-5">
+      <div className="animate-fade-in-up flex max-h-[92vh] w-full max-w-[min(96vw,1100px)] flex-col overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-h-[90vh] lg:max-w-[1280px]">
+        <div className="shrink-0 border-b border-[var(--brand-border)] px-6 pb-4 pt-5 sm:px-7">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
@@ -98,7 +98,7 @@ export function EmailSendModal({
           </div>
         </div>
 
-        <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
+        <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6 sm:px-8 sm:py-7">
           <div className="space-y-1.5">
             <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
               Send type
@@ -156,7 +156,7 @@ export function EmailSendModal({
           </div>
         </div>
 
-        <div className="shrink-0 border-t border-[var(--brand-border)] px-5 pb-5 pt-4">
+        <div className="shrink-0 border-t border-[var(--brand-border)] px-6 pb-6 pt-5 sm:px-8">
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
             <button
               type="button"

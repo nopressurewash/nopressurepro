@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 
 interface AreaMeasureMapProps {
   onAreaConfirm: (areaSqm: number) => void;
+  mapHeightClassName?: string;
 }
 
 const AreaMeasureMapClient = dynamic(
@@ -19,7 +20,7 @@ const AreaMeasureMapClient = dynamic(
             Loading driveway measurement tools...
           </p>
         </div>
-        <div className="h-64 w-full rounded-2xl border border-zinc-800 bg-zinc-950/80 sm:h-80" />
+        <div className="h-[45vh] w-full rounded-2xl border border-zinc-800 bg-zinc-950/80 sm:h-[58vh]" />
         <div className="flex items-center justify-between gap-3 text-xs">
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
@@ -36,7 +37,15 @@ const AreaMeasureMapClient = dynamic(
   },
 );
 
-export function AreaMeasureMap({ onAreaConfirm }: AreaMeasureMapProps) {
-  return <AreaMeasureMapClient onAreaConfirm={onAreaConfirm} />;
+export function AreaMeasureMap({
+  onAreaConfirm,
+  mapHeightClassName,
+}: AreaMeasureMapProps) {
+  return (
+    <AreaMeasureMapClient
+      onAreaConfirm={onAreaConfirm}
+      mapHeightClassName={mapHeightClassName}
+    />
+  );
 }
 
