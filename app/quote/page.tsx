@@ -103,8 +103,8 @@ export default function QuickQuotePage() {
   }
 
   const mapHeightClassName = measureExpanded
-    ? "h-[70vh] sm:h-[78vh]"
-    : "h-[50vh] sm:h-[64vh]";
+    ? "h-[72vh] sm:h-[86vh]"
+    : "h-[40vh] sm:h-[56vh]";
 
   function buildDraftQuote(): Quote {
     return {
@@ -507,59 +507,57 @@ export default function QuickQuotePage() {
 
         {/* Measure modal */}
         {showMeasureModal && (
-          <div
-            className={`animate-fade-in fixed inset-0 z-40 flex justify-center bg-black/90 px-3 pb-6 pt-16 sm:px-4 ${
-              measureExpanded
-                ? "items-center"
-                : "items-end sm:items-center"
-            }`}
-          >
+          <div className="animate-fade-in fixed inset-0 z-40 flex items-center justify-center overflow-y-auto bg-black/90 px-3 py-6 sm:px-4">
             <div
-              className={`animate-fade-in-up w-full overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-surface-raised p-4 sm:p-6 ${
-                measureExpanded
-                  ? "max-w-[min(96vw,1240px)] max-h-[95vh]"
-                  : "max-w-3xl max-h-[88vh]"
-              }`}
+              className="animate-fade-in-up w-full max-w-[min(96vw,1240px)] max-h-[95vh] overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-surface-raised p-4 sm:p-6"
+              role="dialog"
+              aria-modal="true"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                    Driveway measurement
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-zinc-200">
-                    Draw a polygon around the driveway to estimate m².
-                  </p>
+              <div className="flex h-full flex-col overflow-hidden">
+                <div className="flex-shrink-0 border-b border-[var(--brand-border)] px-5 pb-4 pt-5 sm:px-6">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                        Driveway measurement
+                      </p>
+                      <p className="mt-1 text-sm font-medium text-zinc-200">
+                        Draw a polygon around the driveway to estimate m².
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={toggleMeasureExpanded}
+                        aria-pressed={measureExpanded}
+                        className={`rounded-2xl border px-3 py-1.5 text-[11px] font-medium transition-all duration-200 ${
+                          measureExpanded
+                            ? "border-[var(--brand-border)] bg-surface text-zinc-300 hover:border-zinc-500 hover:text-zinc-100"
+                            : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/15"
+                        }`}
+                      >
+                        {measureExpanded ? "Standard view" : "Expand map"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={closeMeasureModal}
+                        className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.98]"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-2">
-                  <button
-                    type="button"
-                    onClick={toggleMeasureExpanded}
-                    aria-pressed={measureExpanded}
-                    className={`rounded-2xl border px-3 py-1.5 text-[11px] font-medium transition-all duration-200 ${
-                      measureExpanded
-                        ? "border-[var(--brand-border)] bg-surface text-zinc-300 hover:border-zinc-500 hover:text-zinc-100"
-                        : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/15"
-                    }`}
-                  >
-                    {measureExpanded ? "Standard view" : "Expand map"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={closeMeasureModal}
-                    className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.98]"
-                  >
-                    Close
-                  </button>
+                <div className="flex-1 overflow-hidden px-5 py-5">
+                  <div className="h-full overflow-y-auto">
+                    <AreaMeasureMap
+                      onAreaConfirm={(area) => {
+                        setDrivewaySqm(Math.round(area));
+                        closeMeasureModal();
+                      }}
+                      mapHeightClassName={mapHeightClassName}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="mt-3">
-                <AreaMeasureMap
-                  onAreaConfirm={(area) => {
-                    setDrivewaySqm(Math.round(area));
-                    closeMeasureModal();
-                  }}
-                  mapHeightClassName={mapHeightClassName}
-                />
               </div>
             </div>
           </div>
