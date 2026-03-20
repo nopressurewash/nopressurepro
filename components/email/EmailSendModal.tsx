@@ -69,12 +69,12 @@ export function EmailSendModal({
 
   return (
     <div
-      className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/90 px-3 pb-6 pt-[6vh] sm:px-6 sm:pb-10 sm:pt-[8vh]"
+      className="animate-fade-in fixed inset-0 z-50 flex min-h-full items-start justify-center overflow-y-auto bg-black/90 px-4 pb-8 pt-[6vh] sm:items-center sm:px-6 sm:pb-10 sm:pt-[8vh]"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="animate-fade-in-up flex max-h-[96vh] w-full max-w-[min(96vw,1180px)] flex-col overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-h-[94vh] lg:max-w-[1280px]">
+      <div className="animate-fade-in-up flex max-h-[94vh] w-full max-w-[min(96vw,1200px)] flex-col overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-h-[92vh] lg:max-w-[1320px]">
         <div className="flex h-full min-h-[60vh] flex-col">
           <div className="flex-shrink-0 border-b border-[var(--brand-border)] px-6 pb-4 pt-5 sm:px-7">
             <div className="flex items-start justify-between gap-3">
