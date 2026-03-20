@@ -65,61 +65,58 @@ function EditClientModal({
   return (
     <div
       className="animate-fade-in fixed inset-0 z-50 overflow-y-auto bg-black/90"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) handleClose();
-      }}
+      onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
     >
-      <div className="flex min-h-full items-start justify-center px-4 pb-8 pt-[6vh] sm:items-center sm:px-6 sm:pb-10 sm:pt-[8vh]">
-        <div className="animate-fade-in-up w-full max-h-[92vh] max-w-[min(96vw,1080px)] rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-w-[1100px]">
-          <div className="flex h-full min-h-[60vh] flex-col overflow-hidden">
-            {/* Header */}
-            <div className="border-b border-[var(--brand-border)] px-6 pb-4 pt-5 sm:px-7">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                    Edit Client
-                  </p>
-                  <p className="mt-1 text-sm font-bold text-zinc-100">
-                    {client.name}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
-                >
-                  Cancel
-                </button>
+      <div className="flex min-h-full items-start justify-center px-4 pb-10 pt-[6vh] sm:px-6 sm:pt-[8vh]">
+        <div className="animate-fade-in-up w-full max-w-xl rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-w-3xl">
+          {/* Header */}
+          <div className="border-b border-[var(--brand-border)] px-6 pb-4 pt-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                  Edit Client
+                </p>
+                <p className="mt-1 text-sm font-bold text-zinc-100">
+                  {client.name}
+                </p>
               </div>
+              <button
+                type="button"
+                onClick={handleClose}
+                className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+              >
+                Cancel
+              </button>
             </div>
+          </div>
 
-            {/* Body */}
-            <div className="flex-1 space-y-5 overflow-y-auto px-6 py-6 sm:px-7">
-              <TextField
-                label="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Client name"
-              />
-              <TextField
-                label="Phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Mobile / landline"
-              />
-              <TextField
-                label="Address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Street address or suburb"
-              />
-              <TextField
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="client@example.com"
-              />
+          {/* Body */}
+          <div className="space-y-5 px-6 py-6">
+            <TextField
+              label="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Client name"
+            />
+            <TextField
+              label="Phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Mobile / landline"
+            />
+            <TextField
+              label="Address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Street address or suburb"
+            />
+            <TextField
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="client@example.com"
+            />
 
               <div className="space-y-1.5">
                 <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
@@ -147,22 +144,21 @@ function EditClientModal({
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="border-t border-[var(--brand-border)] px-6 pb-6 pt-5 sm:px-7">
-              {banner && (
-                <p className="mb-3 animate-fade-in text-xs font-medium text-gold">
-                  {banner}
-                </p>
-              )}
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={!isDirty}
-                className="w-full rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3.5 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Save Changes
-              </button>
-            </div>
+          {/* Footer */}
+          <div className="border-t border-[var(--brand-border)] px-6 pb-6 pt-5">
+            {banner && (
+              <p className="mb-3 animate-fade-in text-xs font-medium text-gold">
+                {banner}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={!isDirty}
+              className="w-full rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3.5 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Save Changes
+            </button>
           </div>
         </div>
       </div>
