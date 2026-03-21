@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { TextField, TextAreaField } from "../ui/FormField";
 import { useSpeechToText } from "../../hooks/useSpeechToText";
 import { formatCurrency } from "../../lib/format";
@@ -32,6 +33,7 @@ export function EditQuoteModal({
   onSave,
   onClose,
 }: EditQuoteModalProps) {
+  const [isClient, setIsClient] = useState(false);
   const [clientName, setClientName] = useState(quote.clientName);
   const [suburb, setSuburb] = useState(quote.suburb);
   const [phone, setPhone] = useState(quote.phone);
@@ -48,6 +50,10 @@ export function EditQuoteModal({
     useSpeechToText(setNotes);
   const [status, setStatus] = useState<QuoteStatus>(quote.status);
   const [banner, setBanner] = useState<string | null>(null);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const totals = useMemo(
     () =>
@@ -130,9 +136,11 @@ export function EditQuoteModal({
     onSave(updated);
   }
 
-  return (
-    <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 sm:items-center">
-      <div className="animate-fade-in-up flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-2xl border border-[var(--brand-border)] bg-surface-raised sm:rounded-2xl">
+  if (!isClient) return null;
+
+  return createPortal(
+    <div className="animate-fade-in fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/90 px-3 pb-6 pt-[8vh] sm:px-4 sm:pb-10 sm:pt-[10vh]">
+      <div className="animate-fade-in-up flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-h-[86vh]">
         {/* Header — fixed */}
         <div className="shrink-0 border-b border-[var(--brand-border)] px-5 pb-3.5 pt-5">
           <div className="flex items-start justify-between gap-3">
@@ -412,6 +420,7 @@ export function EditQuoteModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

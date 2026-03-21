@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Quote } from "../../lib/types";
 import { formatCurrency } from "../../lib/format";
 
@@ -8,6 +9,7 @@ interface ScheduleJobModalProps {
   quote: Quote;
   onSchedule: (id: string, date: string, time: string) => void;
   onClose: () => void;
+  portalToBody?: boolean;
 }
 
 function todayString() {
@@ -19,9 +21,15 @@ export function ScheduleJobModal({
   quote,
   onSchedule,
   onClose,
+  portalToBody = false,
 }: ScheduleJobModalProps) {
+  const [isClient, setIsClient] = useState(false);
   const [date, setDate] = useState(quote.scheduledDate || todayString());
   const [time, setTime] = useState(quote.scheduledTime || "09:00");
+
+  useEffect(() => {
+    if (portalToBody) setIsClient(true);
+  }, [portalToBody]);
 
   function handleSave() {
     if (!date) return;
@@ -29,8 +37,8 @@ export function ScheduleJobModal({
     onClose();
   }
 
-  return (
-    <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 px-3 pb-6 pt-16 sm:items-center sm:px-4">
+  const modalContent = (
+    <div className="animate-fade-in fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/90 px-3 pb-6 pt-[8vh] sm:px-4 sm:pb-10 sm:pt-[10vh]">
       <div className="animate-fade-in-up w-full max-w-md rounded-2xl border border-[var(--brand-border)] bg-surface-raised p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -89,4 +97,8 @@ export function ScheduleJobModal({
       </div>
     </div>
   );
+
+  if (!portalToBody) return modalContent;
+  if (!isClient) return null;
+  return createPortal(modalContent, document.body);
 }
