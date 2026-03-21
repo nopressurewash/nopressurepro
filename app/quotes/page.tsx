@@ -374,6 +374,7 @@ export default function SavedQuotesPage() {
           quote={schedulingQuote}
           onSchedule={updateQuoteSchedule}
           onClose={() => setSchedulingQuote(null)}
+          portalToBody
         />
       )}
 
