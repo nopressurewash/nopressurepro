@@ -188,6 +188,5 @@ export function EmailSendModal({
           </div>
         </div>
       </div>
-    </div>
   );
 }
