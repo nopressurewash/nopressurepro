@@ -367,6 +367,7 @@ export default function SavedQuotesPage() {
           defaultType="quote"
           onClose={() => setEmailDraftTarget(null)}
           portalToBody
+          enableEditableCompose
         />
       )}
 

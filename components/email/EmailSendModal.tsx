@@ -12,15 +12,17 @@ import { exportInvoicePdf } from "../../lib/pdf/exportInvoicePdf";
 import { exportQuotePdf } from "../../lib/pdf/exportQuotePdf";
 import type { Invoice, Quote } from "../../lib/types";
 
-type SendType = "quote" | "invoice";
+type SendType = "quote" | "invoice" | "email";
+type DefaultSendType = "quote" | "invoice";
 
 interface EmailSendModalProps {
   quote?: Quote;
   invoice?: Invoice;
   clientEmail?: string;
-  defaultType: SendType;
+  defaultType: DefaultSendType;
   onClose: () => void;
   portalToBody?: boolean;
+  enableEditableCompose?: boolean;
 }
 
 export function EmailSendModal({
@@ -30,6 +32,7 @@ export function EmailSendModal({
   defaultType,
   onClose,
   portalToBody = false,
+  enableEditableCompose = false,
 }: EmailSendModalProps) {
   const [isClient, setIsClient] = useState(false);
   const canSendQuote = Boolean(quote);
@@ -52,7 +55,47 @@ export function EmailSendModal({
     return { subject: "", body: "" };
   }, [invoice, quote, sendType]);
 
+  const quoteDraft = useMemo(() => {
+    if (!quote) return { subject: "", body: "" };
+    return getQuoteEmailDraft(quote);
+  }, [quote]);
+
+  const invoiceDraft = useMemo(() => {
+    if (!invoice) return { subject: "", body: "" };
+    return getInvoiceEmailDraft(invoice);
+  }, [invoice]);
+
+  const plainEmailDraft = useMemo(() => {
+    return {
+      subject: "",
+      body: `Hello ${clientName},\n\n`,
+    };
+  }, [clientName]);
+
+  const [quoteSubject, setQuoteSubject] = useState(quoteDraft.subject);
+  const [quoteBody, setQuoteBody] = useState(quoteDraft.body);
+  const [invoiceSubject, setInvoiceSubject] = useState(invoiceDraft.subject);
+  const [invoiceBody, setInvoiceBody] = useState(invoiceDraft.body);
+  const [plainSubject, setPlainSubject] = useState(plainEmailDraft.subject);
+  const [plainBody, setPlainBody] = useState(plainEmailDraft.body);
+
+  useEffect(() => {
+    setQuoteSubject(quoteDraft.subject);
+    setQuoteBody(quoteDraft.body);
+  }, [quoteDraft.body, quoteDraft.subject]);
+
+  useEffect(() => {
+    setInvoiceSubject(invoiceDraft.subject);
+    setInvoiceBody(invoiceDraft.body);
+  }, [invoiceDraft.body, invoiceDraft.subject]);
+
+  useEffect(() => {
+    setPlainSubject(plainEmailDraft.subject);
+    setPlainBody(plainEmailDraft.body);
+  }, [plainEmailDraft.body, plainEmailDraft.subject]);
+
   async function handleDownloadPdf() {
+    if (sendType === "email") return;
     if (sendType === "invoice" && invoice) {
       await exportInvoicePdf(invoice);
       return;
@@ -64,6 +107,23 @@ export function EmailSendModal({
 
   function handleOpenEmailApp() {
     if (!email) return;
+
+    if (enableEditableCompose) {
+      const activeSubject =
+        sendType === "invoice"
+          ? invoiceSubject
+          : sendType === "quote"
+            ? quoteSubject
+            : plainSubject;
+      const activeBody =
+        sendType === "invoice"
+          ? invoiceBody
+          : sendType === "quote"
+            ? quoteBody
+            : plainBody;
+      window.location.href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(activeSubject)}&body=${encodeURIComponent(activeBody)}`;
+      return;
+    }
 
     if (sendType === "invoice" && invoice) {
       window.location.href = buildInvoiceMailtoHref(invoice, email);
@@ -113,7 +173,9 @@ export function EmailSendModal({
                 <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
                   Send type
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div
+                  className={`grid gap-2 ${enableEditableCompose ? "grid-cols-3" : "grid-cols-2"}`}
+                >
                   <button
                     type="button"
                     disabled={!canSendQuote}
@@ -138,6 +200,19 @@ export function EmailSendModal({
                   >
                     Invoice
                   </button>
+                  {enableEditableCompose && (
+                    <button
+                      type="button"
+                      onClick={() => setSendType("email")}
+                      className={`rounded-xl border px-3 py-2.5 text-center text-xs font-medium transition-all duration-200 ${
+                        sendType === "email"
+                          ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
+                          : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
+                      }`}
+                    >
+                      Email
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -151,18 +226,58 @@ export function EmailSendModal({
                 <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
                   Subject
                 </label>
-                <div className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2.5 text-sm text-zinc-200">
-                  {draft.subject}
-                </div>
+                {enableEditableCompose ? (
+                  <input
+                    type="text"
+                    value={
+                      sendType === "invoice"
+                        ? invoiceSubject
+                        : sendType === "quote"
+                          ? quoteSubject
+                          : plainSubject
+                    }
+                    onChange={(event) => {
+                      const next = event.target.value;
+                      if (sendType === "invoice") setInvoiceSubject(next);
+                      else if (sendType === "quote") setQuoteSubject(next);
+                      else setPlainSubject(next);
+                    }}
+                    className="w-full rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2.5 text-sm text-zinc-100 outline-none transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15"
+                  />
+                ) : (
+                  <div className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2.5 text-sm text-zinc-200">
+                    {draft.subject}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
-                  Message preview
+                  {enableEditableCompose ? "Message" : "Message preview"}
                 </label>
-                <div className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-3 text-sm leading-relaxed text-zinc-300">
-                  <pre className="whitespace-pre-wrap font-sans">{draft.body}</pre>
-                </div>
+                {enableEditableCompose ? (
+                  <textarea
+                    value={
+                      sendType === "invoice"
+                        ? invoiceBody
+                        : sendType === "quote"
+                          ? quoteBody
+                          : plainBody
+                    }
+                    onChange={(event) => {
+                      const next = event.target.value;
+                      if (sendType === "invoice") setInvoiceBody(next);
+                      else if (sendType === "quote") setQuoteBody(next);
+                      else setPlainBody(next);
+                    }}
+                    rows={10}
+                    className="min-h-[220px] w-full rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-3 text-sm leading-relaxed text-zinc-100 outline-none transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15"
+                  />
+                ) : (
+                  <div className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-3 text-sm leading-relaxed text-zinc-300">
+                    <pre className="whitespace-pre-wrap font-sans">{draft.body}</pre>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -181,7 +296,8 @@ export function EmailSendModal({
                 onClick={() => {
                   void handleDownloadPdf();
                 }}
-                className="rounded-2xl border border-brand-purple/30 bg-brand-purple/10 px-4 py-3 text-sm font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
+                disabled={sendType === "email"}
+                className="rounded-2xl border border-brand-purple/30 bg-brand-purple/10 px-4 py-3 text-sm font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Download PDF
               </button>
