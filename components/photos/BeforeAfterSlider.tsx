@@ -146,7 +146,7 @@ export function BeforeAfterSlider({
       </div>
 
       <p className="text-center text-xs text-zinc-500">
-        Drag left or right to compare the first before and after photos.
+        Drag left or right to compare your selected photos.
       </p>
     </div>
   );
