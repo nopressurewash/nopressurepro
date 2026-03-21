@@ -53,8 +53,9 @@ export default function InvoicesPage() {
   );
 
   return (
-    <AppShell>
-      <section className="space-y-6">
+    <>
+      <AppShell>
+        <section className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-50">
             Invoices
@@ -165,7 +166,8 @@ export default function InvoicesPage() {
             ))}
           </div>
         )}
-      </section>
+        </section>
+      </AppShell>
 
       {emailDraftTarget && (
         <EmailSendModal
@@ -176,6 +178,6 @@ export default function InvoicesPage() {
           onClose={() => setEmailDraftTarget(null)}
         />
       )}
-    </AppShell>
+    </>
   );
 }

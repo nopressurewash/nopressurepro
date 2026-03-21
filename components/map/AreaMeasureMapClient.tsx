@@ -14,6 +14,7 @@ import L from "leaflet";
 
 interface AreaMeasureMapClientProps {
   onAreaConfirm: (areaSqm: number) => void;
+  mapHeightClassName?: string;
 }
 
 type FeatureGroupType = L.FeatureGroup<any>;
@@ -125,6 +126,7 @@ function MapCenterTracker({
 
 export function AreaMeasureMapClient({
   onAreaConfirm,
+  mapHeightClassName,
 }: AreaMeasureMapClientProps) {
   const featureGroupRef = useRef<FeatureGroupType | null>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -145,6 +147,9 @@ export function AreaMeasureMapClient({
   const [locationMessage, setLocationMessage] = useState<string | null>(null);
   const [resolvedAddressStatus, setResolvedAddressStatus] =
     useState<ResolvedAddressStatus>("idle");
+
+  const mapHeightClass =
+    mapHeightClassName ?? "h-[45vh] sm:h-[58vh]";
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -596,7 +601,7 @@ export function AreaMeasureMapClient({
           zoom={19.5}
           zoomControl={true}
           maxZoom={22}
-          className="h-64 w-full overflow-hidden rounded-2xl border border-zinc-800 bg-black sm:h-80"
+          className={`overflow-hidden rounded-2xl border border-zinc-800 bg-black w-full ${mapHeightClass}`}
           whenReady={() => {
             window.setTimeout(() => {
               mapRef.current?.invalidateSize();

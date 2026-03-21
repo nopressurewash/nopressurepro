@@ -64,12 +64,13 @@ function EditClientModal({
 
   return (
     <div
-      className="animate-fade-in fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/90 px-4 pb-6 pt-10 sm:px-6 sm:pb-8 sm:pt-12"
+      className="animate-fade-in fixed inset-0 z-50 overflow-y-auto bg-black/90"
       onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
     >
-      <div className="animate-fade-in-up flex max-h-[calc(100vh-5rem)] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-h-[calc(100vh-6rem)]">
+      <div className="flex min-h-full items-start justify-center px-4 pb-10 pt-[6vh] sm:px-6 sm:pt-[8vh]">
+        <div className="animate-fade-in-up w-full max-w-xl rounded-2xl border border-[var(--brand-border)] bg-surface-raised shadow-2xl sm:max-w-3xl">
           {/* Header */}
-          <div className="shrink-0 border-b border-[var(--brand-border)] px-6 pb-4 pt-5">
+          <div className="border-b border-[var(--brand-border)] px-6 pb-4 pt-5">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
@@ -90,7 +91,7 @@ function EditClientModal({
           </div>
 
           {/* Body */}
-          <div className="flex-1 space-y-5 overflow-y-auto px-6 py-6">
+          <div className="space-y-5 px-6 py-6">
             <TextField
               label="Name"
               value={name}
@@ -117,34 +118,34 @@ function EditClientModal({
               placeholder="client@example.com"
             />
 
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
-                Client type
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {(["Residential", "Commercial"] as const).map((type) => {
-                  const active = clientType === type;
-                  return (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => setClientType(type)}
-                      className={`rounded-xl border px-3 py-2.5 text-center text-xs font-medium transition-all duration-200 ${
-                        active
-                          ? "border-gold/40 bg-gold/10 text-gold"
-                          : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
-                      }`}
-                    >
-                      {type}
-                    </button>
-                  );
-                })}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+                  Client type
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(["Residential", "Commercial"] as const).map((type) => {
+                    const active = clientType === type;
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setClientType(type)}
+                        className={`rounded-xl border px-3 py-2.5 text-center text-xs font-medium transition-all duration-200 ${
+                          active
+                            ? "border-gold/40 bg-gold/10 text-gold"
+                            : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          </div>
 
           {/* Footer */}
-          <div className="shrink-0 border-t border-[var(--brand-border)] px-6 pb-6 pt-5">
+          <div className="border-t border-[var(--brand-border)] px-6 pb-6 pt-5">
             {banner && (
               <p className="mb-3 animate-fade-in text-xs font-medium text-gold">
                 {banner}
@@ -159,6 +160,7 @@ function EditClientModal({
               Save Changes
             </button>
           </div>
+        </div>
       </div>
     </div>
   );
