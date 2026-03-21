@@ -157,6 +157,17 @@ export function TodayView({
               <p className="mt-1 text-xs text-zinc-600">
                 Add reminders, weather details, or follow-ups for this day.
               </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setNoteDraft(dayNote?.note ?? "");
+                  setIsEditingNote(true);
+                  setBanner(null);
+                }}
+                className="mt-4 rounded-xl border border-gold/30 bg-gold/10 px-4 py-2 text-xs font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98]"
+              >
+                Add Note
+              </button>
             </div>
           )
         ) : (
