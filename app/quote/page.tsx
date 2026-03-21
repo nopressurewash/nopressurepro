@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { AppShell } from "../../components/layout/AppShell";
 import { Panel } from "../../components/ui/Panel";
 import { TextAreaField, TextField } from "../../components/ui/FormField";
@@ -54,9 +55,14 @@ export default function QuickQuotePage() {
   const [savedBanner, setSavedBanner] = useState<string | null>(null);
   const [showMeasureModal, setShowMeasureModal] = useState(false);
   const [measureExpanded, setMeasureExpanded] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const [draftPhotoQuoteId, setDraftPhotoQuoteId] = useState(
     createDraftPhotoQuoteId,
   );
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const totals = useMemo(
     () =>
@@ -506,14 +512,15 @@ export default function QuickQuotePage() {
         </div>
 
         {/* Measure modal */}
-        {showMeasureModal && (
-          <div className="animate-fade-in fixed inset-0 z-40 flex items-center justify-center overflow-y-auto bg-black/90 px-3 py-6 sm:px-4">
-            <div
-              className="animate-fade-in-up w-full max-w-[min(96vw,1240px)] max-h-[95vh] overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-surface-raised p-4 sm:p-6"
-              role="dialog"
-              aria-modal="true"
-            >
-              <div className="flex h-full flex-col overflow-hidden">
+        {showMeasureModal &&
+          isClient &&
+          createPortal(
+            <div className="animate-fade-in fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/90 px-3 pb-6 pt-[4vh] sm:px-4 sm:pb-8 sm:pt-[6vh]">
+              <div
+                className="animate-fade-in-up flex max-h-[96vh] w-full max-w-[min(96vw,1240px)] flex-col overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-surface-raised"
+                role="dialog"
+                aria-modal="true"
+              >
                 <div className="flex-shrink-0 border-b border-[var(--brand-border)] px-5 pb-4 pt-5 sm:px-6">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -547,21 +554,19 @@ export default function QuickQuotePage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex-1 overflow-hidden px-5 py-5">
-                  <div className="h-full overflow-y-auto">
-                    <AreaMeasureMap
-                      onAreaConfirm={(area) => {
-                        setDrivewaySqm(Math.round(area));
-                        closeMeasureModal();
-                      }}
-                      mapHeightClassName={mapHeightClassName}
-                    />
-                  </div>
+                <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+                  <AreaMeasureMap
+                    onAreaConfirm={(area) => {
+                      setDrivewaySqm(Math.round(area));
+                      closeMeasureModal();
+                    }}
+                    mapHeightClassName={mapHeightClassName}
+                  />
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body,
+          )}
       </section>
     </AppShell>
   );
