@@ -116,8 +116,7 @@ export function JobPhotoGallery({
 
   const activePhotos = photosByCategory[activeCategory];
   const totalPhotoCount = photos.length;
-  const firstBeforePhoto = photosByCategory.before[0] ?? null;
-  const firstAfterPhoto = photosByCategory.after[0] ?? null;
+  const canCompare = totalPhotoCount >= 2;
 
   useEffect(() => {
     latestCountCallbackRef.current = onPhotoCountChange;
@@ -153,15 +152,14 @@ export function JobPhotoGallery({
           Job Photos
         </p>
         <div className="flex flex-wrap items-center justify-end gap-1.5">
-          {firstBeforePhoto && firstAfterPhoto && (
-            <button
-              type="button"
-              onClick={() => setShowComparison(true)}
-              className="rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-[11px] font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97]"
-            >
-              Compare
-            </button>
-          )}
+          <button
+            type="button"
+            disabled={!canCompare}
+            onClick={() => setShowComparison(true)}
+            className="rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-[11px] font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Compare
+          </button>
           <PhotoUploadButton
             loading={uploading}
             onFilesSelected={(files) => addPhotos(files, activeCategory)}
@@ -223,8 +221,7 @@ export function JobPhotoGallery({
       />
       <BeforeAfterModal
         open={showComparison}
-        beforePhoto={firstBeforePhoto}
-        afterPhoto={firstAfterPhoto}
+        photos={photos}
         onClose={() => setShowComparison(false)}
       />
     </div>
