@@ -366,6 +366,7 @@ export default function SavedQuotesPage() {
           clientEmail={emailDraftTarget.clientEmail}
           defaultType="quote"
           onClose={() => setEmailDraftTarget(null)}
+          portalToBody
         />
       )}
 

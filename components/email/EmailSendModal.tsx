@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   buildInvoiceMailtoHref,
   buildQuoteMailtoHref,
@@ -19,6 +20,7 @@ interface EmailSendModalProps {
   clientEmail?: string;
   defaultType: SendType;
   onClose: () => void;
+  portalToBody?: boolean;
 }
 
 export function EmailSendModal({
@@ -27,7 +29,9 @@ export function EmailSendModal({
   clientEmail,
   defaultType,
   onClose,
+  portalToBody = false,
 }: EmailSendModalProps) {
+  const [isClient, setIsClient] = useState(false);
   const canSendQuote = Boolean(quote);
   const canSendInvoice = Boolean(invoice);
   const [sendType, setSendType] = useState<SendType>(() => {
@@ -37,6 +41,10 @@ export function EmailSendModal({
 
   const email = clientEmail?.trim() ?? "";
   const clientName = quote?.clientName ?? invoice?.clientName ?? "Client";
+
+  useEffect(() => {
+    if (portalToBody) setIsClient(true);
+  }, [portalToBody]);
 
   const draft = useMemo(() => {
     if (sendType === "invoice" && invoice) return getInvoiceEmailDraft(invoice);
@@ -67,7 +75,7 @@ export function EmailSendModal({
     }
   }
 
-  return (
+  const modalContent = (
     <div
       className="animate-fade-in fixed inset-0 z-50 flex min-h-full items-start justify-center overflow-y-auto bg-black/90 px-4 pb-8 pt-[6vh] sm:items-center sm:px-6 sm:pb-10 sm:pt-[8vh]"
       onClick={(event) => {
@@ -191,4 +199,8 @@ export function EmailSendModal({
       </div>
     </div>
   );
+
+  if (!portalToBody) return modalContent;
+  if (!isClient) return null;
+  return createPortal(modalContent, document.body);
 }
