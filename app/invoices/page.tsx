@@ -176,6 +176,7 @@ export default function InvoicesPage() {
           clientEmail={emailDraftTarget.clientEmail}
           defaultType="invoice"
           onClose={() => setEmailDraftTarget(null)}
+          enableEditableCompose
         />
       )}
     </>
