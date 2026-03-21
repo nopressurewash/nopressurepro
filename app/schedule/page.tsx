@@ -14,6 +14,11 @@ import type { Quote } from "../../lib/types";
 
 type ScheduleTab = "today" | "agenda" | "calendar";
 
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 const TABS: { id: ScheduleTab; label: string }[] = [
   { id: "today", label: "Today" },
   { id: "agenda", label: "Agenda" },
@@ -28,6 +33,7 @@ export default function SchedulePage() {
 
   const [activeTab, setActiveTab] = useState<ScheduleTab>("today");
   const [reschedulingJob, setReschedulingJob] = useState<Quote | null>(null);
+  const todayDateKey = todayKey();
 
   const bookedJobs = scheduledJobs.filter((j) => j.status === "booked");
   const bookedCount = bookedJobs.length;
@@ -81,6 +87,8 @@ export default function SchedulePage() {
         {activeTab === "today" && (
           <TodayView
             jobs={scheduledJobs}
+            dayNote={dayNotes[todayDateKey]}
+            onSaveDayNote={saveDayNote}
             onMarkCompleted={handleMarkCompleted}
             onReschedule={handleReschedule}
           />
