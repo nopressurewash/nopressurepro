@@ -6,6 +6,8 @@ import type { JobPhotoCategory, JobPhotoRecord } from "../../lib/types";
 
 interface PhotoPreviewModalProps {
   photo: JobPhotoRecord | null;
+  pairedContext?: string;
+  onComparePaired?: () => void;
   onClose: () => void;
   onDelete: (id: string) => void;
   onMoveCategory: (id: string, category: JobPhotoCategory) => void;
@@ -30,6 +32,8 @@ const pillBase =
 
 export function PhotoPreviewModal({
   photo,
+  pairedContext,
+  onComparePaired,
   onClose,
   onDelete,
   onMoveCategory,
@@ -74,6 +78,20 @@ export function PhotoPreviewModal({
         </div>
 
         <div className="mt-4 space-y-4">
+          {pairedContext && (
+            <div className="rounded-xl border border-brand-purple/30 bg-brand-purple/10 px-3 py-2.5">
+              <p className="text-xs text-brand-purple-light">{pairedContext}</p>
+            </div>
+          )}
+          {onComparePaired && (
+            <button
+              type="button"
+              onClick={onComparePaired}
+              className="w-full rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-xs font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98]"
+            >
+              Compare Paired Photos
+            </button>
+          )}
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
               Photo Name / Caption
