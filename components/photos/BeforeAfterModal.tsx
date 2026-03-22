@@ -60,6 +60,18 @@ export function BeforeAfterModal({
   );
 
   const hasEnoughPhotos = photos.length >= 2;
+  const suggestedPairedAfter = useMemo(
+    () =>
+      photos.find(
+        (photo) =>
+          photo.category === "after" &&
+          Boolean(photo.pairedBeforePhotoId) &&
+          photos.some((candidate) => candidate.id === photo.pairedBeforePhotoId),
+      ) ?? null,
+    [photos],
+  );
+
+  const suggestedBeforePhotoId = suggestedPairedAfter?.pairedBeforePhotoId ?? "";
   const selectedSamePhoto =
     Boolean(firstPhotoId) && Boolean(secondPhotoId) && firstPhotoId === secondPhotoId;
   const canOpenCompare =
@@ -73,11 +85,16 @@ export function BeforeAfterModal({
 
   useEffect(() => {
     if (!open) return;
-    setFirstPhotoId("");
-    setSecondPhotoId("");
+    if (suggestedPairedAfter && suggestedBeforePhotoId) {
+      setFirstPhotoId(suggestedBeforePhotoId);
+      setSecondPhotoId(suggestedPairedAfter.id);
+    } else {
+      setFirstPhotoId("");
+      setSecondPhotoId("");
+    }
     setIsComparing(false);
     setBanner(null);
-  }, [open]);
+  }, [open, suggestedBeforePhotoId, suggestedPairedAfter]);
 
   function handleOpenCompare() {
     if (!hasEnoughPhotos) {
@@ -180,6 +197,11 @@ export function BeforeAfterModal({
                   {selectedSamePhoto && (
                     <p className="text-xs font-medium text-amber-300">
                       Choose two different photos to compare.
+                    </p>
+                  )}
+                  {suggestedPairedAfter && suggestedBeforePhotoId && (
+                    <p className="text-xs text-zinc-500">
+                      Suggested pair loaded from ghost capture.
                     </p>
                   )}
                   {banner && (

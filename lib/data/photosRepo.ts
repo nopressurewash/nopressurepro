@@ -15,6 +15,7 @@ export interface PhotoMetadataRecord {
   category: JobPhotoRecord["category"];
   createdAt: string;
   caption?: string;
+  pairedBeforePhotoId?: string;
   storagePath?: string;
   storageBucket?: string;
 }
@@ -40,6 +41,9 @@ function mapPhotoRow(row: Record<string, unknown>): PhotoMetadataRecord {
     category: String(row.category ?? "other") as JobPhotoRecord["category"],
     createdAt: String(row.created_at ?? new Date().toISOString()),
     caption: row.caption ? String(row.caption) : undefined,
+    pairedBeforePhotoId: metadata.pairedBeforePhotoId
+      ? String(metadata.pairedBeforePhotoId)
+      : undefined,
     storagePath: metadata.storagePath ? String(metadata.storagePath) : undefined,
     storageBucket: metadata.storageBucket
       ? String(metadata.storageBucket)
@@ -144,6 +148,7 @@ export async function savePhotoRecord(
       metadata: {
         localId: photo.id,
         localQuoteId: photo.quoteId,
+        pairedBeforePhotoId: photo.pairedBeforePhotoId ?? null,
         storageBucket: uploaded?.bucket ?? null,
         storagePath: uploaded?.path ?? null,
       },
@@ -210,6 +215,7 @@ export async function updatePhotoRecord(
       metadata: {
         localId: photo.id,
         localQuoteId: photo.quoteId,
+        pairedBeforePhotoId: photo.pairedBeforePhotoId ?? null,
         storageBucket: existingMeta.storageBucket ?? null,
         storagePath: existingMeta.storagePath ?? null,
       },

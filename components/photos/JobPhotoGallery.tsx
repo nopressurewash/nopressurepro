@@ -316,7 +316,9 @@ export function JobPhotoGallery({
         referencePhoto={selectedGhostPhoto}
         onClose={() => setShowGhostCapture(false)}
         onCapture={(file) => {
-          void addPhotos([file], "after");
+          void addPhotos([file], "after", {
+            pairedBeforePhotoId: selectedGhostPhoto?.id,
+          });
           setShowGhostCapture(false);
         }}
       />
