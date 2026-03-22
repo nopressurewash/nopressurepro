@@ -53,6 +53,7 @@ export function useJobPhotos(quoteId: string) {
                 ...local,
                 category: remotePhoto.category,
                 caption: remotePhoto.caption,
+                pairedBeforePhotoId: remotePhoto.pairedBeforePhotoId,
               };
             }
 
@@ -65,6 +66,7 @@ export function useJobPhotos(quoteId: string) {
               category: remotePhoto.category,
               createdAt: remotePhoto.createdAt,
               caption: remotePhoto.caption,
+              pairedBeforePhotoId: remotePhoto.pairedBeforePhotoId,
               blob: remoteBlob,
             } as JobPhotoRecord;
           }),
@@ -108,7 +110,11 @@ export function useJobPhotos(quoteId: string) {
   }, [loadPhotos]);
 
   const addPhotos = useCallback(
-    async (files: File[], category: JobPhotoCategory) => {
+    async (
+      files: File[],
+      category: JobPhotoCategory,
+      options?: { pairedBeforePhotoId?: string },
+    ) => {
       if (!files.length) return;
 
       try {
@@ -122,6 +128,7 @@ export function useJobPhotos(quoteId: string) {
               quoteId,
               category,
               blob,
+              pairedBeforePhotoId: options?.pairedBeforePhotoId,
             });
           }),
         );

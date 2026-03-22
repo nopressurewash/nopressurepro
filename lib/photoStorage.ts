@@ -175,6 +175,7 @@ export async function addPhotoRecord(input: {
   category: JobPhotoCategory;
   blob: Blob;
   caption?: string;
+  pairedBeforePhotoId?: string;
 }): Promise<JobPhotoRecord> {
   const db = await openDatabase();
 
@@ -185,6 +186,7 @@ export async function addPhotoRecord(input: {
     createdAt: new Date().toISOString(),
     blob: input.blob,
     caption: input.caption,
+    pairedBeforePhotoId: input.pairedBeforePhotoId,
   };
 
   return new Promise((resolve, reject) => {

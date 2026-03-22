@@ -131,6 +131,7 @@ export default function GalleryPage() {
                   ...local,
                   category: remotePhoto.category,
                   caption: remotePhoto.caption,
+                  pairedBeforePhotoId: remotePhoto.pairedBeforePhotoId,
                 };
               }
 
@@ -143,6 +144,7 @@ export default function GalleryPage() {
                 category: remotePhoto.category,
                 createdAt: remotePhoto.createdAt,
                 caption: remotePhoto.caption,
+                pairedBeforePhotoId: remotePhoto.pairedBeforePhotoId,
                 blob: remoteBlob,
               } as JobPhotoRecord;
             }),

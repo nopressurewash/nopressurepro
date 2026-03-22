@@ -72,6 +72,7 @@ export interface JobPhotoRecord {
   createdAt: string;
   blob: Blob;
   caption?: string;
+  pairedBeforePhotoId?: string;
 }
 
 export interface CalendarDayNote {
