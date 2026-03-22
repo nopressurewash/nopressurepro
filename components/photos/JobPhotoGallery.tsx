@@ -5,6 +5,7 @@ import { useJobPhotos } from "../../hooks/useJobPhotos";
 import { useObjectUrl } from "../../hooks/useObjectUrl";
 import type { JobPhotoCategory, JobPhotoRecord } from "../../lib/types";
 import { BeforeAfterModal } from "./BeforeAfterModal";
+import { GhostCaptureModal } from "./GhostCaptureModal";
 import { PhotoPreviewModal } from "./PhotoPreviewModal";
 import { PhotoUploadButton } from "./PhotoUploadButton";
 
@@ -33,6 +34,13 @@ function formatDateTime(value: string) {
     day: "2-digit",
     month: "short",
   });
+}
+
+function getPhotoSelectLabel(photo: JobPhotoRecord, index: number) {
+  const category = getCategoryLabel(photo.category);
+  const caption = photo.caption?.trim();
+  if (caption) return `${category} - ${caption}`;
+  return `${category} - ${formatDateTime(photo.createdAt)} - Photo ${index + 1}`;
 }
 
 function PhotoTile({
@@ -103,6 +111,9 @@ export function JobPhotoGallery({
     useState<JobPhotoCategory>("before");
   const [previewPhoto, setPreviewPhoto] = useState<JobPhotoRecord | null>(null);
   const [showComparison, setShowComparison] = useState(false);
+  const [showGhostPicker, setShowGhostPicker] = useState(false);
+  const [showGhostCapture, setShowGhostCapture] = useState(false);
+  const [ghostReferencePhotoId, setGhostReferencePhotoId] = useState("");
   const latestCountCallbackRef = useRef(onPhotoCountChange);
   const lastReportedCountRef = useRef<number | null>(null);
 
@@ -117,6 +128,9 @@ export function JobPhotoGallery({
   const activePhotos = photosByCategory[activeCategory];
   const totalPhotoCount = photos.length;
   const canCompare = totalPhotoCount >= 2;
+  const beforePhotos = photosByCategory.before;
+  const selectedGhostPhoto =
+    beforePhotos.find((photo) => photo.id === ghostReferencePhotoId) ?? null;
 
   useEffect(() => {
     latestCountCallbackRef.current = onPhotoCountChange;
@@ -145,6 +159,12 @@ export function JobPhotoGallery({
     }
   }, [photos, previewPhoto]);
 
+  useEffect(() => {
+    if (!selectedGhostPhoto) {
+      setShowGhostCapture(false);
+    }
+  }, [selectedGhostPhoto]);
+
   return (
     <div className="space-y-3 rounded-xl border border-[var(--brand-border)] bg-surface-raised p-3">
       <div className="flex items-start justify-between gap-2">
@@ -164,6 +184,20 @@ export function JobPhotoGallery({
             loading={uploading}
             onFilesSelected={(files) => addPhotos(files, activeCategory)}
           />
+          {activeCategory === "after" && beforePhotos.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setGhostReferencePhotoId((current) =>
+                  current || beforePhotos[0]?.id || "",
+                );
+                setShowGhostPicker(true);
+              }}
+              className="rounded-xl border border-brand-purple/30 bg-brand-purple/10 px-3 py-2 text-[11px] font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.97]"
+            >
+              Use Before as Ghost
+            </button>
+          )}
         </div>
       </div>
 
@@ -223,6 +257,68 @@ export function JobPhotoGallery({
         open={showComparison}
         photos={photos}
         onClose={() => setShowComparison(false)}
+      />
+      {showGhostPicker && (
+        <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/90 px-3 pb-6 pt-16 sm:items-center sm:px-4">
+          <div className="animate-fade-in-up w-full max-w-xl rounded-2xl border border-[var(--brand-border)] bg-surface-raised p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                  Ghost Overlay
+                </p>
+                <p className="mt-1 text-sm font-semibold text-zinc-100">
+                  Pick a before photo as your capture guide.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowGhostPicker(false)}
+                className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+              >
+                Close
+              </button>
+            </div>
+            <div className="mt-4 space-y-3">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+                  Before reference image
+                </label>
+                <select
+                  value={ghostReferencePhotoId}
+                  onChange={(event) => setGhostReferencePhotoId(event.target.value)}
+                  className="w-full rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2.5 text-sm text-zinc-100 outline-none transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15"
+                >
+                  {beforePhotos.map((photo, index) => (
+                    <option key={photo.id} value={photo.id}>
+                      {getPhotoSelectLabel(photo, index)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="button"
+                disabled={!selectedGhostPhoto}
+                onClick={() => {
+                  if (!selectedGhostPhoto) return;
+                  setShowGhostPicker(false);
+                  setShowGhostCapture(true);
+                }}
+                className="w-full rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-xs font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Open Ghost Camera
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <GhostCaptureModal
+        open={showGhostCapture}
+        referencePhoto={selectedGhostPhoto}
+        onClose={() => setShowGhostCapture(false)}
+        onCapture={(file) => {
+          void addPhotos([file], "after");
+          setShowGhostCapture(false);
+        }}
       />
     </div>
   );
