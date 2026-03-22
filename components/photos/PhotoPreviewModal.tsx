@@ -76,13 +76,13 @@ export function PhotoPreviewModal({
         <div className="mt-4 space-y-4">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-              Caption
+              Photo Name / Caption
             </p>
             <div className="mt-2 flex flex-col gap-2 sm:flex-row">
               <input
                 value={captionDraft}
                 onChange={(event) => setCaptionDraft(event.target.value)}
-                placeholder="Add a short note for this photo"
+                placeholder="Add a photo label for easier compare selection"
                 className="flex-1 rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15"
               />
               <button
@@ -90,7 +90,7 @@ export function PhotoPreviewModal({
                 onClick={() => onSaveCaption(photo.id, captionDraft)}
                 className="rounded-xl border border-gold/30 bg-gold/10 px-4 py-2.5 text-xs font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97]"
               >
-                Save Caption
+                Save Label
               </button>
             </div>
           </div>
