@@ -28,8 +28,16 @@ function formatDate(value: string) {
   return date.toLocaleDateString("en-AU", {
     day: "2-digit",
     month: "short",
-    year: "2-digit",
   });
+}
+
+function getCompareOptionLabel(photo: JobPhotoRecord, index: number) {
+  const category = getCategoryLabel(photo.category);
+  const caption = photo.caption?.trim();
+  if (caption) {
+    return `${category} — ${caption}`;
+  }
+  return `${category} — ${formatDate(photo.createdAt)} — Photo ${index + 1}`;
 }
 
 export function BeforeAfterModal({
@@ -141,9 +149,9 @@ export function BeforeAfterModal({
                         className="w-full rounded-xl border border-[var(--brand-border)] bg-surface-raised px-3 py-2.5 text-sm text-zinc-100 outline-none transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15"
                       >
                         <option value="">Select photo</option>
-                        {photos.map((photo) => (
+                        {photos.map((photo, index) => (
                           <option key={photo.id} value={photo.id}>
-                            {getCategoryLabel(photo.category)} - {formatDate(photo.createdAt)}
+                            {getCompareOptionLabel(photo, index)}
                           </option>
                         ))}
                       </select>
@@ -161,9 +169,9 @@ export function BeforeAfterModal({
                         className="w-full rounded-xl border border-[var(--brand-border)] bg-surface-raised px-3 py-2.5 text-sm text-zinc-100 outline-none transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15"
                       >
                         <option value="">Select photo</option>
-                        {photos.map((photo) => (
+                        {photos.map((photo, index) => (
                           <option key={photo.id} value={photo.id}>
-                            {getCategoryLabel(photo.category)} - {formatDate(photo.createdAt)}
+                            {getCompareOptionLabel(photo, index)}
                           </option>
                         ))}
                       </select>
