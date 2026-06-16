@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { AppShell } from "../../components/layout/AppShell";
 import { Panel } from "../../components/ui/Panel";
@@ -176,6 +177,86 @@ function StepNav({
   );
 }
 
+function SaveHandoffPanel({
+  quote,
+  photosLinked,
+  photoCount,
+  onViewQuotes,
+  onExportPdf,
+  onReviewPhotos,
+  onStartNew,
+}: {
+  quote: Quote;
+  photosLinked: boolean;
+  photoCount: number;
+  onViewQuotes: () => void;
+  onExportPdf: () => void;
+  onReviewPhotos: () => void;
+  onStartNew: () => void;
+}) {
+  return (
+    <Panel className="animate-fade-in-up space-y-4 border-gold/20">
+      <div>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
+          Quote saved
+        </p>
+        <p className="mt-1 text-lg font-bold text-zinc-50">
+          {quote.clientName}
+          <span className="font-normal text-zinc-500"> · {quote.suburb}</span>
+        </p>
+        <p className="mt-1 text-sm text-zinc-400">
+          {formatCurrency(quote.recommended)} recommended · saved to your
+          quotes list
+        </p>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded-full border border-gold/30 bg-gold/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-gold">
+          {getQuoteStatusLabel(quote.status)}
+        </span>
+        {photoCount > 0 && (
+          <span className="text-[11px] text-zinc-500">
+            {photosLinked
+              ? `${photoCount} photo${photoCount === 1 ? "" : "s"} linked`
+              : "Photos may need re-attaching in Saved Quotes"}
+          </span>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={onViewQuotes}
+          className="flex w-full items-center justify-center rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98]"
+        >
+          View in Saved Quotes
+        </button>
+        <button
+          type="button"
+          onClick={onExportPdf}
+          className="flex w-full items-center justify-center rounded-2xl border border-brand-purple/30 bg-brand-purple/10 px-4 py-3 text-sm font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
+        >
+          Export PDF preview
+        </button>
+        <button
+          type="button"
+          onClick={onReviewPhotos}
+          className="flex w-full items-center justify-center rounded-2xl border border-[var(--brand-border)] bg-surface px-4 py-3 text-sm font-semibold text-zinc-300 transition-all duration-200 hover:border-zinc-600 active:scale-[0.98] sm:col-span-2"
+        >
+          {photoCount > 0 ? "Review linked photos" : "Add photos in Saved Quotes"}
+        </button>
+        <button
+          type="button"
+          onClick={onStartNew}
+          className="flex w-full items-center justify-center rounded-2xl border border-[var(--brand-border)] bg-surface px-4 py-2.5 text-sm font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.98] sm:col-span-2"
+        >
+          Start a new quote
+        </button>
+      </div>
+    </Panel>
+  );
+}
+
 function createDraftPhotoQuoteId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return `draft-${crypto.randomUUID()}`;
@@ -185,6 +266,7 @@ function createDraftPhotoQuoteId() {
 }
 
 export default function QuickQuotePage() {
+  const router = useRouter();
   const { rates, addQuote } = useLocalData();
 
   const [clientName, setClientName] = useState("");
@@ -214,6 +296,11 @@ export default function QuickQuotePage() {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [draftPhotoCount, setDraftPhotoCount] = useState(0);
   const [stepMessage, setStepMessage] = useState<string | null>(null);
+  const [saveHandoff, setSaveHandoff] = useState<{
+    quote: Quote;
+    photosLinked: boolean;
+    photoCount: number;
+  } | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -372,10 +459,12 @@ export default function QuickQuotePage() {
   async function handleSave() {
     if (!clientName.trim() || !suburb.trim()) {
       setSavedBanner("Enter client name and suburb to save.");
+      setTimeout(() => setSavedBanner(null), 2800);
       return;
     }
 
     setSaving(true);
+    const linkedPhotoCount = draftPhotoCount;
     try {
       const id = `${Date.now()}`;
       const quote: Quote = {
@@ -405,18 +494,41 @@ export default function QuickQuotePage() {
       }) as any;
 
       addQuote(quote);
+      let photosLinked = true;
       try {
         await reassignPhotoRecordsToQuote(draftPhotoQuoteId, id);
         setDraftPhotoQuoteId(createDraftPhotoQuoteId());
         setDraftPhotoCount(0);
-        setSavedBanner("Quote saved to your list.");
       } catch {
-        setSavedBanner("Quote saved, but photos could not be linked.");
+        photosLinked = false;
       }
+      setSaveHandoff({ quote, photosLinked, photoCount: linkedPhotoCount });
+      setSavedBanner(null);
     } finally {
       setSaving(false);
-      setTimeout(() => setSavedBanner(null), 2800);
     }
+  }
+
+  function resetQuoteBuilder() {
+    setClientName("");
+    setSuburb("");
+    setPhone("");
+    setEmail("");
+    setDrivewaySqm(0);
+    setPathsSqm(0);
+    setPatioSqm(0);
+    setStainLevel("medium");
+    setEstimatedHours(3);
+    setHouseWash(false);
+    setRoofWash(false);
+    setWallsExtras(false);
+    setNotes("");
+    setDraftPhotoQuoteId(createDraftPhotoQuoteId());
+    setDraftPhotoCount(0);
+    setActiveStepIndex(0);
+    setSaveHandoff(null);
+    setSavedBanner(null);
+    setStepMessage(null);
   }
 
   const clientSection = (
@@ -761,7 +873,7 @@ export default function QuickQuotePage() {
         Export PDF preview
       </button>
       {savedBanner && (
-        <p className="animate-fade-in text-xs font-medium text-gold">
+        <p className="animate-fade-in text-xs font-medium text-amber-300">
           {savedBanner}
         </p>
       )}
@@ -786,23 +898,41 @@ export default function QuickQuotePage() {
               Quick Quote
             </h1>
             <p className="mt-1.5 text-sm text-zinc-500">
-              {viewMode === "guided"
-                ? `Step ${activeStep.step} of ${QUOTE_STEPS.length} · ${activeStep.title}`
-                : "Build a quote on site — client, job scope, then price."}
+              {saveHandoff
+                ? "Your quote is saved — choose what to do next."
+                : viewMode === "guided"
+                  ? `Step ${activeStep.step} of ${QUOTE_STEPS.length} · ${activeStep.title}`
+                  : "Build a quote on site — client, job scope, then price."}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() =>
-              setViewMode((mode) => (mode === "guided" ? "full" : "guided"))
-            }
-            className="shrink-0 rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2 text-[11px] font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
-          >
-            {viewMode === "guided" ? "Full view" : "Guided mode"}
-          </button>
+          {!saveHandoff && (
+            <button
+              type="button"
+              onClick={() =>
+                setViewMode((mode) => (mode === "guided" ? "full" : "guided"))
+              }
+              className="shrink-0 rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2 text-[11px] font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
+            >
+              {viewMode === "guided" ? "Full view" : "Guided mode"}
+            </button>
+          )}
         </div>
 
-        {viewMode === "guided" ? (
+        {saveHandoff ? (
+          <SaveHandoffPanel
+            quote={saveHandoff.quote}
+            photosLinked={saveHandoff.photosLinked}
+            photoCount={saveHandoff.photoCount}
+            onViewQuotes={() => router.push("/quotes")}
+            onExportPdf={() => exportQuotePdf(saveHandoff.quote)}
+            onReviewPhotos={() =>
+              router.push(
+                `/quotes?quote=${encodeURIComponent(saveHandoff.quote.id)}&photos=1`,
+              )
+            }
+            onStartNew={resetQuoteBuilder}
+          />
+        ) : viewMode === "guided" ? (
           <div className="space-y-3">
             {QUOTE_STEPS.map((stepDef, index) => {
               if (index > activeStepIndex) return null;
