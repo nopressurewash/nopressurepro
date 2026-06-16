@@ -123,7 +123,7 @@ export function GhostCaptureModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+            className="btn-ghost rounded-xl px-3 py-1.5 text-xs font-medium active:scale-[0.97]"
           >
             Close
           </button>
@@ -156,7 +156,7 @@ export function GhostCaptureModal({
 
         <div className="mt-4 space-y-3">
           {error ? (
-            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-3 text-xs text-amber-300">
+            <div className="callout-warning rounded-xl px-3 py-3 text-xs">
               {error}
             </div>
           ) : (
@@ -165,10 +165,8 @@ export function GhostCaptureModal({
                 <button
                   type="button"
                   onClick={() => setOverlayEnabled((prev) => !prev)}
-                  className={`rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.97] ${
-                    overlayEnabled
-                      ? "border-gold/40 bg-gold/10 text-gold"
-                      : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
+                  className={`rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.97] ${
+                    overlayEnabled ? "chip-active-primary" : "chip-inactive"
                   }`}
                 >
                   {overlayEnabled ? "Hide Overlay" : "Show Overlay"}
@@ -194,7 +192,7 @@ export function GhostCaptureModal({
                 type="button"
                 onClick={handleCapture}
                 disabled={!cameraReady}
-                className="w-full rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-primary w-full rounded-xl px-4 py-2.5 text-sm font-bold active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Capture After Photo
               </button>

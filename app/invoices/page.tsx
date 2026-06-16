@@ -156,7 +156,7 @@ export default function InvoicesPage() {
                     <button
                       type="button"
                       onClick={() => handleDelete(inv)}
-                      className={`${actionClass} text-zinc-500 hover:bg-rose-500/10 hover:text-rose-400`}
+                      className={`${actionClass} btn-destructive-inline`}
                     >
                       {deletingId === inv.id ? "Confirm delete?" : "Delete"}
                     </button>

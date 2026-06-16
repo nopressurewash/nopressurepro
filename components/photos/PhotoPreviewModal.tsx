@@ -63,7 +63,7 @@ export function PhotoPreviewModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+            className="btn-ghost rounded-xl px-3 py-1.5 text-xs font-medium active:scale-[0.97]"
           >
             Close
           </button>
@@ -79,7 +79,7 @@ export function PhotoPreviewModal({
 
         <div className="mt-4 space-y-4">
           {pairedContext && (
-            <div className="rounded-xl border border-brand-purple/30 bg-brand-purple/10 px-3 py-2.5">
+            <div className="callout-purple rounded-xl px-3 py-2.5">
               <p className="text-xs text-brand-purple-light">{pairedContext}</p>
             </div>
           )}
@@ -87,7 +87,7 @@ export function PhotoPreviewModal({
             <button
               type="button"
               onClick={onComparePaired}
-              className="w-full rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-xs font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98]"
+              className="btn-primary w-full rounded-xl px-4 py-2.5 text-xs font-bold active:scale-[0.98]"
             >
               Compare Before & After
             </button>
@@ -109,7 +109,7 @@ export function PhotoPreviewModal({
               <button
                 type="button"
                 onClick={() => onSaveCaption(photo.id, captionDraft)}
-                className="rounded-xl border border-gold/30 bg-gold/10 px-4 py-2.5 text-xs font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97]"
+                className="btn-primary rounded-xl px-4 py-2.5 text-xs font-semibold active:scale-[0.97]"
               >
                 Save Caption
               </button>
@@ -128,10 +128,8 @@ export function PhotoPreviewModal({
                     key={category}
                     type="button"
                     onClick={() => onMoveCategory(photo.id, category)}
-                    className={`${pillBase} ${
-                      active
-                        ? "border-gold/30 bg-gold/10 text-gold"
-                        : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
+                    className={`${pillBase} active:scale-[0.98] ${
+                      active ? "chip-active-primary" : "chip-inactive"
                     }`}
                   >
                     {getCategoryLabel(category)}
@@ -148,7 +146,7 @@ export function PhotoPreviewModal({
                 onDelete(photo.id);
                 onClose();
               }}
-              className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-400 transition-all duration-200 hover:bg-rose-500/15 active:scale-[0.97]"
+              className="btn-destructive rounded-xl px-4 py-2 text-xs font-semibold active:scale-[0.97]"
             >
               Delete Photo
             </button>

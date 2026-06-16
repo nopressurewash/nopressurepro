@@ -158,7 +158,7 @@ export function BeforeAfterModal({
               <button
                 type="button"
                 onClick={() => setIsComparing(false)}
-                className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
+                className="btn-ghost rounded-xl px-3 py-1.5 text-xs font-medium active:scale-[0.97]"
               >
                 Change Photos
               </button>
@@ -166,7 +166,7 @@ export function BeforeAfterModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+              className="btn-ghost rounded-xl px-3 py-1.5 text-xs font-medium active:scale-[0.97]"
             >
               Close
             </button>
@@ -225,7 +225,7 @@ export function BeforeAfterModal({
                     </div>
                   </div>
                   {selectedSamePhoto && (
-                    <p className="text-xs font-medium text-amber-300">
+                    <p className="text-xs font-medium text-warning">
                       Choose two different photos to compare.
                     </p>
                   )}
@@ -235,13 +235,13 @@ export function BeforeAfterModal({
                     </p>
                   )}
                   {banner && (
-                    <p className="text-xs font-medium text-amber-300">{banner}</p>
+                    <p className="text-xs font-medium text-warning">{banner}</p>
                   )}
                   <button
                     type="button"
                     onClick={handleOpenCompare}
                     disabled={!canOpenCompare}
-                    className="w-full rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-xs font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="btn-primary w-full rounded-xl px-4 py-2.5 text-xs font-bold active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     View Side-by-Side
                   </button>

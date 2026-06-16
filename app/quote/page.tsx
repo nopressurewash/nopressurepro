@@ -118,7 +118,7 @@ function StepSummaryCard({
       <button
         type="button"
         onClick={onEdit}
-        className="shrink-0 rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-1.5 text-[11px] font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-100 active:scale-[0.97]"
+        className="shrink-0 btn-ghost rounded-xl px-3 py-1.5 text-[11px] font-semibold active:scale-[0.97]"
       >
         Edit
       </button>
@@ -149,7 +149,7 @@ function StepNav({
         <button
           type="button"
           onClick={onBack}
-          className="rounded-xl border border-[var(--brand-border)] bg-surface px-4 py-2.5 text-xs font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
+          className="btn-ghost rounded-xl px-4 py-2.5 text-xs font-semibold active:scale-[0.97]"
         >
           Back
         </button>
@@ -159,7 +159,7 @@ function StepNav({
           <button
             type="button"
             onClick={onSkip}
-            className="rounded-xl border border-[var(--brand-border)] bg-surface px-4 py-2.5 text-xs font-semibold text-zinc-500 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-300 active:scale-[0.97]"
+            className="btn-ghost rounded-xl px-4 py-2.5 text-xs font-semibold active:scale-[0.97]"
           >
             Skip
           </button>
@@ -168,7 +168,7 @@ function StepNav({
           type="button"
           onClick={onContinue}
           disabled={continueDisabled}
-          className="rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-xs font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+          className="btn-primary rounded-xl px-4 py-2.5 text-xs font-bold active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
         >
           {continueLabel}
         </button>
@@ -211,7 +211,7 @@ function SaveHandoffPanel({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full border border-gold/30 bg-gold/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-gold">
+        <span className="badge-gold rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide">
           {getQuoteStatusLabel(quote.status)}
         </span>
         {photoCount > 0 && (
@@ -227,28 +227,28 @@ function SaveHandoffPanel({
         <button
           type="button"
           onClick={onViewQuotes}
-          className="flex w-full items-center justify-center rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98]"
+          className="btn-primary flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-bold active:scale-[0.98]"
         >
           View in Saved Quotes
         </button>
         <button
           type="button"
           onClick={onExportPdf}
-          className="flex w-full items-center justify-center rounded-2xl border border-brand-purple/30 bg-brand-purple/10 px-4 py-3 text-sm font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
+          className="btn-secondary flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold active:scale-[0.98]"
         >
           Export PDF preview
         </button>
         <button
           type="button"
           onClick={onReviewPhotos}
-          className="flex w-full items-center justify-center rounded-2xl border border-[var(--brand-border)] bg-surface px-4 py-3 text-sm font-semibold text-zinc-300 transition-all duration-200 hover:border-zinc-600 active:scale-[0.98] sm:col-span-2"
+          className="btn-ghost flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold active:scale-[0.98] sm:col-span-2"
         >
           {photoCount > 0 ? "Review linked photos" : "Add photos in Saved Quotes"}
         </button>
         <button
           type="button"
           onClick={onStartNew}
-          className="flex w-full items-center justify-center rounded-2xl border border-[var(--brand-border)] bg-surface px-4 py-2.5 text-sm font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.98] sm:col-span-2"
+          className="btn-ghost flex w-full items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-medium active:scale-[0.98] sm:col-span-2"
         >
           Start a new quote
         </button>
@@ -585,7 +585,7 @@ export default function QuickQuotePage() {
         <button
           type="button"
           onClick={openMeasureModal}
-          className="shrink-0 rounded-xl border border-brand-purple/30 bg-brand-purple/10 px-3 py-2 text-[11px] font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
+          className="btn-secondary shrink-0 rounded-xl px-3 py-2 text-[11px] font-semibold active:scale-[0.98]"
         >
           Measure on map
         </button>
@@ -636,10 +636,8 @@ export default function QuickQuotePage() {
                   key={level}
                   type="button"
                   onClick={() => setStainLevel(level)}
-                  className={`rounded-xl border px-2 py-2.5 capitalize font-medium transition-all duration-200 ${
-                    active
-                      ? "border-gold/40 bg-gold/10 text-gold"
-                      : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
+                  className={`rounded-xl px-2 py-2.5 capitalize font-medium transition-all duration-200 active:scale-[0.98] ${
+                    active ? "chip-active-primary" : "chip-inactive"
                   }`}
                 >
                   {level}
@@ -675,10 +673,8 @@ export default function QuickQuotePage() {
           <button
             type="button"
             onClick={() => setHouseWash((v) => !v)}
-            className={`${toggleBase} ${
-              houseWash
-                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-                : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
+            className={`${toggleBase} active:scale-[0.98] ${
+              houseWash ? "chip-active-primary" : "chip-inactive"
             }`}
           >
             <span>House wash</span>
@@ -689,10 +685,8 @@ export default function QuickQuotePage() {
           <button
             type="button"
             onClick={() => setRoofWash((v) => !v)}
-            className={`${toggleBase} ${
-              roofWash
-                ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
-                : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
+            className={`${toggleBase} active:scale-[0.98] ${
+              roofWash ? "chip-active-secondary" : "chip-inactive"
             }`}
           >
             <span>Roof wash</span>
@@ -703,10 +697,8 @@ export default function QuickQuotePage() {
           <button
             type="button"
             onClick={() => setWallsExtras((v) => !v)}
-            className={`${toggleBase} ${
-              wallsExtras
-                ? "border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-300"
-                : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
+            className={`${toggleBase} active:scale-[0.98] ${
+              wallsExtras ? "chip-active-primary" : "chip-inactive"
             }`}
           >
             <span>Walls / extras</span>
@@ -730,10 +722,8 @@ export default function QuickQuotePage() {
         <button
           type="button"
           onClick={handleVoiceInput}
-          className={`shrink-0 rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
-            speechStatus === "listening"
-              ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
-              : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/15"
+          className={`shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
+            speechStatus === "listening" ? "btn-destructive" : "btn-primary"
           }`}
         >
           {speechStatus === "listening" ? "Stop mic" : "Dictate"}
@@ -744,7 +734,7 @@ export default function QuickQuotePage() {
           className={`text-[11px] ${
             speechStatus === "listening"
               ? "text-gold"
-              : "text-amber-300"
+              : "text-warning"
           }`}
         >
           {speechStatus === "listening"
@@ -861,19 +851,19 @@ export default function QuickQuotePage() {
         type="button"
         onClick={handleSave}
         disabled={saving}
-        className="flex w-full items-center justify-center rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3.5 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        className="btn-primary flex w-full items-center justify-center rounded-2xl px-4 py-3.5 text-sm font-bold active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {saving ? "Saving..." : "Save to quotes list"}
       </button>
       <button
         type="button"
         onClick={() => exportQuotePdf(buildDraftQuote())}
-        className="flex w-full items-center justify-center rounded-2xl border border-brand-purple/30 bg-brand-purple/10 px-4 py-3 text-sm font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
+        className="btn-secondary flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold active:scale-[0.98]"
       >
         Export PDF preview
       </button>
       {savedBanner && (
-        <p className="animate-fade-in text-xs font-medium text-amber-300">
+        <p className="animate-fade-in text-xs font-medium text-warning">
           {savedBanner}
         </p>
       )}
@@ -911,7 +901,7 @@ export default function QuickQuotePage() {
               onClick={() =>
                 setViewMode((mode) => (mode === "guided" ? "full" : "guided"))
               }
-              className="shrink-0 rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2 text-[11px] font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
+              className="shrink-0 btn-ghost rounded-xl px-3 py-2 text-[11px] font-semibold active:scale-[0.97]"
             >
               {viewMode === "guided" ? "Full view" : "Guided mode"}
             </button>
@@ -957,7 +947,7 @@ export default function QuickQuotePage() {
                       <button
                         type="button"
                         onClick={handleStepBack}
-                        className="rounded-xl border border-[var(--brand-border)] bg-surface px-4 py-2.5 text-xs font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
+                        className="btn-ghost rounded-xl px-4 py-2.5 text-xs font-semibold active:scale-[0.97]"
                       >
                         Back
                       </button>
@@ -1018,10 +1008,8 @@ export default function QuickQuotePage() {
                         type="button"
                         onClick={toggleMeasureExpanded}
                         aria-pressed={measureExpanded}
-                        className={`rounded-2xl border px-3 py-1.5 text-[11px] font-medium transition-all duration-200 ${
-                          measureExpanded
-                            ? "border-[var(--brand-border)] bg-surface text-zinc-300 hover:border-zinc-500 hover:text-zinc-100"
-                            : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/15"
+                        className={`rounded-2xl px-3 py-1.5 text-[11px] font-medium transition-all duration-200 active:scale-[0.98] ${
+                          measureExpanded ? "chip-inactive" : "chip-active-primary"
                         }`}
                       >
                         {measureExpanded ? "Standard view" : "Expand map"}
@@ -1029,7 +1017,7 @@ export default function QuickQuotePage() {
                       <button
                         type="button"
                         onClick={closeMeasureModal}
-                        className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.98]"
+                        className="btn-ghost rounded-xl px-3 py-1.5 text-xs font-medium active:scale-[0.98]"
                       >
                         Close
                       </button>
