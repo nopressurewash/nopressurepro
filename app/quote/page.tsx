@@ -25,6 +25,27 @@ import { Quote } from "../../lib/types";
 const toggleBase =
   "flex items-center justify-between rounded-xl border px-3 py-3 text-xs font-medium transition-all duration-200";
 
+function SectionHeader({
+  step,
+  title,
+  hint,
+}: {
+  step: string;
+  title: string;
+  hint?: string;
+}) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+        {step}. {title}
+      </p>
+      {hint ? (
+        <p className="mt-0.5 text-[11px] leading-relaxed text-zinc-600">{hint}</p>
+      ) : null}
+    </div>
+  );
+}
+
 function createDraftPhotoQuoteId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return `draft-${crypto.randomUUID()}`;
@@ -87,6 +108,21 @@ export default function QuickQuotePage() {
     return "Heavy · 1.5–2.0% SH, test patch first, agitate if needed.";
   }, [stainLevel]);
 
+  const serviceSummary = useMemo(
+    () =>
+      buildServiceType({
+        drivewaySqm,
+        pathsSqm,
+        patioSqm,
+        house: houseWash,
+        roof: roofWash,
+        walls: wallsExtras,
+      }),
+    [drivewaySqm, pathsSqm, patioSqm, houseWash, roofWash, wallsExtras],
+  );
+
+  const canSave = Boolean(clientName.trim() && suburb.trim());
+
   function handleNumericChange(
     value: string,
     setter: (v: number) => void,
@@ -140,7 +176,7 @@ export default function QuickQuotePage() {
 
   async function handleSave() {
     if (!clientName.trim() || !suburb.trim()) {
-      setSavedBanner("Add at least a client name and suburb.");
+      setSavedBanner("Enter client name and suburb to save.");
       return;
     }
 
@@ -195,24 +231,28 @@ export default function QuickQuotePage() {
             Quick Quote
           </h1>
           <p className="mt-1.5 text-sm text-zinc-500">
-            Price a job in under a minute. Adjust live on-site.
+            Build a quote on site — client, job scope, then price.
           </p>
         </div>
 
         {/* Client section */}
         <Panel className="space-y-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-            Client
-          </p>
+          <SectionHeader
+            step="1"
+            title="Client & property"
+            hint="Name and suburb are required to save."
+          />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <TextField
-              label="Name"
+              label="Client name"
+              helpText="Required"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
-              placeholder="e.g. Sarah, Body Corp, Café"
+              placeholder="e.g. Sarah, body corp, café"
             />
             <TextField
               label="Suburb"
+              helpText="Required"
               value={suburb}
               onChange={(e) => setSuburb(e.target.value)}
               placeholder="e.g. Mermaid Waters"
@@ -221,61 +261,65 @@ export default function QuickQuotePage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <TextField
               label="Phone"
+              helpText="Optional"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="Mobile for SMS follow-up"
+              placeholder="Mobile for follow-up"
             />
             <TextField
               label="Email"
+              helpText="Optional"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="client@example.com"
+              placeholder="For quote email later"
             />
           </div>
         </Panel>
 
         {/* Surfaces section */}
         <Panel className="space-y-4">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-              Surfaces (m²)
-            </p>
+          <div className="flex items-start justify-between gap-2">
+            <SectionHeader
+              step="2"
+              title="Job scope"
+              hint="Enter areas and add-ons — the price updates as you go."
+            />
             <button
               type="button"
               onClick={openMeasureModal}
-              className="rounded-xl border border-brand-purple/30 bg-brand-purple/10 px-3 py-2 text-[11px] font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
+              className="shrink-0 rounded-xl border border-brand-purple/30 bg-brand-purple/10 px-3 py-2 text-[11px] font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
             >
-              Measure driveway
+              Measure on map
             </button>
           </div>
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
             <TextField
-              label="Driveway"
+              label="Driveway m²"
               inputMode="decimal"
               value={drivewaySqm || ""}
               onChange={(e) =>
                 handleNumericChange(e.target.value, setDrivewaySqm)
               }
-              placeholder="0"
+              placeholder="0 if none"
             />
             <TextField
-              label="Paths"
+              label="Paths m²"
               inputMode="decimal"
               value={pathsSqm || ""}
               onChange={(e) =>
                 handleNumericChange(e.target.value, setPathsSqm)
               }
-              placeholder="0"
+              placeholder="0 if none"
             />
             <TextField
-              label="Patio"
+              label="Patio m²"
               inputMode="decimal"
               value={patioSqm || ""}
               onChange={(e) =>
                 handleNumericChange(e.target.value, setPatioSqm)
               }
-              placeholder="0"
+              placeholder="0 if none"
             />
           </div>
 
@@ -284,6 +328,9 @@ export default function QuickQuotePage() {
               <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
                 Stain level
               </label>
+              <p className="text-[10px] text-zinc-600">
+                Affects chemical mix and pricing band.
+              </p>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 {(["light", "medium", "heavy"] as StainLevel[]).map((level) => {
                   const active = stainLevel === level;
@@ -306,6 +353,7 @@ export default function QuickQuotePage() {
             </div>
             <TextField
               label="Estimated hours"
+              helpText="For $/hr"
               type="number"
               step="0.25"
               min="0.25"
@@ -319,7 +367,14 @@ export default function QuickQuotePage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="space-y-2">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+              Add-on services
+            </p>
+            <p className="text-[10px] text-zinc-600">
+              Tap to include — prices from your saved rates.
+            </p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <button
               type="button"
               onClick={() => setHouseWash((v) => !v)}
@@ -362,19 +417,63 @@ export default function QuickQuotePage() {
                 {formatCurrency(rates.wallsExtras)}
               </span>
             </button>
+            </div>
           </div>
+        </Panel>
+
+        {/* Notes */}
+        <Panel className="space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <SectionHeader
+              step="3"
+              title="Job notes"
+              hint="Optional — access, water, hazards, upsells, or voice dictation."
+            />
+            <button
+              type="button"
+              onClick={handleVoiceInput}
+              className={`shrink-0 rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
+                speechStatus === "listening"
+                  ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
+                  : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/15"
+              }`}
+            >
+              {speechStatus === "listening" ? "Stop mic" : "Dictate"}
+            </button>
+          </div>
+          {(speechStatus === "listening" || speechMessage) && (
+            <p
+              className={`text-[11px] ${
+                speechStatus === "listening"
+                  ? "text-gold"
+                  : "text-amber-300"
+              }`}
+            >
+              {speechStatus === "listening"
+                ? "Listening — speak your job notes."
+                : speechMessage}
+            </p>
+          )}
+          <TextAreaField
+            label="Notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={3}
+            placeholder="e.g. Narrow driveway, hose from side gate, cars in carport"
+          />
         </Panel>
 
         {/* Quote bands */}
         <Panel className="space-y-4">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
-              Quote bands
-            </p>
-            <p className="text-[11px] text-zinc-600">
-              Lead with confidence.
-            </p>
-          </div>
+          <SectionHeader
+            step="4"
+            title="Price estimate"
+            hint="Lead with Recommended on site. Low and High give you room to negotiate."
+          />
+          <p className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2 text-xs text-zinc-400">
+            Scope:{" "}
+            <span className="font-medium text-zinc-200">{serviceSummary}</span>
+          </p>
           <div className="grid grid-cols-3 gap-3">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
@@ -384,7 +483,7 @@ export default function QuickQuotePage() {
                 {formatCurrency(totals.low)}
               </p>
               <p className="mt-1 text-[11px] text-zinc-600">
-                Softer / repeat.
+                Repeat / easy job.
               </p>
             </div>
             <div>
@@ -395,7 +494,7 @@ export default function QuickQuotePage() {
                 {formatCurrency(totals.recommended)}
               </p>
               <p className="mt-1 text-[11px] text-zinc-600">
-                Normal lead price.
+                Your on-site lead.
               </p>
             </div>
             <div>
@@ -406,7 +505,7 @@ export default function QuickQuotePage() {
                 {formatCurrency(totals.high)}
               </p>
               <p className="mt-1 text-[11px] text-zinc-600">
-                Hard access / rush.
+                Rush / difficult.
               </p>
             </div>
           </div>
@@ -414,7 +513,7 @@ export default function QuickQuotePage() {
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-3">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Revenue / hour
+                $/hour check
               </p>
               <p className="mt-1.5 text-base font-bold tabular-nums text-zinc-200">
                 {totals.revenuePerHour > 0
@@ -424,7 +523,7 @@ export default function QuickQuotePage() {
             </div>
             <div className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-3">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Chem mix helper
+                Chemical mix
               </p>
               <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-400">
                 {chemicalMixHint}
@@ -433,83 +532,48 @@ export default function QuickQuotePage() {
           </div>
         </Panel>
 
-        {/* Notes */}
-        <Panel className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Voice input
-              </p>
-              <p
-                className={`mt-1 text-[11px] ${
-                  speechStatus === "listening"
-                    ? "text-gold"
-                    : speechMessage
-                      ? "text-amber-300"
-                      : "text-zinc-500"
-                }`}
-              >
-                {speechStatus === "listening"
-                  ? "Listening..."
-                  : speechMessage ?? (speechStatus === "stopped" ? "Stopped" : "Idle")}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={handleVoiceInput}
-              className={`rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
-                speechStatus === "listening"
-                  ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
-                  : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/15"
-              }`}
-            >
-              {speechStatus === "listening" ? "Stop Mic" : "Use Mic"}
-            </button>
-          </div>
-          <TextAreaField
-            label="Job notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            rows={3}
-            placeholder="Access, water, nearby cars, power, gutters, special requests, upsell ideas&hellip;"
-          />
-        </Panel>
-
         {/* Job Photos */}
-        <JobPhotoGallery quoteId={draftPhotoQuoteId} />
+        <div className="space-y-1.5">
+          <SectionHeader
+            step="5"
+            title="Job photos"
+            hint="Optional — before/after shots for records or client follow-up."
+          />
+          <JobPhotoGallery quoteId={draftPhotoQuoteId} />
+        </div>
 
         {/* Actions */}
-        <div className="space-y-3">
-          <p className="text-xs text-zinc-500">
-            New quotes save as{" "}
-            <span className="font-medium text-gold">
-              {getQuoteStatusLabel("draft")}
-            </span>
-            .
-          </p>
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => exportQuotePdf(buildDraftQuote())}
-              className="flex w-full items-center justify-center rounded-2xl border border-brand-purple/30 bg-brand-purple/10 px-4 py-3.5 text-sm font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
-            >
-              Export PDF
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              className="flex w-full items-center justify-center rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3.5 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {saving ? "Saving..." : "Save quote to list"}
-            </button>
-          </div>
+        <Panel className="space-y-3">
+          <SectionHeader
+            step="6"
+            title="Save or export"
+            hint={
+              canSave
+                ? `Saves as ${getQuoteStatusLabel("draft")} to your quotes list.`
+                : "Add client name and suburb above to save."
+            }
+          />
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="flex w-full items-center justify-center rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3.5 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Save to quotes list"}
+          </button>
+          <button
+            type="button"
+            onClick={() => exportQuotePdf(buildDraftQuote())}
+            className="flex w-full items-center justify-center rounded-2xl border border-brand-purple/30 bg-brand-purple/10 px-4 py-3 text-sm font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
+          >
+            Export PDF preview
+          </button>
           {savedBanner && (
             <p className="animate-fade-in text-xs font-medium text-gold">
               {savedBanner}
             </p>
           )}
-        </div>
+        </Panel>
 
         {/* Measure modal */}
         {showMeasureModal &&
