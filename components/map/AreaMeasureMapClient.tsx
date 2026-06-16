@@ -493,10 +493,10 @@ export function AreaMeasureMapClient({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search property address"
-              className="w-full rounded-2xl border border-zinc-800 bg-zinc-900/80 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-amber-400/70 focus:ring-2 focus:ring-amber-400/30"
+              className="w-full rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] transition-all duration-200 focus:border-[var(--brand-border-accent)] focus:bg-[var(--brand-surface-raised)] focus:ring-1 focus:ring-[var(--brand-gold-glow)]"
             />
             {query.trim().length >= 3 && (
-              <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-[1000] overflow-hidden rounded-2xl border border-zinc-800 bg-black/95 shadow-[0_0_35px_rgba(0,0,0,0.85)]">
+              <div className="surface-overlay absolute left-0 right-0 top-[calc(100%+8px)] z-[1000] overflow-hidden rounded-2xl">
                 {searching ? (
                   <p className="px-3 py-2 text-xs text-zinc-400">
                     Searching addresses...
@@ -512,7 +512,7 @@ export function AreaMeasureMapClient({
                         setSelectedCenter([suggestion.lat, suggestion.lon]);
                         setSelectedBounds(suggestion.boundingBox);
                       }}
-                      className="block w-full border-b border-zinc-900 px-3 py-2 text-left text-xs text-zinc-200 transition hover:bg-zinc-900/90"
+                      className="block w-full border-b border-[var(--brand-border-subtle)] px-3 py-2 text-left text-xs text-[var(--text-primary)] transition hover:bg-[var(--brand-surface-overlay)]"
                     >
                       {suggestion.displayName}
                     </button>
@@ -530,10 +530,8 @@ export function AreaMeasureMapClient({
             <button
               type="button"
               onClick={() => setMapMode("imagery")}
-              className={`rounded-2xl border px-3 py-2 text-xs font-semibold transition ${
-                mapMode === "imagery"
-                  ? "border-amber-400/80 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-zinc-950 shadow-[0_0_20px_rgba(250,204,21,0.5)]"
-                  : "border-zinc-800 bg-zinc-900/80 text-zinc-300"
+              className={`rounded-2xl px-3 py-2 text-xs font-semibold transition active:scale-[0.99] ${
+                mapMode === "imagery" ? "chip-active-primary" : "chip-inactive"
               }`}
             >
               Aerial
@@ -541,10 +539,8 @@ export function AreaMeasureMapClient({
             <button
               type="button"
               onClick={() => setMapMode("street")}
-              className={`rounded-2xl border px-3 py-2 text-xs font-semibold transition ${
-                mapMode === "street"
-                  ? "border-amber-400/80 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-zinc-950 shadow-[0_0_20px_rgba(250,204,21,0.5)]"
-                  : "border-zinc-800 bg-zinc-900/80 text-zinc-300"
+              className={`rounded-2xl px-3 py-2 text-xs font-semibold transition active:scale-[0.99] ${
+                mapMode === "street" ? "chip-active-primary" : "chip-inactive"
               }`}
             >
               Street
@@ -556,7 +552,7 @@ export function AreaMeasureMapClient({
           <button
             type="button"
             onClick={handleUseMapCenter}
-            className="rounded-2xl border border-amber-400/80 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 px-3 py-2 text-xs font-semibold text-zinc-950 shadow-[0_0_20px_rgba(250,204,21,0.45)] transition active:scale-[0.99]"
+            className="btn-primary rounded-2xl px-3 py-2 text-xs font-semibold active:scale-[0.99]"
           >
             Use Map Center
           </button>
@@ -564,7 +560,7 @@ export function AreaMeasureMapClient({
             type="button"
             onClick={handleUseMyLocation}
             disabled={locating}
-            className="rounded-2xl border border-purple-500/60 bg-gradient-to-r from-purple-800 via-fuchsia-700 to-purple-900 px-3 py-2 text-xs font-semibold text-zinc-50 shadow-[0_0_20px_rgba(147,51,234,0.45)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+            className="btn-secondary rounded-2xl px-3 py-2 text-xs font-semibold active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {locating ? "Locating..." : "Use My Location"}
           </button>
@@ -574,9 +570,9 @@ export function AreaMeasureMapClient({
           Search street or suburb, use your location, or move the map manually.
         </p>
         {locationMessage && (
-          <p className="text-xs text-amber-200">{locationMessage}</p>
+          <p className="text-xs text-warning">{locationMessage}</p>
         )}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-[11px] text-zinc-500">
+        <div className="surface-panel rounded-2xl px-3 py-2 text-[11px] text-[var(--text-muted)]">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <span>Lat: {mapCenter[0].toFixed(6)}</span>
             <span>Lng: {mapCenter[1].toFixed(6)}</span>
@@ -601,7 +597,7 @@ export function AreaMeasureMapClient({
           zoom={19.5}
           zoomControl={true}
           maxZoom={22}
-          className={`overflow-hidden rounded-2xl border border-zinc-800 bg-black w-full ${mapHeightClass}`}
+          className={`overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-black w-full ${mapHeightClass}`}
           whenReady={() => {
             window.setTimeout(() => {
               mapRef.current?.invalidateSize();
@@ -658,9 +654,9 @@ export function AreaMeasureMapClient({
                   allowIntersection: false,
                   showArea: true,
                   shapeOptions: {
-                    color: "#facc15",
+                    color: "#c8962c",
                     weight: 2,
-                    fillColor: "#facc15",
+                    fillColor: "#c8962c",
                     fillOpacity: 0.25,
                   },
                 },
@@ -676,8 +672,8 @@ export function AreaMeasureMapClient({
               center={selectedCenter}
               radius={7}
               pathOptions={{
-                color: "#facc15",
-                fillColor: "#facc15",
+                color: "#c8962c",
+                fillColor: "#c8962c",
                 fillOpacity: 0.8,
                 weight: 2,
               }}
@@ -686,19 +682,19 @@ export function AreaMeasureMapClient({
         </MapContainer>
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="relative h-8 w-8">
-            <div className="absolute left-1/2 top-0 h-8 w-px -translate-x-1/2 bg-amber-300/90" />
-            <div className="absolute left-0 top-1/2 h-px w-8 -translate-y-1/2 bg-amber-300/90" />
-            <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-300/90 bg-black/60" />
+            <div className="absolute left-1/2 top-0 h-8 w-px -translate-x-1/2 bg-gold-light/90" />
+            <div className="absolute left-0 top-1/2 h-px w-8 -translate-y-1/2 bg-gold-light/90" />
+            <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold-light/90 bg-black/60" />
           </div>
         </div>
       </div>
 
       <div className="flex items-center justify-between gap-3 text-xs">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+          <p className="label-muted">
             Measured area
           </p>
-          <p className="mt-1 text-sm font-semibold text-amber-100">
+          <p className={`mt-1 text-sm font-semibold ${areaSqm > 0 ? "text-gold-light" : "text-[var(--text-secondary)]"}`}>
             {areaSqm > 0
               ? `${areaSqm.toLocaleString("en-AU")} m²`
               : "Draw a polygon around the driveway."}
@@ -708,7 +704,7 @@ export function AreaMeasureMapClient({
           type="button"
           disabled={areaSqm <= 0}
           onClick={() => onAreaConfirm(areaSqm)}
-          className="rounded-2xl border border-amber-400/80 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 px-3 py-2 text-xs font-semibold text-zinc-950 shadow-[0_0_25px_rgba(250,204,21,0.6)] transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn-primary rounded-2xl px-3 py-2 text-xs font-semibold active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
         >
           Use this area
         </button>
