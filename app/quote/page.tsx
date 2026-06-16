@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { AppShell } from "../../components/layout/AppShell";
 import { Panel } from "../../components/ui/Panel";
@@ -46,6 +46,136 @@ function SectionHeader({
   );
 }
 
+type QuoteStepId = "client" | "scope" | "notes" | "price" | "photos" | "save";
+
+const QUOTE_STEPS: {
+  id: QuoteStepId;
+  step: string;
+  title: string;
+  hint: string;
+  optional?: boolean;
+}[] = [
+  {
+    id: "client",
+    step: "1",
+    title: "Client & property",
+    hint: "Name and suburb are required to save.",
+  },
+  {
+    id: "scope",
+    step: "2",
+    title: "Job scope",
+    hint: "Enter areas and add-ons — the price updates as you go.",
+  },
+  {
+    id: "notes",
+    step: "3",
+    title: "Job notes",
+    hint: "Optional — access, water, hazards, upsells, or voice dictation.",
+    optional: true,
+  },
+  {
+    id: "price",
+    step: "4",
+    title: "Price estimate",
+    hint: "Lead with Recommended on site. Low and High give you room to negotiate.",
+  },
+  {
+    id: "photos",
+    step: "5",
+    title: "Job photos",
+    hint: "Optional — before/after shots for records or client follow-up.",
+    optional: true,
+  },
+  {
+    id: "save",
+    step: "6",
+    title: "Save or export",
+    hint: "Save to your quotes list or export a PDF preview.",
+  },
+];
+
+function StepSummaryCard({
+  step,
+  title,
+  summary,
+  onEdit,
+}: {
+  step: string;
+  title: string;
+  summary: string;
+  onEdit: () => void;
+}) {
+  return (
+    <Panel className="flex items-start justify-between gap-3 py-3">
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+          {step}. {title}
+        </p>
+        <p className="mt-1 truncate text-sm text-zinc-300">{summary}</p>
+      </div>
+      <button
+        type="button"
+        onClick={onEdit}
+        className="shrink-0 rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-1.5 text-[11px] font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-100 active:scale-[0.97]"
+      >
+        Edit
+      </button>
+    </Panel>
+  );
+}
+
+function StepNav({
+  onBack,
+  onContinue,
+  onSkip,
+  showBack,
+  showSkip,
+  continueLabel = "Continue",
+  continueDisabled = false,
+}: {
+  onBack: () => void;
+  onContinue: () => void;
+  onSkip?: () => void;
+  showBack: boolean;
+  showSkip: boolean;
+  continueLabel?: string;
+  continueDisabled?: boolean;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2 pt-1">
+      {showBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="rounded-xl border border-[var(--brand-border)] bg-surface px-4 py-2.5 text-xs font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
+        >
+          Back
+        </button>
+      )}
+      <div className="ml-auto flex flex-wrap items-center gap-2">
+        {showSkip && onSkip && (
+          <button
+            type="button"
+            onClick={onSkip}
+            className="rounded-xl border border-[var(--brand-border)] bg-surface px-4 py-2.5 text-xs font-semibold text-zinc-500 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-300 active:scale-[0.97]"
+          >
+            Skip
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={onContinue}
+          disabled={continueDisabled}
+          className="rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-xs font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {continueLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function createDraftPhotoQuoteId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return `draft-${crypto.randomUUID()}`;
@@ -80,6 +210,10 @@ export default function QuickQuotePage() {
   const [draftPhotoQuoteId, setDraftPhotoQuoteId] = useState(
     createDraftPhotoQuoteId,
   );
+  const [viewMode, setViewMode] = useState<"guided" | "full">("guided");
+  const [activeStepIndex, setActiveStepIndex] = useState(0);
+  const [draftPhotoCount, setDraftPhotoCount] = useState(0);
+  const [stepMessage, setStepMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -122,6 +256,67 @@ export default function QuickQuotePage() {
   );
 
   const canSave = Boolean(clientName.trim() && suburb.trim());
+
+  function getStepSummary(stepId: QuoteStepId): string {
+    switch (stepId) {
+      case "client": {
+        const name = clientName.trim() || "No name";
+        const place = suburb.trim() || "No suburb";
+        const contact = phone.trim() ? ` · ${phone.trim()}` : "";
+        return `${name}, ${place}${contact}`;
+      }
+      case "scope":
+        return `${serviceSummary} · ${stainLevel} stain · ${estimatedHours}h`;
+      case "notes":
+        return notes.trim()
+          ? notes.trim().length > 72
+            ? `${notes.trim().slice(0, 72)}…`
+            : notes.trim()
+          : "No notes added";
+      case "price":
+        return `${formatCurrency(totals.recommended)} recommended · ${formatCurrency(totals.low)}–${formatCurrency(totals.high)}`;
+      case "photos":
+        return draftPhotoCount === 0
+          ? "No photos added"
+          : `${draftPhotoCount} photo${draftPhotoCount === 1 ? "" : "s"} added`;
+      case "save":
+        return canSave ? "Ready to save or export" : "Client name and suburb required";
+    }
+  }
+
+  function showStepFeedback(message: string) {
+    setStepMessage(message);
+    setTimeout(() => setStepMessage(null), 2800);
+  }
+
+  function goToStep(index: number) {
+    setActiveStepIndex(Math.max(0, Math.min(QUOTE_STEPS.length - 1, index)));
+  }
+
+  function handleStepBack() {
+    if (activeStepIndex > 0) {
+      goToStep(activeStepIndex - 1);
+    }
+  }
+
+  function handleStepContinue() {
+    const step = QUOTE_STEPS[activeStepIndex];
+    if (step.id === "client" && !canSave) {
+      showStepFeedback("Enter client name and suburb to continue.");
+      return;
+    }
+    if (activeStepIndex < QUOTE_STEPS.length - 1) {
+      goToStep(activeStepIndex + 1);
+    }
+  }
+
+  function handleStepSkip() {
+    const step = QUOTE_STEPS[activeStepIndex];
+    if (!step.optional) return;
+    handleStepContinue();
+  }
+
+  const activeStep = QUOTE_STEPS[activeStepIndex];
 
   function handleNumericChange(
     value: string,
@@ -213,6 +408,7 @@ export default function QuickQuotePage() {
       try {
         await reassignPhotoRecordsToQuote(draftPhotoQuoteId, id);
         setDraftPhotoQuoteId(createDraftPhotoQuoteId());
+        setDraftPhotoCount(0);
         setSavedBanner("Quote saved to your list.");
       } catch {
         setSavedBanner("Quote saved, but photos could not be linked.");
@@ -223,357 +419,449 @@ export default function QuickQuotePage() {
     }
   }
 
+  const clientSection = (
+    <Panel className="space-y-4">
+      <SectionHeader
+        step="1"
+        title="Client & property"
+        hint="Name and suburb are required to save."
+      />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <TextField
+          label="Client name"
+          helpText="Required"
+          value={clientName}
+          onChange={(e) => setClientName(e.target.value)}
+          placeholder="e.g. Sarah, body corp, café"
+        />
+        <TextField
+          label="Suburb"
+          helpText="Required"
+          value={suburb}
+          onChange={(e) => setSuburb(e.target.value)}
+          placeholder="e.g. Mermaid Waters"
+        />
+      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <TextField
+          label="Phone"
+          helpText="Optional"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="Mobile for follow-up"
+        />
+        <TextField
+          label="Email"
+          helpText="Optional"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="For quote email later"
+        />
+      </div>
+    </Panel>
+  );
+
+  const scopeSection = (
+    <Panel className="space-y-4">
+      <div className="flex items-start justify-between gap-2">
+        <SectionHeader
+          step="2"
+          title="Job scope"
+          hint="Enter areas and add-ons — the price updates as you go."
+        />
+        <button
+          type="button"
+          onClick={openMeasureModal}
+          className="shrink-0 rounded-xl border border-brand-purple/30 bg-brand-purple/10 px-3 py-2 text-[11px] font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
+        >
+          Measure on map
+        </button>
+      </div>
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+        <TextField
+          label="Driveway m²"
+          inputMode="decimal"
+          value={drivewaySqm || ""}
+          onChange={(e) =>
+            handleNumericChange(e.target.value, setDrivewaySqm)
+          }
+          placeholder="0 if none"
+        />
+        <TextField
+          label="Paths m²"
+          inputMode="decimal"
+          value={pathsSqm || ""}
+          onChange={(e) =>
+            handleNumericChange(e.target.value, setPathsSqm)
+          }
+          placeholder="0 if none"
+        />
+        <TextField
+          label="Patio m²"
+          inputMode="decimal"
+          value={patioSqm || ""}
+          onChange={(e) =>
+            handleNumericChange(e.target.value, setPatioSqm)
+          }
+          placeholder="0 if none"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="space-y-2">
+          <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+            Stain level
+          </label>
+          <p className="text-[10px] text-zinc-600">
+            Affects chemical mix and pricing band.
+          </p>
+          <div className="grid grid-cols-3 gap-2 text-xs">
+            {(["light", "medium", "heavy"] as StainLevel[]).map((level) => {
+              const active = stainLevel === level;
+              return (
+                <button
+                  key={level}
+                  type="button"
+                  onClick={() => setStainLevel(level)}
+                  className={`rounded-xl border px-2 py-2.5 capitalize font-medium transition-all duration-200 ${
+                    active
+                      ? "border-gold/40 bg-gold/10 text-gold"
+                      : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
+                  }`}
+                >
+                  {level}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <TextField
+          label="Estimated hours"
+          helpText="For $/hr"
+          type="number"
+          step="0.25"
+          min="0.25"
+          max="99"
+          inputMode="decimal"
+          value={estimatedHours || ""}
+          onChange={(e) =>
+            setEstimatedHours(parseHoursInput(e.target.value))
+          }
+          placeholder="3"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+          Add-on services
+        </p>
+        <p className="text-[10px] text-zinc-600">
+          Tap to include — prices from your saved rates.
+        </p>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <button
+            type="button"
+            onClick={() => setHouseWash((v) => !v)}
+            className={`${toggleBase} ${
+              houseWash
+                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+                : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
+            }`}
+          >
+            <span>House wash</span>
+            <span className="text-[11px] tabular-nums text-zinc-500">
+              {formatCurrency(rates.houseWash)}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setRoofWash((v) => !v)}
+            className={`${toggleBase} ${
+              roofWash
+                ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
+                : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
+            }`}
+          >
+            <span>Roof wash</span>
+            <span className="text-[11px] tabular-nums text-zinc-500">
+              {formatCurrency(rates.roofWash)}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setWallsExtras((v) => !v)}
+            className={`${toggleBase} ${
+              wallsExtras
+                ? "border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-300"
+                : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
+            }`}
+          >
+            <span>Walls / extras</span>
+            <span className="text-[11px] tabular-nums text-zinc-500">
+              {formatCurrency(rates.wallsExtras)}
+            </span>
+          </button>
+        </div>
+      </div>
+    </Panel>
+  );
+
+  const notesSection = (
+    <Panel className="space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <SectionHeader
+          step="3"
+          title="Job notes"
+          hint="Optional — access, water, hazards, upsells, or voice dictation."
+        />
+        <button
+          type="button"
+          onClick={handleVoiceInput}
+          className={`shrink-0 rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
+            speechStatus === "listening"
+              ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
+              : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/15"
+          }`}
+        >
+          {speechStatus === "listening" ? "Stop mic" : "Dictate"}
+        </button>
+      </div>
+      {(speechStatus === "listening" || speechMessage) && (
+        <p
+          className={`text-[11px] ${
+            speechStatus === "listening"
+              ? "text-gold"
+              : "text-amber-300"
+          }`}
+        >
+          {speechStatus === "listening"
+            ? "Listening — speak your job notes."
+            : speechMessage}
+        </p>
+      )}
+      <TextAreaField
+        label="Notes"
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        rows={3}
+        placeholder="e.g. Narrow driveway, hose from side gate, cars in carport"
+      />
+    </Panel>
+  );
+
+  const priceSection = (
+    <Panel className="space-y-4">
+      <SectionHeader
+        step="4"
+        title="Price estimate"
+        hint="Lead with Recommended on site. Low and High give you room to negotiate."
+      />
+      <p className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2 text-xs text-zinc-400">
+        Scope:{" "}
+        <span className="font-medium text-zinc-200">{serviceSummary}</span>
+      </p>
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+            Low
+          </p>
+          <p className="mt-1.5 text-xl font-bold tabular-nums text-zinc-300">
+            {formatCurrency(totals.low)}
+          </p>
+          <p className="mt-1 text-[11px] text-zinc-600">
+            Repeat / easy job.
+          </p>
+        </div>
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
+            Recommended
+          </p>
+          <p className="mt-1.5 text-xl font-bold tabular-nums text-gold-light">
+            {formatCurrency(totals.recommended)}
+          </p>
+          <p className="mt-1 text-[11px] text-zinc-600">
+            Your on-site lead.
+          </p>
+        </div>
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+            High
+          </p>
+          <p className="mt-1.5 text-xl font-bold tabular-nums text-zinc-300">
+            {formatCurrency(totals.high)}
+          </p>
+          <p className="mt-1 text-[11px] text-zinc-600">
+            Rush / difficult.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+            $/hour check
+          </p>
+          <p className="mt-1.5 text-base font-bold tabular-nums text-zinc-200">
+            {totals.revenuePerHour > 0
+              ? formatCurrency(totals.revenuePerHour)
+              : "-"}
+          </p>
+        </div>
+        <div className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+            Chemical mix
+          </p>
+          <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-400">
+            {chemicalMixHint}
+          </p>
+        </div>
+      </div>
+    </Panel>
+  );
+
+  const photosSection = (
+    <div className="space-y-1.5">
+      <SectionHeader
+        step="5"
+        title="Job photos"
+        hint="Optional — before/after shots for records or client follow-up."
+      />
+      <JobPhotoGallery
+        quoteId={draftPhotoQuoteId}
+        onPhotoCountChange={setDraftPhotoCount}
+      />
+    </div>
+  );
+
+  const saveSection = (
+    <Panel className="space-y-3">
+      <SectionHeader
+        step="6"
+        title="Save or export"
+        hint={
+          canSave
+            ? `Saves as ${getQuoteStatusLabel("draft")} to your quotes list.`
+            : "Add client name and suburb above to save."
+        }
+      />
+      <button
+        type="button"
+        onClick={handleSave}
+        disabled={saving}
+        className="flex w-full items-center justify-center rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3.5 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {saving ? "Saving..." : "Save to quotes list"}
+      </button>
+      <button
+        type="button"
+        onClick={() => exportQuotePdf(buildDraftQuote())}
+        className="flex w-full items-center justify-center rounded-2xl border border-brand-purple/30 bg-brand-purple/10 px-4 py-3 text-sm font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
+      >
+        Export PDF preview
+      </button>
+      {savedBanner && (
+        <p className="animate-fade-in text-xs font-medium text-gold">
+          {savedBanner}
+        </p>
+      )}
+    </Panel>
+  );
+
+  const stepSections: Record<QuoteStepId, ReactNode> = {
+    client: clientSection,
+    scope: scopeSection,
+    notes: notesSection,
+    price: priceSection,
+    photos: photosSection,
+    save: saveSection,
+  };
+
   return (
     <AppShell>
       <section className="space-y-5">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-50">
-            Quick Quote
-          </h1>
-          <p className="mt-1.5 text-sm text-zinc-500">
-            Build a quote on site — client, job scope, then price.
-          </p>
-        </div>
-
-        {/* Client section */}
-        <Panel className="space-y-4">
-          <SectionHeader
-            step="1"
-            title="Client & property"
-            hint="Name and suburb are required to save."
-          />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <TextField
-              label="Client name"
-              helpText="Required"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              placeholder="e.g. Sarah, body corp, café"
-            />
-            <TextField
-              label="Suburb"
-              helpText="Required"
-              value={suburb}
-              onChange={(e) => setSuburb(e.target.value)}
-              placeholder="e.g. Mermaid Waters"
-            />
-          </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <TextField
-              label="Phone"
-              helpText="Optional"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="Mobile for follow-up"
-            />
-            <TextField
-              label="Email"
-              helpText="Optional"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="For quote email later"
-            />
-          </div>
-        </Panel>
-
-        {/* Surfaces section */}
-        <Panel className="space-y-4">
-          <div className="flex items-start justify-between gap-2">
-            <SectionHeader
-              step="2"
-              title="Job scope"
-              hint="Enter areas and add-ons — the price updates as you go."
-            />
-            <button
-              type="button"
-              onClick={openMeasureModal}
-              className="shrink-0 rounded-xl border border-brand-purple/30 bg-brand-purple/10 px-3 py-2 text-[11px] font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
-            >
-              Measure on map
-            </button>
-          </div>
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-            <TextField
-              label="Driveway m²"
-              inputMode="decimal"
-              value={drivewaySqm || ""}
-              onChange={(e) =>
-                handleNumericChange(e.target.value, setDrivewaySqm)
-              }
-              placeholder="0 if none"
-            />
-            <TextField
-              label="Paths m²"
-              inputMode="decimal"
-              value={pathsSqm || ""}
-              onChange={(e) =>
-                handleNumericChange(e.target.value, setPathsSqm)
-              }
-              placeholder="0 if none"
-            />
-            <TextField
-              label="Patio m²"
-              inputMode="decimal"
-              value={patioSqm || ""}
-              onChange={(e) =>
-                handleNumericChange(e.target.value, setPatioSqm)
-              }
-              placeholder="0 if none"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="space-y-2">
-              <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
-                Stain level
-              </label>
-              <p className="text-[10px] text-zinc-600">
-                Affects chemical mix and pricing band.
-              </p>
-              <div className="grid grid-cols-3 gap-2 text-xs">
-                {(["light", "medium", "heavy"] as StainLevel[]).map((level) => {
-                  const active = stainLevel === level;
-                  return (
-                    <button
-                      key={level}
-                      type="button"
-                      onClick={() => setStainLevel(level)}
-                      className={`rounded-xl border px-2 py-2.5 capitalize font-medium transition-all duration-200 ${
-                        active
-                          ? "border-gold/40 bg-gold/10 text-gold"
-                          : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
-                      }`}
-                    >
-                      {level}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <TextField
-              label="Estimated hours"
-              helpText="For $/hr"
-              type="number"
-              step="0.25"
-              min="0.25"
-              max="99"
-              inputMode="decimal"
-              value={estimatedHours || ""}
-              onChange={(e) =>
-                setEstimatedHours(parseHoursInput(e.target.value))
-              }
-              placeholder="3"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
-              Add-on services
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-50">
+              Quick Quote
+            </h1>
+            <p className="mt-1.5 text-sm text-zinc-500">
+              {viewMode === "guided"
+                ? `Step ${activeStep.step} of ${QUOTE_STEPS.length} · ${activeStep.title}`
+                : "Build a quote on site — client, job scope, then price."}
             </p>
-            <p className="text-[10px] text-zinc-600">
-              Tap to include — prices from your saved rates.
-            </p>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            <button
-              type="button"
-              onClick={() => setHouseWash((v) => !v)}
-              className={`${toggleBase} ${
-                houseWash
-                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-                  : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
-              }`}
-            >
-              <span>House wash</span>
-              <span className="text-[11px] tabular-nums text-zinc-500">
-                {formatCurrency(rates.houseWash)}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setRoofWash((v) => !v)}
-              className={`${toggleBase} ${
-                roofWash
-                  ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
-                  : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
-              }`}
-            >
-              <span>Roof wash</span>
-              <span className="text-[11px] tabular-nums text-zinc-500">
-                {formatCurrency(rates.roofWash)}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setWallsExtras((v) => !v)}
-              className={`${toggleBase} ${
-                wallsExtras
-                  ? "border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-300"
-                  : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
-              }`}
-            >
-              <span>Walls / extras</span>
-              <span className="text-[11px] tabular-nums text-zinc-500">
-                {formatCurrency(rates.wallsExtras)}
-              </span>
-            </button>
-            </div>
           </div>
-        </Panel>
-
-        {/* Notes */}
-        <Panel className="space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <SectionHeader
-              step="3"
-              title="Job notes"
-              hint="Optional — access, water, hazards, upsells, or voice dictation."
-            />
-            <button
-              type="button"
-              onClick={handleVoiceInput}
-              className={`shrink-0 rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
-                speechStatus === "listening"
-                  ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
-                  : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/15"
-              }`}
-            >
-              {speechStatus === "listening" ? "Stop mic" : "Dictate"}
-            </button>
-          </div>
-          {(speechStatus === "listening" || speechMessage) && (
-            <p
-              className={`text-[11px] ${
-                speechStatus === "listening"
-                  ? "text-gold"
-                  : "text-amber-300"
-              }`}
-            >
-              {speechStatus === "listening"
-                ? "Listening — speak your job notes."
-                : speechMessage}
-            </p>
-          )}
-          <TextAreaField
-            label="Notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            rows={3}
-            placeholder="e.g. Narrow driveway, hose from side gate, cars in carport"
-          />
-        </Panel>
-
-        {/* Quote bands */}
-        <Panel className="space-y-4">
-          <SectionHeader
-            step="4"
-            title="Price estimate"
-            hint="Lead with Recommended on site. Low and High give you room to negotiate."
-          />
-          <p className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2 text-xs text-zinc-400">
-            Scope:{" "}
-            <span className="font-medium text-zinc-200">{serviceSummary}</span>
-          </p>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Low
-              </p>
-              <p className="mt-1.5 text-xl font-bold tabular-nums text-zinc-300">
-                {formatCurrency(totals.low)}
-              </p>
-              <p className="mt-1 text-[11px] text-zinc-600">
-                Repeat / easy job.
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
-                Recommended
-              </p>
-              <p className="mt-1.5 text-xl font-bold tabular-nums text-gold-light">
-                {formatCurrency(totals.recommended)}
-              </p>
-              <p className="mt-1 text-[11px] text-zinc-600">
-                Your on-site lead.
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                High
-              </p>
-              <p className="mt-1.5 text-xl font-bold tabular-nums text-zinc-300">
-                {formatCurrency(totals.high)}
-              </p>
-              <p className="mt-1 text-[11px] text-zinc-600">
-                Rush / difficult.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                $/hour check
-              </p>
-              <p className="mt-1.5 text-base font-bold tabular-nums text-zinc-200">
-                {totals.revenuePerHour > 0
-                  ? formatCurrency(totals.revenuePerHour)
-                  : "-"}
-              </p>
-            </div>
-            <div className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Chemical mix
-              </p>
-              <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-400">
-                {chemicalMixHint}
-              </p>
-            </div>
-          </div>
-        </Panel>
-
-        {/* Job Photos */}
-        <div className="space-y-1.5">
-          <SectionHeader
-            step="5"
-            title="Job photos"
-            hint="Optional — before/after shots for records or client follow-up."
-          />
-          <JobPhotoGallery quoteId={draftPhotoQuoteId} />
-        </div>
-
-        {/* Actions */}
-        <Panel className="space-y-3">
-          <SectionHeader
-            step="6"
-            title="Save or export"
-            hint={
-              canSave
-                ? `Saves as ${getQuoteStatusLabel("draft")} to your quotes list.`
-                : "Add client name and suburb above to save."
+          <button
+            type="button"
+            onClick={() =>
+              setViewMode((mode) => (mode === "guided" ? "full" : "guided"))
             }
-          />
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="flex w-full items-center justify-center rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3.5 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="shrink-0 rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2 text-[11px] font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
           >
-            {saving ? "Saving..." : "Save to quotes list"}
+            {viewMode === "guided" ? "Full view" : "Guided mode"}
           </button>
-          <button
-            type="button"
-            onClick={() => exportQuotePdf(buildDraftQuote())}
-            className="flex w-full items-center justify-center rounded-2xl border border-brand-purple/30 bg-brand-purple/10 px-4 py-3 text-sm font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98]"
-          >
-            Export PDF preview
-          </button>
-          {savedBanner && (
-            <p className="animate-fade-in text-xs font-medium text-gold">
-              {savedBanner}
-            </p>
-          )}
-        </Panel>
+        </div>
+
+        {viewMode === "guided" ? (
+          <div className="space-y-3">
+            {QUOTE_STEPS.map((stepDef, index) => {
+              if (index > activeStepIndex) return null;
+
+              if (index < activeStepIndex) {
+                return (
+                  <StepSummaryCard
+                    key={stepDef.id}
+                    step={stepDef.step}
+                    title={stepDef.title}
+                    summary={getStepSummary(stepDef.id)}
+                    onEdit={() => goToStep(index)}
+                  />
+                );
+              }
+
+              return (
+                <div key={stepDef.id} className="space-y-3">
+                  {stepSections[stepDef.id]}
+                  {stepDef.id === "save" ? (
+                    activeStepIndex > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleStepBack}
+                        className="rounded-xl border border-[var(--brand-border)] bg-surface px-4 py-2.5 text-xs font-semibold text-zinc-400 transition-all duration-200 hover:border-zinc-600 hover:text-zinc-200 active:scale-[0.97]"
+                      >
+                        Back
+                      </button>
+                    )
+                  ) : (
+                    <>
+                      {stepMessage && (
+                        <p className="text-xs font-medium text-gold">
+                          {stepMessage}
+                        </p>
+                      )}
+                      <StepNav
+                        showBack={activeStepIndex > 0}
+                        showSkip={Boolean(stepDef.optional)}
+                        onBack={handleStepBack}
+                        onContinue={handleStepContinue}
+                        onSkip={handleStepSkip}
+                      />
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {clientSection}
+            {scopeSection}
+            {notesSection}
+            {priceSection}
+            {photosSection}
+            {saveSection}
+          </div>
+        )}
 
         {/* Measure modal */}
         {showMeasureModal &&
