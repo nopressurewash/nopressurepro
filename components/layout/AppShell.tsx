@@ -49,15 +49,19 @@ function SidebarLink({
       } ${
         active
           ? secondary
-            ? "bg-gold/10 text-gold"
-            : "bg-gold/10 text-gold"
+            ? "nav-active-secondary"
+            : "nav-active-primary"
           : secondary
-            ? "text-zinc-500 hover:bg-zinc-800/40 hover:text-zinc-300"
-            : "text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100"
+            ? "text-[var(--text-muted)] hover:bg-[var(--brand-surface-overlay)] hover:text-[var(--text-secondary)]"
+            : "text-[var(--text-secondary)] hover:bg-[var(--brand-surface-overlay)] hover:text-[var(--text-primary)]"
       }`}
     >
       {active && (
-        <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-full bg-gold" />
+        <span
+          className={`absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-full ${
+            secondary ? "bg-brand-purple-light" : "bg-gold"
+          }`}
+        />
       )}
       <span className="pl-1">{label}</span>
     </Link>
@@ -78,7 +82,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-background text-zinc-100">
+    <div className="flex min-h-screen bg-background text-[var(--text-primary)]">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-52 flex-col border-r border-[var(--brand-border)] bg-[var(--brand-surface)] md:flex">
         <Link href="/" className="flex items-center gap-2.5 border-b border-[var(--brand-border)] px-4 py-4">
           <Image
@@ -100,7 +104,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Link>
 
         <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
-          <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
+          <p className="mb-1 px-3 label-muted">
             Main
           </p>
           {primaryNavItems.map((item) => (
@@ -112,7 +116,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             />
           ))}
 
-          <p className="mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
+          <p className="mb-1 mt-4 px-3 label-muted">
             More
           </p>
           {secondaryNavItems.map((item) => (
@@ -128,7 +132,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-h-screen flex-1 flex-col md:pl-52">
-        <header className="border-b border-[var(--brand-border)] bg-[var(--brand-surface)]">
+        <header className="border-b border-[var(--brand-border)] bg-[var(--brand-surface)] shadow-[var(--shadow-nav)]">
           <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-2.5 sm:py-3 md:max-w-5xl md:justify-end">
             <Link href="/" className="flex items-center gap-3 md:hidden">
               <Image
@@ -159,7 +163,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </Link>
             <div className="flex items-center gap-3">
-              <div className="rounded-full border border-gold/30 bg-gold/[0.08] px-3 py-[3px] text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
+              <div className="badge-gold rounded-full px-3 py-[3px] text-[10px] font-bold uppercase tracking-[0.2em]">
                 V1
               </div>
               <UserMenu email={email} onLogout={signOut} />
@@ -184,10 +188,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         {mobileMoreOpen && (
           <div
-            className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+4.25rem)] left-3 right-3 z-40 animate-fade-in-up rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-2 shadow-xl md:hidden"
+            className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+4.25rem)] left-3 right-3 z-40 animate-fade-in-up surface-overlay rounded-2xl p-2 md:hidden"
             role="menu"
           >
-            <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
+            <p className="px-2 py-1 label-muted">
               More
             </p>
             {secondaryNavItems.map((item) => {
@@ -200,8 +204,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                   onClick={() => setMobileMoreOpen(false)}
                   className={`flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                     active
-                      ? "bg-gold/10 text-gold"
-                      : "text-zinc-400 active:bg-zinc-800"
+                      ? "nav-active-secondary"
+                      : "text-[var(--text-secondary)] active:bg-[var(--brand-surface-overlay)]"
                   }`}
                 >
                   {item.label}
@@ -212,7 +216,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
 
         <nav
-          className="fixed bottom-0 left-0 right-0 z-30 border-t border-[var(--brand-border)] bg-[var(--brand-surface)]/95 backdrop-blur-md md:hidden"
+          className="fixed bottom-0 left-0 right-0 z-30 border-t border-[var(--brand-border)] bg-[var(--brand-surface)]/95 shadow-[var(--shadow-nav)] backdrop-blur-md md:hidden"
           style={navStyle}
         >
           <div className="mx-auto flex max-w-3xl items-stretch justify-between px-1 py-1.5">
@@ -225,8 +229,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                   href={item.href}
                   className={`relative flex flex-1 flex-col items-center justify-center rounded-xl px-1 py-2.5 text-[10px] font-semibold tracking-wide transition-all duration-200 ${
                     active
-                      ? "bg-gold/10 text-gold"
-                      : "text-zinc-500 active:bg-zinc-800/50 active:text-zinc-300"
+                      ? "nav-active-primary"
+                      : "text-[var(--text-muted)] active:bg-[var(--brand-surface-overlay)] active:text-[var(--text-secondary)]"
                   }`}
                 >
                   {active && (
@@ -241,14 +245,14 @@ export function AppShell({ children }: { children: ReactNode }) {
               onClick={() => setMobileMoreOpen((open) => !open)}
               className={`relative flex flex-1 flex-col items-center justify-center rounded-xl px-1 py-2.5 text-[10px] font-semibold tracking-wide transition-all duration-200 ${
                 secondaryActive || mobileMoreOpen
-                  ? "bg-gold/10 text-gold"
-                  : "text-zinc-500 active:bg-zinc-800/50 active:text-zinc-300"
+                  ? "nav-active-secondary"
+                  : "text-[var(--text-muted)] active:bg-[var(--brand-surface-overlay)] active:text-[var(--text-secondary)]"
               }`}
               aria-expanded={mobileMoreOpen}
               aria-haspopup="menu"
             >
               {(secondaryActive || mobileMoreOpen) && (
-                <span className="absolute left-1/2 top-0 h-[2px] w-5 -translate-x-1/2 rounded-full bg-gold" />
+                <span className="absolute left-1/2 top-0 h-[2px] w-5 -translate-x-1/2 rounded-full bg-brand-purple-light" />
               )}
               <span>More</span>
             </button>

@@ -65,21 +65,21 @@ export function isActivePipelineStatus(status: QuoteStatus): boolean {
 export function getQuoteStatusClasses(status: QuoteStatus): string {
   switch (status) {
     case "draft":
-      return "border-zinc-700 bg-zinc-800/60 text-zinc-400";
+      return "border-[var(--brand-border)] bg-[var(--brand-surface)] text-[var(--text-muted)]";
     case "sent":
-      return "border-sky-500/40 bg-sky-500/10 text-sky-400";
+      return "badge-purple";
     case "approved":
-      return "border-[var(--brand-purple)]/40 bg-[var(--brand-purple)]/10 text-[var(--brand-purple-light)]";
+      return "badge-purple shadow-[0_0_12px_-3px_var(--brand-purple-glow)]";
     case "follow_up":
-      return "border-amber-400/40 bg-amber-400/10 text-amber-300";
+      return "badge-gold";
     case "booked":
-      return "border-[var(--brand-gold)]/40 bg-[var(--brand-gold)]/10 text-[var(--brand-gold)]";
+      return "badge-gold shadow-[0_0_12px_-3px_var(--brand-gold-glow)]";
     case "completed":
-      return "border-emerald-500/40 bg-emerald-500/10 text-emerald-400";
+      return "border border-[color-mix(in_srgb,var(--semantic-success)_40%,transparent)] bg-[var(--semantic-success-muted)] text-[var(--semantic-success)]";
     case "paid":
-      return "border-[var(--brand-gold-light)]/40 bg-[var(--brand-gold-light)]/10 text-[var(--brand-gold-light)]";
+      return "badge-gold shadow-[0_0_12px_-3px_var(--brand-gold-glow)]";
     case "lost":
-      return "border-rose-500/40 bg-rose-500/10 text-rose-400";
+      return "border border-[color-mix(in_srgb,var(--semantic-error)_40%,transparent)] bg-[var(--semantic-error-muted)] text-[var(--semantic-error)]";
   }
 }
 

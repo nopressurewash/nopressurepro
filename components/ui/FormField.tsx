@@ -12,11 +12,11 @@ function FieldShell({ label, helpText, children }: FieldShellProps) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
-        <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+        <label className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-secondary)]">
           {label}
         </label>
         {helpText ? (
-          <p className="text-[10px] text-zinc-600">{helpText}</p>
+          <p className="text-[10px] text-[var(--text-muted)]">{helpText}</p>
         ) : null}
       </div>
       {children}
@@ -25,7 +25,7 @@ function FieldShell({ label, helpText, children }: FieldShellProps) {
 }
 
 const inputBase =
-  "w-full rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15 focus:bg-surface-raised";
+  "w-full rounded-xl border border-[var(--brand-border)] bg-[var(--brand-surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] transition-all duration-200 focus:border-[var(--brand-border-accent)] focus:bg-[var(--brand-surface-raised)] focus:ring-1 focus:ring-[var(--brand-gold-glow)]";
 
 type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
