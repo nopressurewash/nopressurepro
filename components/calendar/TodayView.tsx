@@ -89,8 +89,8 @@ export function TodayView({
     <div className="space-y-6 animate-fade-in-up">
       {/* Today summary bar */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 rounded-2xl border border-[var(--brand-border-accent)] bg-gold/[0.04] px-4 py-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold/70">
+        <div className="flex-1 stat-card-gold rounded-2xl px-4 py-3">
+          <p className="label-muted text-gold">
             Today
           </p>
           <p className="mt-1 text-lg font-bold tabular-nums text-gold-light">
@@ -100,8 +100,8 @@ export function TodayView({
             </span>
           </p>
         </div>
-        <div className="flex-1 rounded-2xl border border-brand-purple/20 bg-brand-purple/[0.04] px-4 py-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-purple-light/70">
+        <div className="flex-1 stat-card-purple rounded-2xl px-4 py-3">
+          <p className="label-muted text-brand-purple-light">
             Value
           </p>
           <p className="mt-1 text-lg font-bold tabular-nums text-brand-purple-light">

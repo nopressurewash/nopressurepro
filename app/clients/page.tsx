@@ -349,10 +349,8 @@ function JobGroup({
               </span>
               {paid !== null && (
                 <span
-                  className={`rounded-full border px-2 py-0.5 text-[10px] font-bold leading-tight ${
-                    paid
-                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                      : "border-amber-500/40 bg-amber-500/10 text-amber-300"
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold leading-tight ${
+                    paid ? "badge-success" : "badge-warning"
                   }`}
                 >
                   {paid ? "Paid" : "Unpaid"}
@@ -488,7 +486,7 @@ export default function ClientsPage() {
                     )}
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    <span className="rounded-full border border-gold/25 bg-gold/[0.08] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-gold">
+                    <span className="badge-gold rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em]">
                       {client.clientType}
                     </span>
                     <button
@@ -511,7 +509,7 @@ export default function ClientsPage() {
                     </p>
                     <p className="text-zinc-500">
                       Total value:{" "}
-                      <span className="font-semibold text-emerald-400">
+                      <span className="font-semibold text-gold-light">
                         {formatCurrency(client.totalValue)}
                       </span>
                     </p>

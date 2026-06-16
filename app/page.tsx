@@ -69,27 +69,27 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="animate-fade-in-up rounded-2xl border border-[var(--brand-border-accent)] bg-gold/[0.05] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
+          <div className="animate-fade-in-up stat-card-gold rounded-2xl p-4">
+            <p className="label-muted text-gold">
               Completed Revenue
             </p>
             <p className="mt-2.5 text-2xl font-bold tabular-nums text-gold-light">
               {formatCurrency(totalCompletedRevenue)}
             </p>
-            <p className="mt-1.5 text-[11px] text-zinc-500">
+            <p className="mt-1.5 text-[11px] text-[var(--text-muted)]">
               Completed or paid quotes only.
             </p>
           </div>
 
           <div className="animate-fade-in-up animate-delay-75">
             <Panel className="h-full">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              <p className="label-muted">
                 Pipeline Revenue
               </p>
-              <p className="mt-2.5 text-2xl font-bold tabular-nums text-zinc-100">
+              <p className="mt-2.5 text-2xl font-bold tabular-nums text-[var(--text-primary)]">
                 {formatCurrency(totalProjectedRevenue)}
               </p>
-              <p className="mt-1.5 text-[11px] text-zinc-500">
+              <p className="mt-1.5 text-[11px] text-[var(--text-muted)]">
                 Sent, approved, and booked work.
               </p>
             </Panel>
@@ -97,39 +97,39 @@ export default function DashboardPage() {
 
           <div className="animate-fade-in-up animate-delay-75">
             <Panel className="h-full">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              <p className="label-muted">
                 Average Quote
               </p>
-              <p className="mt-2.5 text-2xl font-bold tabular-nums text-zinc-100">
+              <p className="mt-2.5 text-2xl font-bold tabular-nums text-[var(--text-primary)]">
                 {formatCurrency(averageQuoteValue)}
               </p>
-              <p className="mt-1.5 text-[11px] text-zinc-500">
+              <p className="mt-1.5 text-[11px] text-[var(--text-muted)]">
                 Across every saved quote.
               </p>
             </Panel>
           </div>
 
-          <div className="animate-fade-in-up animate-delay-150 rounded-2xl border border-brand-purple/20 bg-brand-purple/[0.05] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-purple-light">
+          <div className="animate-fade-in-up animate-delay-150 stat-card-purple rounded-2xl p-4">
+            <p className="label-muted text-brand-purple-light">
               Completion Rate
             </p>
             <p className="mt-2.5 text-2xl font-bold tabular-nums text-brand-purple-light">
               {completionRate.toFixed(0)}%
             </p>
-            <p className="mt-1.5 text-[11px] text-zinc-500">
+            <p className="mt-1.5 text-[11px] text-[var(--text-muted)]">
               Completed or paid vs total.
             </p>
           </div>
         </div>
 
-        <div className="animate-fade-in-up animate-delay-150 rounded-2xl border border-brand-purple/20 bg-brand-purple/[0.05] p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-purple-light">
+        <div className="animate-fade-in-up animate-delay-150 stat-card-purple rounded-2xl p-4">
+          <p className="label-muted text-brand-purple-light">
             Live Revenue / Hour
           </p>
           <p className="mt-2.5 text-2xl font-bold tabular-nums text-brand-purple-light">
             {liveRevenuePerHour > 0 ? formatCurrency(liveRevenuePerHour) : "-"}
           </p>
-          <p className="mt-1.5 text-[11px] text-zinc-500">
+          <p className="mt-1.5 text-[11px] text-[var(--text-muted)]">
             From your latest quick quote.
           </p>
         </div>
