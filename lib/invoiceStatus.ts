@@ -23,12 +23,12 @@ export function getInvoiceStatusLabel(status: InvoiceStatus): string {
 export function getInvoiceStatusClasses(status: InvoiceStatus): string {
   switch (status) {
     case "draft":
-      return "border-zinc-700 bg-zinc-800/60 text-zinc-400";
+      return "border-[var(--brand-border)] bg-[var(--brand-surface)] text-[var(--text-muted)]";
     case "sent":
-      return "border-brand-purple/40 bg-brand-purple/10 text-brand-purple-light";
+      return "badge-purple";
     case "paid":
-      return "border-emerald-500/40 bg-emerald-500/10 text-emerald-400";
+      return "border border-[color-mix(in_srgb,var(--semantic-success)_40%,transparent)] bg-[var(--semantic-success-muted)] text-[var(--semantic-success)]";
     case "overdue":
-      return "border-rose-500/40 bg-rose-500/10 text-rose-400";
+      return "border border-[color-mix(in_srgb,var(--semantic-error)_40%,transparent)] bg-[var(--semantic-error-muted)] text-[var(--semantic-error)]";
   }
 }

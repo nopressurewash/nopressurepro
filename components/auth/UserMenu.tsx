@@ -17,19 +17,19 @@ export function UserMenu({ email, onLogout }: UserMenuProps) {
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-2 rounded-full border border-[var(--brand-border)] bg-surface px-3 py-1 text-xs font-semibold text-zinc-200 transition-all duration-200 hover:border-gold/40 hover:text-gold"
+        className="btn-ghost flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold hover:border-[var(--brand-border-accent)] hover:text-[var(--brand-gold-light)]"
       >
         {email}
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-44 rounded-xl border border-[var(--brand-border)] bg-surface-raised py-2 text-sm text-zinc-100 shadow-lg">
+        <div className="surface-overlay absolute right-0 top-full mt-2 w-44 rounded-xl py-2 text-sm text-[var(--text-primary)]">
           <button
             type="button"
             onClick={async () => {
               setOpen(false);
               await onLogout();
             }}
-            className="w-full px-4 py-2 text-left text-xs font-semibold uppercase tracking-[0.2em] text-rose-400 transition-colors hover:bg-zinc-800"
+            className="w-full px-4 py-2 text-left text-xs font-semibold uppercase tracking-[0.2em] text-[var(--semantic-error)] transition-colors hover:bg-[var(--brand-surface-overlay)]"
           >
             Logout
           </button>
