@@ -147,10 +147,10 @@ export function BeforeAfterModal({
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-              Before / After
+              Photo Compare
             </p>
             <p className="mt-1 text-sm font-semibold text-zinc-100">
-              Choose the exact two photos to compare.
+              Pick two photos, then drag the slider to compare.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -178,10 +178,14 @@ export function BeforeAfterModal({
             <div className="space-y-3 rounded-xl border border-[var(--brand-border)] bg-surface p-3 sm:p-4">
               {hasEnoughPhotos ? (
                 <>
+                  <p className="text-[11px] leading-relaxed text-zinc-500">
+                    Left selection appears on the Before side; right on the
+                    After side of the slider.
+                  </p>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
-                        First Image
+                        Left (Before side)
                       </label>
                       <select
                         value={firstPhotoId}
@@ -201,7 +205,7 @@ export function BeforeAfterModal({
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
-                        Second Image
+                        Right (After side)
                       </label>
                       <select
                         value={secondPhotoId}
@@ -227,7 +231,7 @@ export function BeforeAfterModal({
                   )}
                   {suggestedPairedAfter && suggestedBeforePhotoId && (
                     <p className="text-xs text-zinc-500">
-                      Suggested pair loaded from ghost capture.
+                      A matched before/after pair is pre-selected.
                     </p>
                   )}
                   {banner && (
@@ -239,7 +243,7 @@ export function BeforeAfterModal({
                     disabled={!canOpenCompare}
                     className="w-full rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-xs font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    Open Compare
+                    View Side-by-Side
                   </button>
                 </>
               ) : (

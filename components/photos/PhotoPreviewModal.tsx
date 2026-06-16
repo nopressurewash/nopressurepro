@@ -89,18 +89,21 @@ export function PhotoPreviewModal({
               onClick={onComparePaired}
               className="w-full rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-xs font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98]"
             >
-              Compare Paired Photos
+              Compare Before & After
             </button>
           )}
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-              Photo Name / Caption
+              Caption
+            </p>
+            <p className="mt-1 text-[11px] text-zinc-600">
+              Optional label shown in photo lists and compare pickers.
             </p>
             <div className="mt-2 flex flex-col gap-2 sm:flex-row">
               <input
                 value={captionDraft}
                 onChange={(event) => setCaptionDraft(event.target.value)}
-                placeholder="Add a photo label for easier compare selection"
+                placeholder="e.g. Driveway, north side"
                 className="flex-1 rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15"
               />
               <button
@@ -108,14 +111,14 @@ export function PhotoPreviewModal({
                 onClick={() => onSaveCaption(photo.id, captionDraft)}
                 className="rounded-xl border border-gold/30 bg-gold/10 px-4 py-2.5 text-xs font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97]"
               >
-                Save Label
+                Save Caption
               </button>
             </div>
           </div>
 
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-              Move to category
+              Category
             </p>
             <div className="mt-2 grid grid-cols-3 gap-2">
               {categories.map((category) => {

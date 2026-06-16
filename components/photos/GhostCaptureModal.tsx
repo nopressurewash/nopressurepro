@@ -117,7 +117,7 @@ export function GhostCaptureModal({
               Ghost Capture
             </p>
             <p className="mt-1 text-sm font-semibold text-zinc-100">
-              Align the live shot to the before overlay.
+              Line up the live camera with the before overlay.
             </p>
           </div>
           <button
