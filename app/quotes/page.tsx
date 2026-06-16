@@ -84,6 +84,18 @@ export default function SavedQuotesPage() {
     };
   }, [quotes]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const quoteId = params.get("quote");
+    const openPhotos = params.get("photos");
+    if (!quoteId || openPhotos !== "1") return;
+    if (!quotes.some((quote) => quote.id === quoteId)) return;
+
+    setExpandedPhotoQuoteId(quoteId);
+  }, [quotes]);
+
   return (
     <AppShell>
       <section className="space-y-6">
