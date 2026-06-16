@@ -8,6 +8,9 @@ import { BeforeAfterSlider } from "./BeforeAfterSlider";
 interface BeforeAfterModalProps {
   open: boolean;
   photos: JobPhotoRecord[];
+  initialFirstPhotoId?: string;
+  initialSecondPhotoId?: string;
+  autoStartCompare?: boolean;
   onClose: () => void;
 }
 
@@ -43,6 +46,9 @@ function getCompareOptionLabel(photo: JobPhotoRecord, index: number) {
 export function BeforeAfterModal({
   open,
   photos,
+  initialFirstPhotoId,
+  initialSecondPhotoId,
+  autoStartCompare = false,
   onClose,
 }: BeforeAfterModalProps) {
   const [firstPhotoId, setFirstPhotoId] = useState("");
@@ -85,16 +91,36 @@ export function BeforeAfterModal({
 
   useEffect(() => {
     if (!open) return;
-    if (suggestedPairedAfter && suggestedBeforePhotoId) {
+    const hasInitialPair =
+      Boolean(initialFirstPhotoId) &&
+      Boolean(initialSecondPhotoId) &&
+      initialFirstPhotoId !== initialSecondPhotoId &&
+      photos.some((photo) => photo.id === initialFirstPhotoId) &&
+      photos.some((photo) => photo.id === initialSecondPhotoId);
+
+    if (hasInitialPair) {
+      setFirstPhotoId(initialFirstPhotoId ?? "");
+      setSecondPhotoId(initialSecondPhotoId ?? "");
+      setIsComparing(autoStartCompare);
+    } else if (suggestedPairedAfter && suggestedBeforePhotoId) {
       setFirstPhotoId(suggestedBeforePhotoId);
       setSecondPhotoId(suggestedPairedAfter.id);
+      setIsComparing(false);
     } else {
       setFirstPhotoId("");
       setSecondPhotoId("");
+      setIsComparing(false);
     }
-    setIsComparing(false);
     setBanner(null);
-  }, [open, suggestedBeforePhotoId, suggestedPairedAfter]);
+  }, [
+    autoStartCompare,
+    initialFirstPhotoId,
+    initialSecondPhotoId,
+    open,
+    photos,
+    suggestedBeforePhotoId,
+    suggestedPairedAfter,
+  ]);
 
   function handleOpenCompare() {
     if (!hasEnoughPhotos) {
