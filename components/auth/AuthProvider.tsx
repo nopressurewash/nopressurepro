@@ -13,6 +13,12 @@ import {
 import type { ReactNode } from "react";
 import { supabaseClient } from "../../lib/supabaseClient";
 import { bootstrapWorkspace } from "../../lib/bootstrapWorkspace";
+import {
+  clearPasswordRecoveryPending,
+  isPasswordRecoveryPending,
+  markPasswordRecoveryPending,
+  urlIndicatesRecovery,
+} from "../../lib/passwordRecovery";
 
 interface AuthContextValue {
   isLoading: boolean;
@@ -24,7 +30,9 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const protectedPaths = ["/", "/dashboard", "/quotes", "/clients", "/settings"];
+function isPublicAuthPath(pathname: string | null) {
+  return Boolean(pathname?.startsWith("/login"));
+}
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -42,6 +50,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const bootstrapUserIdRef = useRef<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
 
   const ensureWorkspace = useCallback(
     async (user: { id: string; email?: string | null }) => {
@@ -93,6 +106,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: listener } =
       supabaseClient.auth.onAuthStateChange((_event, sess) => {
+        if (_event === "PASSWORD_RECOVERY") {
+          markPasswordRecoveryPending();
+          if (!pathnameRef.current?.startsWith("/login/reset-password")) {
+            router.replace("/login/reset-password");
+          }
+          setSession(sess);
+          return;
+        }
+
+        if (_event === "USER_UPDATED") {
+          clearPasswordRecoveryPending();
+        }
+
         if (_event === "SIGNED_OUT") {
           setSession(null);
           setBusinessId(null);
@@ -116,7 +142,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLoading) return;
-    if (pathname?.startsWith("/login")) return;
+
+    if (
+      typeof window !== "undefined" &&
+      urlIndicatesRecovery() &&
+      !pathname?.startsWith("/login/reset-password")
+    ) {
+      const suffix = `${window.location.search}${window.location.hash}`;
+      router.replace(`/login/reset-password${suffix}`);
+      return;
+    }
+
+    if (
+      isPasswordRecoveryPending() &&
+      !pathname?.startsWith("/login/reset-password")
+    ) {
+      router.replace("/login/reset-password");
+      return;
+    }
+
+    if (isPublicAuthPath(pathname)) return;
     if (!session?.user) {
       router.replace("/login");
     }
