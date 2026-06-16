@@ -30,8 +30,32 @@ function formatDate(iso: string) {
   });
 }
 
-const actionLink =
-  "rounded-lg px-2 py-1 text-[11px] font-medium transition-all duration-200 active:scale-[0.97]";
+const primaryAction =
+  "rounded-xl border px-3 py-2 text-[11px] font-semibold transition-all duration-200 active:scale-[0.97]";
+
+const secondaryAction =
+  "rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-all duration-200 active:scale-[0.97]";
+
+function getStatusHint(status: QuoteStatus): string {
+  switch (status) {
+    case "draft":
+      return "Ready to send or schedule.";
+    case "sent":
+      return "Waiting on client response.";
+    case "approved":
+      return "Client approved — book or invoice.";
+    case "follow_up":
+      return "Needs another touchpoint.";
+    case "booked":
+      return "Job is on the calendar.";
+    case "completed":
+      return "Work done — invoice if needed.";
+    case "paid":
+      return "Closed and paid.";
+    case "lost":
+      return "Marked as lost.";
+  }
+}
 
 export default function SavedQuotesPage() {
   const {
@@ -104,7 +128,7 @@ export default function SavedQuotesPage() {
             Saved Quotes
           </h1>
           <p className="mt-1.5 text-sm text-zinc-500">
-            Every quote from the builder, ready to follow up.
+            Follow up, schedule, and close out quotes from the field.
           </p>
         </div>
 
@@ -114,8 +138,7 @@ export default function SavedQuotesPage() {
               No saved quotes yet.
             </p>
             <p className="mx-auto mt-2 max-w-xs text-sm text-zinc-500">
-              Use the Quick Quote Builder to price a job, then tap &ldquo;Save
-              quote&rdquo; to store it here.
+              Build a quote in Quick Quote, then save it here for follow-up.
             </p>
           </Panel>
         ) : (
@@ -131,15 +154,22 @@ export default function SavedQuotesPage() {
                       {q.clientName || "Unnamed client"}
                     </p>
                     <p className="mt-0.5 text-xs text-zinc-500">
-                      {q.suburb || "Suburb unknown"} · {q.phone || "No phone"}
+                      {q.suburb || "Suburb unknown"}
+                      {q.phone ? ` · ${q.phone}` : ""}
+                    </p>
+                    <p className="mt-1 text-[11px] text-zinc-600">
+                      {q.serviceType} · Created {formatDate(q.createdAt)}
                     </p>
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="text-base font-bold tabular-nums text-gold">
                       {formatCurrency(q.recommended)}
                     </p>
+                    <p className="mt-0.5 text-[10px] tabular-nums text-zinc-600">
+                      {formatCurrency(q.low)}–{formatCurrency(q.high)}
+                    </p>
                     <span
-                      className={`mt-1 inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] ${getQuoteStatusClasses(
+                      className={`mt-1.5 inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] ${getQuoteStatusClasses(
                         q.status,
                       )}`}
                     >
@@ -148,83 +178,65 @@ export default function SavedQuotesPage() {
                   </div>
                 </div>
 
+                {(q.sentAt || q.approvedAt || q.estimatedHours > 0 || (photoCounts[q.id] ?? 0) > 0) && (
+                  <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+                    {q.sentAt && (
+                      <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 font-medium text-sky-400">
+                        Sent {formatDate(q.sentAt)}
+                      </span>
+                    )}
+                    {q.approvedAt && (
+                      <span className="rounded-full border border-brand-purple/30 bg-brand-purple/10 px-2 py-0.5 font-medium text-brand-purple-light">
+                        Approved {formatDate(q.approvedAt)}
+                      </span>
+                    )}
+                    {q.estimatedHours > 0 && (
+                      <span className="rounded-full border border-[var(--brand-border)] bg-surface px-2 py-0.5 tabular-nums text-zinc-500">
+                        {q.estimatedHours.toFixed(1)}h · {formatCurrency(q.revenuePerHour)}/hr
+                      </span>
+                    )}
+                    {(photoCounts[q.id] ?? 0) > 0 && (
+                      <span className="rounded-full border border-gold/30 bg-gold/10 px-2 py-0.5 font-medium text-gold">
+                        {photoCounts[q.id]} photo{(photoCounts[q.id] ?? 0) === 1 ? "" : "s"}
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 {q.scheduledDate && (
-                  <p className="flex items-center gap-1.5 text-[11px]">
+                  <p className="flex items-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-[11px]">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    <span className="font-medium text-emerald-400/80">
-                      {formatDate(q.scheduledDate)}
+                    <span className="font-medium text-emerald-400/90">
+                      Scheduled {formatDate(q.scheduledDate)}
                       {q.scheduledTime && ` at ${q.scheduledTime}`}
                     </span>
                   </p>
                 )}
 
-                <div className="flex items-center justify-between gap-2 text-xs text-zinc-500">
-                  <p>
-                    {q.serviceType} · {formatDate(q.createdAt)}
-                    {q.sentAt && (
-                      <span className="ml-1.5 text-sky-400/80">
-                        · Sent {formatDate(q.sentAt)}
-                      </span>
-                    )}
-                    {q.approvedAt && (
-                      <span className="ml-1.5 text-brand-purple-light/80">
-                        · Approved {formatDate(q.approvedAt)}
-                      </span>
-                    )}
+                {q.notes && (
+                  <p className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2 text-[11px] leading-relaxed text-zinc-500">
+                    {q.notes.length > 160
+                      ? `${q.notes.slice(0, 160)}…`
+                      : q.notes}
                   </p>
-                  <p className="tabular-nums">
-                    {q.estimatedHours > 0
-                      ? `${q.estimatedHours.toFixed(1)}h · ${formatCurrency(q.revenuePerHour)}/hr`
-                      : "-"}
-                    {(photoCounts[q.id] ?? 0) > 0 && (
-                      <span className="ml-2 text-zinc-600">
-                        · {photoCounts[q.id]} photos
-                      </span>
-                    )}
-                  </p>
-                </div>
+                )}
 
-                {/* Approval progression quick actions */}
-                <div className="flex flex-wrap items-center gap-1.5 border-t border-[var(--brand-border)] pt-3">
-                  <span className="mr-1 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-                    Progression
-                  </span>
-                  {(["sent", "approved", "follow_up", "lost"] as const).map((status) => {
-                    const isCurrent = q.status === status;
-                    return (
-                      <button
-                        key={status}
-                        type="button"
-                        onClick={() => updateQuoteStatus(q.id, status)}
-                        className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all duration-200 active:scale-[0.97] ${
-                          isCurrent
-                            ? status === "lost"
-                              ? "border border-rose-500/50 bg-rose-500/15 text-rose-400"
-                              : status === "sent"
-                                ? "border border-sky-500/50 bg-sky-500/15 text-sky-400"
-                                : status === "approved"
-                                  ? "border border-brand-purple/50 bg-brand-purple/15 text-brand-purple-light"
-                                  : "border border-amber-400/50 bg-amber-400/15 text-amber-300"
-                            : "border border-zinc-700/80 bg-surface text-zinc-500 hover:border-zinc-600 hover:text-zinc-300"
-                        }`}
-                      >
-                        {getQuoteStatusLabel(status)}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--brand-border)] pt-3">
-                  <div className="flex items-center gap-2">
-                    <label className="text-[11px] font-medium text-zinc-500">
-                      Status
-                    </label>
+                <div className="space-y-2.5 border-t border-[var(--brand-border)] pt-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                        Quote status
+                      </p>
+                      <p className="mt-0.5 text-[10px] text-zinc-600">
+                        {getStatusHint(q.status)}
+                      </p>
+                    </div>
                     <select
                       value={q.status}
                       onChange={(e) =>
                         updateQuoteStatus(q.id, e.target.value as QuoteStatus)
                       }
-                      className="rounded-lg border border-[var(--brand-border)] bg-surface px-2.5 py-1.5 text-[11px] text-zinc-200 outline-none transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15"
+                      className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2 text-[11px] font-semibold text-zinc-200 outline-none transition-all duration-200 focus:border-gold/40 focus:ring-1 focus:ring-gold/15"
                     >
                       {QUOTE_STATUS_OPTIONS.map((status) => (
                         <option key={status} value={status}>
@@ -233,96 +245,102 @@ export default function SavedQuotesPage() {
                       ))}
                     </select>
                   </div>
-                  <div className="flex flex-wrap items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setEditingQuote(q)}
-                      className={`${actionLink} text-zinc-300 hover:bg-zinc-800`}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSchedulingQuote(q)}
-                      className={`${actionLink} ${q.scheduledDate ? "text-emerald-400 hover:bg-emerald-500/10" : "text-sky-400 hover:bg-sky-500/10"}`}
-                    >
-                      {q.scheduledDate ? "Scheduled" : "Schedule"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setExpandedPhotoQuoteId((current) =>
-                          current === q.id ? null : q.id,
-                        )
-                      }
-                      className={`${actionLink} text-gold hover:bg-gold/10`}
-                    >
-                      {expandedPhotoQuoteId === q.id
-                        ? "Hide Photos"
-                        : "Photos"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => exportQuotePdf(q)}
-                      className={`${actionLink} text-brand-purple-light hover:bg-brand-purple/10`}
-                    >
-                      PDF
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEmailDraftTarget({
-                          quote: q,
-                          invoice: invoices.find((inv) => inv.quoteId === q.id),
-                          clientEmail: findClientEmail(clients, q.clientName, q.phone),
-                        });
-                      }}
-                      className={`${actionLink} text-gold hover:bg-gold/10`}
-                    >
-                      Email
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (q.status === "draft") {
-                          setInvoiceConfirmQuote(q);
-                          return;
+
+                  <div>
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                      Next actions
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEmailDraftTarget({
+                            quote: q,
+                            invoice: invoices.find((inv) => inv.quoteId === q.id),
+                            clientEmail: findClientEmail(clients, q.clientName, q.phone),
+                          });
+                        }}
+                        className={`${primaryAction} border-gold/30 bg-gold/10 text-gold hover:bg-gold/15`}
+                      >
+                        Email quote
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSchedulingQuote(q)}
+                        className={`${primaryAction} ${
+                          q.scheduledDate
+                            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15"
+                            : "border-sky-500/30 bg-sky-500/10 text-sky-400 hover:bg-sky-500/15"
+                        }`}
+                      >
+                        {q.scheduledDate ? "Reschedule" : "Schedule job"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedPhotoQuoteId((current) =>
+                            current === q.id ? null : q.id,
+                          )
                         }
-                        const invoice = buildInvoiceFromQuote(q, invoices);
-                        addInvoice(invoice);
-                        router.push("/invoices");
-                      }}
-                      className={`${actionLink} text-gold hover:bg-gold/10`}
-                    >
-                      To Invoice
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const linkedInvoice = invoices.find((inv) => inv.quoteId === q.id);
-                        if (linkedInvoice) {
-                          setDeleteBlockedBanner(
-                            `Cannot delete quote: linked invoice ${linkedInvoice.invoiceNumber || linkedInvoice.id} exists.`,
-                          );
-                          setTimeout(() => setDeleteBlockedBanner(null), 3000);
-                          return;
-                        }
-                        deleteQuote(q.id);
-                      }}
-                      className={`${actionLink} text-zinc-500 hover:bg-rose-500/10 hover:text-rose-400`}
-                    >
-                      Delete
-                    </button>
+                        className={`${primaryAction} border-gold/30 bg-gold/10 text-gold hover:bg-gold/15`}
+                      >
+                        {(photoCounts[q.id] ?? 0) > 0
+                          ? `Photos (${photoCounts[q.id]})`
+                          : expandedPhotoQuoteId === q.id
+                            ? "Hide photos"
+                            : "Add photos"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (q.status === "draft") {
+                            setInvoiceConfirmQuote(q);
+                            return;
+                          }
+                          const invoice = buildInvoiceFromQuote(q, invoices);
+                          addInvoice(invoice);
+                          router.push("/invoices");
+                        }}
+                        className={`${primaryAction} border-brand-purple/30 bg-brand-purple/10 text-brand-purple-light hover:bg-brand-purple/15`}
+                      >
+                        Create invoice
+                      </button>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setEditingQuote(q)}
+                        className={`${secondaryAction} text-zinc-300 hover:bg-zinc-800`}
+                      >
+                        Edit quote
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => exportQuotePdf(q)}
+                        className={`${secondaryAction} text-brand-purple-light hover:bg-brand-purple/10`}
+                      >
+                        Export PDF
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const linkedInvoice = invoices.find((inv) => inv.quoteId === q.id);
+                          if (linkedInvoice) {
+                            setDeleteBlockedBanner(
+                              `Cannot delete quote: linked invoice ${linkedInvoice.invoiceNumber || linkedInvoice.id} exists.`,
+                            );
+                            setTimeout(() => setDeleteBlockedBanner(null), 3000);
+                            return;
+                          }
+                          deleteQuote(q.id);
+                        }}
+                        className={`${secondaryAction} text-zinc-500 hover:bg-rose-500/10 hover:text-rose-400`}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                {q.notes && (
-                  <p className="text-[11px] leading-relaxed text-zinc-500">
-                    {q.notes.length > 160
-                      ? `${q.notes.slice(0, 160)}…`
-                      : q.notes}
-                  </p>
-                )}
 
                 {expandedPhotoQuoteId === q.id && (
                   <div className="animate-fade-in-up pt-1">
