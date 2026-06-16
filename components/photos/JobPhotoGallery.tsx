@@ -50,6 +50,51 @@ function getPhotoContextLabel(photo: JobPhotoRecord) {
   return `${category} — ${formatDateTime(photo.createdAt)}`;
 }
 
+function getAddPhotoHint(
+  category: JobPhotoCategory,
+  hasBeforePhotos: boolean,
+) {
+  switch (category) {
+    case "before":
+      return "Document the site before work starts.";
+    case "after":
+      return hasBeforePhotos
+        ? "Capture finished results, or use ghost overlay for aligned shots."
+        : "Add at least one Before photo first, then return here.";
+    case "other":
+      return "Optional extras — access, stains, equipment, or notes.";
+  }
+}
+
+function getEmptyStateCopy(
+  category: JobPhotoCategory,
+  hasBeforePhotos: boolean,
+) {
+  switch (category) {
+    case "before":
+      return {
+        title: "No before photos yet",
+        body: "Start here on site. Use Take Photo or Choose Photo above.",
+      };
+    case "after":
+      if (!hasBeforePhotos) {
+        return {
+          title: "No after photos yet",
+          body: "Open the Before tab and add a reference shot first. That unlocks after photos and ghost capture.",
+        };
+      }
+      return {
+        title: "No after photos yet",
+        body: "Add finished shots above. For matching angles, tap Use Before as Ghost to overlay a before reference while you shoot.",
+      };
+    case "other":
+      return {
+        title: "No other photos yet",
+        body: "Add anything useful that is not a before/after pair.",
+      };
+  }
+}
+
 function PhotoTile({
   photo,
   pairBadge,
@@ -160,6 +205,8 @@ export function JobPhotoGallery({
   }, [photoById, photos]);
   const selectedGhostPhoto =
     beforePhotos.find((photo) => photo.id === ghostReferencePhotoId) ?? null;
+  const hasBeforePhotos = beforePhotos.length > 0;
+  const emptyStateCopy = getEmptyStateCopy(activeCategory, hasBeforePhotos);
 
   const previewPairData = useMemo(() => {
     if (!previewPhoto) return null;
@@ -168,7 +215,7 @@ export function JobPhotoGallery({
       const beforePhoto = photoById.get(previewPhoto.pairedBeforePhotoId);
       if (!beforePhoto) return null;
       return {
-        context: `Paired with: ${getPhotoContextLabel(beforePhoto)}`,
+        context: `Before/after pair — ${getPhotoContextLabel(beforePhoto)}`,
         beforeId: beforePhoto.id,
         afterId: previewPhoto.id,
       };
@@ -182,13 +229,13 @@ export function JobPhotoGallery({
       if (pairedAfterPhotos.length === 0) return null;
       if (pairedAfterPhotos.length === 1) {
         return {
-          context: `Paired with: ${getPhotoContextLabel(pairedAfterPhotos[0])}`,
+          context: `Before/after pair — ${getPhotoContextLabel(pairedAfterPhotos[0])}`,
           beforeId: previewPhoto.id,
           afterId: pairedAfterPhotos[0].id,
         };
       }
       return {
-        context: `Paired to ${pairedAfterPhotos.length} after photos.`,
+        context: `Linked to ${pairedAfterPhotos.length} after photos.`,
       };
     }
 
@@ -231,19 +278,31 @@ export function JobPhotoGallery({
   return (
     <div className="space-y-3 rounded-xl border border-[var(--brand-border)] bg-surface-raised p-3">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-          Job Photos
-        </p>
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+            Job Photos
+          </p>
+          <p className="mt-0.5 text-[11px] text-zinc-600">
+            {canCompare
+              ? "Compare any two photos from this job."
+              : "Add 2+ photos to enable compare."}
+          </p>
+        </div>
         <button
           type="button"
           disabled={!canCompare}
+          title={
+            canCompare
+              ? "Open side-by-side compare"
+              : "Add at least two photos to compare"
+          }
           onClick={() => {
             setCompareInitialFirstId("");
             setCompareInitialSecondId("");
             setCompareAutoStart(false);
             setShowComparison(true);
           }}
-          className="rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-[11px] font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+          className="shrink-0 rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-[11px] font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
         >
           Compare
         </button>
@@ -269,25 +328,33 @@ export function JobPhotoGallery({
         })}
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5">
-        <PhotoUploadButton
-          loading={uploading}
-          onFilesSelected={(files) => addPhotos(files, activeCategory)}
-        />
-        {activeCategory === "after" && beforePhotos.length > 0 && (
-          <button
-            type="button"
-            onClick={() => {
-              setGhostReferencePhotoId((current) =>
-                current || beforePhotos[0]?.id || "",
-              );
-              setShowGhostPicker(true);
-            }}
-            className="rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-[11px] font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97]"
-          >
-            Use Before as Ghost
-          </button>
-        )}
+      <div className="rounded-xl border border-[var(--brand-border)] bg-surface px-3 py-2.5">
+        <p className="text-xs font-semibold text-zinc-200">
+          Add {getCategoryLabel(activeCategory)} photos
+        </p>
+        <p className="mt-0.5 text-[11px] leading-relaxed text-zinc-500">
+          {getAddPhotoHint(activeCategory, hasBeforePhotos)}
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          <PhotoUploadButton
+            loading={uploading}
+            onFilesSelected={(files) => addPhotos(files, activeCategory)}
+          />
+          {activeCategory === "after" && hasBeforePhotos && (
+            <button
+              type="button"
+              onClick={() => {
+                setGhostReferencePhotoId((current) =>
+                  current || beforePhotos[0]?.id || "",
+                );
+                setShowGhostPicker(true);
+              }}
+              className="rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-[11px] font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97]"
+            >
+              Use Before as Ghost
+            </button>
+          )}
+        </div>
       </div>
 
       {error && <p className="text-xs font-medium text-gold">{error}</p>}
@@ -297,10 +364,10 @@ export function JobPhotoGallery({
       ) : activePhotos.length === 0 ? (
         <div className="rounded-xl border border-dashed border-zinc-800/60 bg-surface px-3 py-6 text-center">
           <p className="text-sm font-semibold text-zinc-300">
-            No {getCategoryLabel(activeCategory).toLowerCase()} photos yet.
+            {emptyStateCopy.title}
           </p>
-          <p className="mt-1 text-xs text-zinc-600">
-            Add photos for documentation or client records.
+          <p className="mx-auto mt-1 max-w-sm text-xs leading-relaxed text-zinc-600">
+            {emptyStateCopy.body}
           </p>
         </div>
       ) : (
@@ -312,11 +379,13 @@ export function JobPhotoGallery({
               pairBadge={
                 photo.category === "after" && photo.pairedBeforePhotoId
                   ? photoById.has(photo.pairedBeforePhotoId)
-                    ? "Paired"
+                    ? "Before/after pair"
                     : undefined
                   : photo.category === "before" &&
                       (pairedAfterCountByBeforeId[photo.id] ?? 0) > 0
-                    ? `Paired x${pairedAfterCountByBeforeId[photo.id]}`
+                    ? (pairedAfterCountByBeforeId[photo.id] ?? 0) === 1
+                      ? "1 after match"
+                      : `${pairedAfterCountByBeforeId[photo.id]} after matches`
                     : undefined
               }
               onClick={() => setPreviewPhoto(photo)}
@@ -366,7 +435,7 @@ export function JobPhotoGallery({
                   Ghost Overlay
                 </p>
                 <p className="mt-1 text-sm font-semibold text-zinc-100">
-                  Pick a before photo as your capture guide.
+                  Choose a before photo to overlay on your camera.
                 </p>
               </div>
               <button
@@ -380,7 +449,7 @@ export function JobPhotoGallery({
             <div className="mt-4 space-y-3">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
-                  Before reference image
+                  Before reference
                 </label>
                 <select
                   value={ghostReferencePhotoId}
