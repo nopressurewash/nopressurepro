@@ -234,39 +234,19 @@ export function JobPhotoGallery({
         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
           Job Photos
         </p>
-        <div className="flex flex-wrap items-center justify-end gap-1.5">
-          <button
-            type="button"
-            disabled={!canCompare}
-            onClick={() => {
-              setCompareInitialFirstId("");
-              setCompareInitialSecondId("");
-              setCompareAutoStart(false);
-              setShowComparison(true);
-            }}
-            className="rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-[11px] font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Compare
-          </button>
-          <PhotoUploadButton
-            loading={uploading}
-            onFilesSelected={(files) => addPhotos(files, activeCategory)}
-          />
-          {activeCategory === "after" && beforePhotos.length > 0 && (
-            <button
-              type="button"
-              onClick={() => {
-                setGhostReferencePhotoId((current) =>
-                  current || beforePhotos[0]?.id || "",
-                );
-                setShowGhostPicker(true);
-              }}
-              className="rounded-xl border border-brand-purple/30 bg-brand-purple/10 px-3 py-2 text-[11px] font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.97]"
-            >
-              Use Before as Ghost
-            </button>
-          )}
-        </div>
+        <button
+          type="button"
+          disabled={!canCompare}
+          onClick={() => {
+            setCompareInitialFirstId("");
+            setCompareInitialSecondId("");
+            setCompareAutoStart(false);
+            setShowComparison(true);
+          }}
+          className="rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-[11px] font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Compare
+        </button>
       </div>
 
       <div className="grid grid-cols-3 gap-1.5">
@@ -287,6 +267,27 @@ export function JobPhotoGallery({
             </button>
           );
         })}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5">
+        <PhotoUploadButton
+          loading={uploading}
+          onFilesSelected={(files) => addPhotos(files, activeCategory)}
+        />
+        {activeCategory === "after" && beforePhotos.length > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              setGhostReferencePhotoId((current) =>
+                current || beforePhotos[0]?.id || "",
+              );
+              setShowGhostPicker(true);
+            }}
+            className="rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-[11px] font-semibold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.97]"
+          >
+            Use Before as Ghost
+          </button>
+        )}
       </div>
 
       {error && <p className="text-xs font-medium text-gold">{error}</p>}
