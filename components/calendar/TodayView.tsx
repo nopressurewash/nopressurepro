@@ -182,7 +182,7 @@ export function TodayView({
                     speechStatus === "listening"
                       ? "text-gold"
                       : speechMessage
-                        ? "text-amber-300"
+                        ? "text-warning"
                         : "text-zinc-500"
                   }`}
                 >
@@ -194,10 +194,8 @@ export function TodayView({
               <button
                 type="button"
                 onClick={handleVoiceInput}
-                className={`rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
-                  speechStatus === "listening"
-                    ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
-                    : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/15"
+                className={`rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
+                  speechStatus === "listening" ? "btn-destructive" : "btn-primary"
                 }`}
               >
                 {speechStatus === "listening" ? "Stop Mic" : "Use Mic"}
@@ -214,7 +212,7 @@ export function TodayView({
             <button
               type="button"
               onClick={handleSaveNote}
-              className="w-full rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-xs font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98]"
+              className="btn-primary w-full rounded-xl px-4 py-2.5 text-xs font-bold active:scale-[0.98]"
             >
               {noteDraft.trim() ? "Save Day Note" : "Clear Day Note"}
             </button>

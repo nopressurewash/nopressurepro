@@ -210,6 +210,62 @@ select {
   border: 1px solid var(--brand-border-accent);
 }
 
+.callout-warning {
+  background: var(--brand-surface);
+  border: 1px solid color-mix(in srgb, var(--semantic-warning) 35%, transparent);
+  color: var(--semantic-warning);
+}
+
+.text-warning {
+  color: var(--semantic-warning);
+}
+
+/* Chips / segmented controls */
+.chip-inactive {
+  border: 1px solid var(--brand-border);
+  background: var(--brand-surface);
+  color: var(--text-secondary);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.chip-inactive:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.chip-active-primary {
+  border: 1px solid var(--brand-border-accent);
+  background: var(--brand-gold-muted);
+  color: var(--brand-gold-light);
+}
+
+.chip-active-secondary {
+  border: 1px solid var(--brand-border-purple);
+  background: var(--brand-purple-muted);
+  color: var(--brand-purple-light);
+}
+
+.btn-destructive {
+  border: 1px solid color-mix(in srgb, var(--semantic-error) 35%, transparent);
+  background: var(--semantic-error-muted);
+  color: var(--semantic-error);
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-destructive:hover {
+  background: color-mix(in srgb, var(--semantic-error-muted) 70%, var(--semantic-error) 15%);
+}
+
+.btn-destructive-inline {
+  color: var(--text-muted);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-destructive-inline:hover {
+  background: var(--semantic-error-muted);
+  color: var(--semantic-error);
+}
+
 @keyframes fade-in-up {
   from {
     opacity: 0;

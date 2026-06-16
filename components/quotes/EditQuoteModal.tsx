@@ -155,7 +155,7 @@ export function EditQuoteModal({
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+              className="btn-ghost rounded-xl px-3 py-1.5 text-xs font-medium active:scale-[0.97]"
             >
               Cancel
             </button>
@@ -233,10 +233,8 @@ export function EditQuoteModal({
                         key={level}
                         type="button"
                         onClick={() => setStainLevel(level)}
-                        className={`rounded-xl border px-2 py-2 capitalize font-medium transition-all duration-200 ${
-                          active
-                            ? "border-gold/40 bg-gold/10 text-gold"
-                            : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
+                        className={`rounded-xl px-2 py-2 capitalize font-medium transition-all duration-200 active:scale-[0.98] ${
+                          active ? "chip-active-primary" : "chip-inactive"
                         }`}
                       >
                         {level}
@@ -262,10 +260,8 @@ export function EditQuoteModal({
               <button
                 type="button"
                 onClick={() => setHouseWash((v) => !v)}
-                className={`${toggleBase} ${
-                  houseWash
-                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-                    : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
+                className={`${toggleBase} active:scale-[0.98] ${
+                  houseWash ? "chip-active-primary" : "chip-inactive"
                 }`}
               >
                 <span>House wash</span>
@@ -276,10 +272,8 @@ export function EditQuoteModal({
               <button
                 type="button"
                 onClick={() => setRoofWash((v) => !v)}
-                className={`${toggleBase} ${
-                  roofWash
-                    ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
-                    : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
+                className={`${toggleBase} active:scale-[0.98] ${
+                  roofWash ? "chip-active-secondary" : "chip-inactive"
                 }`}
               >
                 <span>Roof wash</span>
@@ -290,10 +284,8 @@ export function EditQuoteModal({
               <button
                 type="button"
                 onClick={() => setWallsExtras((v) => !v)}
-                className={`${toggleBase} ${
-                  wallsExtras
-                    ? "border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-300"
-                    : "border-[var(--brand-border)] bg-surface text-zinc-400 active:bg-zinc-800"
+                className={`${toggleBase} active:scale-[0.98] ${
+                  wallsExtras ? "chip-active-primary" : "chip-inactive"
                 }`}
               >
                 <span>Walls / extras</span>
@@ -354,7 +346,7 @@ export function EditQuoteModal({
                     speechStatus === "listening"
                       ? "text-gold"
                       : speechMessage
-                        ? "text-amber-300"
+                        ? "text-warning"
                         : "text-zinc-500"
                   }`}
                 >
@@ -366,10 +358,8 @@ export function EditQuoteModal({
               <button
                 type="button"
                 onClick={handleVoiceInput}
-                className={`rounded-xl border px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
-                  speechStatus === "listening"
-                    ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
-                    : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/15"
+                className={`rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
+                  speechStatus === "listening" ? "btn-destructive" : "btn-primary"
                 }`}
               >
                 {speechStatus === "listening" ? "Stop Mic" : "Use Mic"}
@@ -414,7 +404,7 @@ export function EditQuoteModal({
             type="button"
             onClick={handleSave}
             disabled={!isDirty}
-            className="w-full rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+            className="btn-primary w-full rounded-2xl px-4 py-3 text-sm font-bold active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
           >
             Save Changes
           </button>

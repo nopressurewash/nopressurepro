@@ -408,7 +408,7 @@ export default function SavedQuotesPage() {
                           }
                           deleteQuote(q.id);
                         }}
-                        className={`${secondaryAction} text-zinc-500 hover:bg-rose-500/10 hover:text-rose-400`}
+                        className={`${secondaryAction} btn-destructive-inline`}
                       >
                         Delete
                       </button>

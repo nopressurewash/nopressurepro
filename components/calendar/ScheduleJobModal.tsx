@@ -68,7 +68,7 @@ export function ScheduleJobModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+            className="btn-ghost rounded-xl px-3 py-1.5 text-xs font-medium active:scale-[0.97]"
           >
             Close
           </button>
@@ -102,7 +102,7 @@ export function ScheduleJobModal({
           <button
             type="button"
             onClick={handleSave}
-            className="w-full rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98]"
+            className="btn-primary w-full rounded-2xl px-4 py-3 text-sm font-bold active:scale-[0.98]"
           >
             {bookingApproved
               ? "Confirm booking"

@@ -160,7 +160,7 @@ export function EmailSendModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-zinc-700/60 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-400 transition-all duration-200 hover:border-zinc-500 hover:text-zinc-100 active:scale-[0.97]"
+              className="btn-ghost rounded-xl px-3 py-1.5 text-xs font-medium active:scale-[0.97]"
             >
               Close
             </button>
@@ -180,11 +180,11 @@ export function EmailSendModal({
                     type="button"
                     disabled={!canSendQuote}
                     onClick={() => setSendType("quote")}
-                    className={`rounded-xl border px-3 py-2.5 text-center text-xs font-medium transition-all duration-200 ${
+                    className={`rounded-xl px-3 py-2.5 text-center text-xs font-medium transition-all duration-200 active:scale-[0.98] ${
                       sendType === "quote"
-                        ? "border-gold/40 bg-gold/10 text-gold"
-                        : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
-                    } ${!canSendQuote ? "cursor-not-allowed opacity-40 hover:border-[var(--brand-border)] hover:bg-surface hover:text-zinc-400" : ""}`}
+                        ? "chip-active-primary"
+                        : "chip-inactive"
+                    } ${!canSendQuote ? "cursor-not-allowed opacity-40 hover:border-[var(--brand-border)] hover:bg-[var(--brand-surface)] hover:text-[var(--text-secondary)]" : ""}`}
                   >
                     Quote
                   </button>
@@ -192,11 +192,11 @@ export function EmailSendModal({
                     type="button"
                     disabled={!canSendInvoice}
                     onClick={() => setSendType("invoice")}
-                    className={`rounded-xl border px-3 py-2.5 text-center text-xs font-medium transition-all duration-200 ${
+                    className={`rounded-xl px-3 py-2.5 text-center text-xs font-medium transition-all duration-200 active:scale-[0.98] ${
                       sendType === "invoice"
-                        ? "border-brand-purple/40 bg-brand-purple/10 text-brand-purple-light"
-                        : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
-                    } ${!canSendInvoice ? "cursor-not-allowed opacity-40 hover:border-[var(--brand-border)] hover:bg-surface hover:text-zinc-400" : ""}`}
+                        ? "chip-active-secondary"
+                        : "chip-inactive"
+                    } ${!canSendInvoice ? "cursor-not-allowed opacity-40 hover:border-[var(--brand-border)] hover:bg-[var(--brand-surface)] hover:text-[var(--text-secondary)]" : ""}`}
                   >
                     Invoice
                   </button>
@@ -204,10 +204,10 @@ export function EmailSendModal({
                     <button
                       type="button"
                       onClick={() => setSendType("email")}
-                      className={`rounded-xl border px-3 py-2.5 text-center text-xs font-medium transition-all duration-200 ${
+                      className={`rounded-xl px-3 py-2.5 text-center text-xs font-medium transition-all duration-200 active:scale-[0.98] ${
                         sendType === "email"
-                          ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
-                          : "border-[var(--brand-border)] bg-surface text-zinc-400 hover:border-zinc-600 active:bg-zinc-800"
+                          ? "chip-active-secondary"
+                          : "chip-inactive"
                       }`}
                     >
                       Email
@@ -217,7 +217,7 @@ export function EmailSendModal({
               </div>
 
               {!email && (
-                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs font-medium text-amber-300">
+                <div className="callout-warning rounded-2xl px-4 py-3 text-xs font-medium">
                   Add a client email in the Clients tab before opening the email app.
                 </div>
               )}
@@ -287,7 +287,7 @@ export function EmailSendModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-2xl border border-[var(--brand-border)] bg-surface px-4 py-3 text-sm font-semibold text-zinc-300 transition-all duration-200 hover:bg-zinc-800 active:scale-[0.98]"
+                className="btn-ghost rounded-2xl px-4 py-3 text-sm font-semibold active:scale-[0.98]"
               >
                 Cancel
               </button>
@@ -297,7 +297,7 @@ export function EmailSendModal({
                   void handleDownloadPdf();
                 }}
                 disabled={sendType === "email"}
-                className="rounded-2xl border border-brand-purple/30 bg-brand-purple/10 px-4 py-3 text-sm font-semibold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-secondary rounded-2xl px-4 py-3 text-sm font-semibold active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Download PDF
               </button>
@@ -305,7 +305,7 @@ export function EmailSendModal({
                 type="button"
                 onClick={handleOpenEmailApp}
                 disabled={!email}
-                className="rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-primary rounded-2xl px-4 py-3 text-sm font-bold active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Open in Email App
               </button>
