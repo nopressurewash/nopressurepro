@@ -45,7 +45,7 @@ export function ScheduleJobCard({
     <div
       className={`group relative rounded-2xl border p-4 transition-all duration-200 ${
         isNext
-          ? "border-[var(--brand-border-accent)] bg-gold/[0.04]"
+          ? "stat-card-gold"
           : "border-[var(--brand-border)] bg-surface-raised hover:border-zinc-700"
       }`}
     >
@@ -110,7 +110,7 @@ export function ScheduleJobCard({
               <button
                 type="button"
                 onClick={() => onMarkCompleted(job.id)}
-                className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-400 transition-all duration-200 hover:bg-emerald-500/15 active:scale-[0.97]"
+                className="badge-success rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-all duration-200 hover:opacity-90 active:scale-[0.97]"
               >
                 Complete
               </button>

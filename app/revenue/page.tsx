@@ -99,62 +99,62 @@ export default function RevenuePage() {
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.06] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-400">
+          <div className="stat-card-gold rounded-2xl p-4">
+            <p className="label-muted text-gold">
               Today
             </p>
-            <p className="mt-2 text-2xl font-bold text-emerald-300">
+            <p className="mt-2 text-2xl font-bold tabular-nums text-gold-light">
               {formatCurrency(todayTotal)}
             </p>
-            <p className="mt-1 text-[11px] text-zinc-500">
+            <p className="mt-1 text-[11px] text-[var(--text-muted)]">
               Completed or paid today.
             </p>
           </div>
           <Panel>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+            <p className="label-muted">
               This week
             </p>
-            <p className="mt-2 text-2xl font-bold text-zinc-100">
+            <p className="mt-2 text-2xl font-bold tabular-nums text-[var(--text-primary)]">
               {formatCurrency(weekTotal)}
             </p>
-            <p className="mt-1 text-[11px] text-zinc-500">
+            <p className="mt-1 text-[11px] text-[var(--text-muted)]">
               Monday–Sunday based on quote dates.
             </p>
           </Panel>
           <Panel>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+            <p className="label-muted">
               This month
             </p>
-            <p className="mt-2 text-2xl font-bold text-zinc-100">
+            <p className="mt-2 text-2xl font-bold tabular-nums text-[var(--text-primary)]">
               {formatCurrency(monthTotal)}
             </p>
-            <p className="mt-1 text-[11px] text-zinc-500">
+            <p className="mt-1 text-[11px] text-[var(--text-muted)]">
               Calendar month across all work.
             </p>
           </Panel>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-brand-purple/20 bg-brand-purple/[0.05] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-purple-light">
+          <div className="stat-card-purple rounded-2xl p-4">
+            <p className="label-muted text-brand-purple-light">
               Avg revenue per hour
             </p>
             <p className="mt-2 text-2xl font-bold text-brand-purple-light">
               {averagePerHour > 0 ? formatCurrency(averagePerHour) : "-"}
             </p>
-            <p className="mt-1 text-[11px] text-zinc-500">
+            <p className="mt-1 text-[11px] text-[var(--text-muted)]">
               Based on estimated hours on closed work.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[var(--brand-border-accent)] bg-gold/[0.05] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
+          <div className="stat-card-gold rounded-2xl p-4">
+            <p className="label-muted text-gold">
               Top service type
             </p>
             <p className="mt-2 text-lg font-bold text-gold-light">
               {topService}
             </p>
-            <p className="mt-1 text-[11px] text-zinc-500">
+            <p className="mt-1 text-[11px] text-[var(--text-muted)]">
               Highest closed revenue by category.
             </p>
           </div>

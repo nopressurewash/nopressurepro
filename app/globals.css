@@ -176,6 +176,40 @@ select {
   color: var(--brand-purple-light);
 }
 
+.badge-success {
+  border: 1px solid color-mix(in srgb, var(--semantic-success) 35%, transparent);
+  background: var(--semantic-success-muted);
+  color: var(--semantic-success);
+}
+
+.badge-warning {
+  border: 1px solid color-mix(in srgb, var(--semantic-warning) 35%, transparent);
+  background: var(--semantic-warning-muted);
+  color: var(--semantic-warning);
+}
+
+.stat-card-gold {
+  background: var(--brand-surface-raised);
+  border: 1px solid var(--brand-border-accent);
+  box-shadow: var(--shadow-panel);
+}
+
+.stat-card-purple {
+  background: var(--brand-surface-raised);
+  border: 1px solid var(--brand-border-purple);
+  box-shadow: var(--shadow-panel);
+}
+
+.callout-purple {
+  background: var(--brand-surface);
+  border: 1px solid var(--brand-border-purple);
+}
+
+.callout-gold {
+  background: var(--brand-surface);
+  border: 1px solid var(--brand-border-accent);
+}
+
 @keyframes fade-in-up {
   from {
     opacity: 0;

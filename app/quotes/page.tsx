@@ -67,10 +67,10 @@ function isReadyToBook(quote: Quote): boolean {
 
 function getQuoteCardAccentClass(quote: Quote): string {
   if (quote.scheduledDate) {
-    return "border-emerald-500/25 bg-emerald-500/[0.03]";
+    return "callout-gold";
   }
   if (isReadyToBook(quote)) {
-    return "border-brand-purple/35 bg-brand-purple/[0.04]";
+    return "callout-purple";
   }
   return "";
 }
@@ -209,7 +209,7 @@ export default function SavedQuotesPage() {
                 {(q.sentAt || q.approvedAt || q.estimatedHours > 0 || (photoCounts[q.id] ?? 0) > 0) && (
                   <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
                     {q.sentAt && (
-                      <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 font-medium text-sky-400">
+                      <span className="badge-purple rounded-full px-2 py-0.5 font-medium">
                         Sent {formatDate(q.sentAt)}
                       </span>
                     )}
@@ -232,13 +232,13 @@ export default function SavedQuotesPage() {
                 )}
 
                 {readyToBook && (
-                  <div className="rounded-xl border border-brand-purple/30 bg-brand-purple/10 px-3 py-3">
+                  <div className="callout-purple rounded-xl px-3 py-3">
                     <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-purple-light">
+                        <p className="label-muted text-brand-purple-light">
                           Ready to book
                         </p>
-                        <p className="mt-1 text-xs leading-relaxed text-zinc-300">
+                        <p className="mt-1 text-xs leading-relaxed text-[var(--text-secondary)]">
                           Client approved this quote. Pick a date and time to add
                           it to your calendar.
                         </p>
@@ -246,7 +246,7 @@ export default function SavedQuotesPage() {
                       <button
                         type="button"
                         onClick={openSchedule}
-                        className="shrink-0 rounded-xl border border-brand-purple/40 bg-brand-purple/15 px-4 py-2.5 text-xs font-bold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/20 active:scale-[0.98] sm:min-w-[9.5rem]"
+                        className="btn-secondary shrink-0 rounded-xl px-4 py-2.5 text-xs font-bold active:scale-[0.98] sm:min-w-[9.5rem]"
                       >
                         Book on calendar
                       </button>
@@ -255,16 +255,21 @@ export default function SavedQuotesPage() {
                 )}
 
                 {q.scheduledDate && (
-                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-400">
-                      Job booked
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-emerald-300">
+                  <div className="callout-gold rounded-xl px-3 py-2.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="label-muted text-gold">
+                        Job booked
+                      </p>
+                      <span className="badge-success rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide">
+                        On calendar
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
                       {formatDate(q.scheduledDate)}
                       {q.scheduledTime && ` at ${q.scheduledTime}`}
                     </p>
-                    <p className="mt-0.5 text-[10px] text-emerald-400/80">
-                      On your calendar — use Change booking below to update.
+                    <p className="mt-0.5 text-[10px] text-[var(--text-muted)]">
+                      Use Change booking below to update.
                     </p>
                   </div>
                 )}
@@ -313,7 +318,7 @@ export default function SavedQuotesPage() {
                         <button
                           type="button"
                           onClick={openSchedule}
-                          className={`${primaryAction} col-span-2 border-brand-purple/40 bg-brand-purple/15 text-brand-purple-light hover:bg-brand-purple/20`}
+                          className={`${primaryAction} btn-secondary col-span-2`}
                         >
                           Book on calendar
                         </button>
@@ -327,7 +332,7 @@ export default function SavedQuotesPage() {
                             clientEmail: findClientEmail(clients, q.clientName, q.phone),
                           });
                         }}
-                        className={`${primaryAction} border-gold/30 bg-gold/10 text-gold hover:bg-gold/15`}
+                        className={`${primaryAction} btn-primary`}
                       >
                         Email quote
                       </button>
@@ -337,8 +342,8 @@ export default function SavedQuotesPage() {
                           onClick={openSchedule}
                           className={`${primaryAction} ${
                             q.scheduledDate
-                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15"
-                              : "border-sky-500/30 bg-sky-500/10 text-sky-400 hover:bg-sky-500/15"
+                              ? "btn-primary"
+                              : "btn-secondary"
                           }`}
                         >
                           {getScheduleButtonLabel(q)}
@@ -351,7 +356,7 @@ export default function SavedQuotesPage() {
                             current === q.id ? null : q.id,
                           )
                         }
-                        className={`${primaryAction} border-gold/30 bg-gold/10 text-gold hover:bg-gold/15`}
+                        className={`${primaryAction} btn-primary`}
                       >
                         {(photoCounts[q.id] ?? 0) > 0
                           ? `Photos (${photoCounts[q.id]})`
@@ -370,7 +375,7 @@ export default function SavedQuotesPage() {
                           addInvoice(invoice);
                           router.push("/invoices");
                         }}
-                        className={`${primaryAction} border-brand-purple/30 bg-brand-purple/10 text-brand-purple-light hover:bg-brand-purple/15`}
+                        className={`${primaryAction} btn-secondary`}
                       >
                         Create invoice
                       </button>
@@ -440,7 +445,7 @@ export default function SavedQuotesPage() {
       )}
 
       {deleteBlockedBanner && (
-        <div className="fixed left-1/2 top-28 z-50 -translate-x-1/2 animate-fade-in rounded-2xl border border-amber-400/30 bg-surface-raised px-5 py-3 text-xs font-semibold text-amber-300 shadow-lg">
+        <div className="badge-warning fixed left-1/2 top-28 z-50 -translate-x-1/2 animate-fade-in rounded-2xl px-5 py-3 text-xs font-semibold shadow-lg">
           {deleteBlockedBanner}
         </div>
       )}
