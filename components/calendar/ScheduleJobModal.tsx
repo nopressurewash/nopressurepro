@@ -31,6 +31,8 @@ export function ScheduleJobModal({
     if (portalToBody) setIsClient(true);
   }, [portalToBody]);
 
+  const bookingApproved = quote.status === "approved" && !quote.scheduledDate;
+
   function handleSave() {
     if (!date) return;
     onSchedule(quote.id, date, time);
@@ -43,13 +45,24 @@ export function ScheduleJobModal({
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-              Schedule Job
+              {bookingApproved
+                ? "Book approved job"
+                : quote.scheduledDate
+                  ? "Change booking"
+                  : "Schedule job"}
             </p>
             <p className="mt-1 text-sm font-bold text-zinc-100">
               {quote.clientName}
             </p>
             <p className="mt-0.5 text-xs text-zinc-500">
               {quote.suburb} · {formatCurrency(quote.recommended)}
+            </p>
+            <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-600">
+              {bookingApproved
+                ? "Pick when you will do this approved work."
+                : quote.scheduledDate
+                  ? "Update the date or time for this booking."
+                  : "Add this quote to your job calendar."}
             </p>
           </div>
           <button
@@ -91,7 +104,11 @@ export function ScheduleJobModal({
             onClick={handleSave}
             className="w-full rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-bold text-gold transition-all duration-200 hover:bg-gold/15 active:scale-[0.98]"
           >
-            {quote.scheduledDate ? "Update Schedule" : "Schedule Job"}
+            {bookingApproved
+              ? "Confirm booking"
+              : quote.scheduledDate
+                ? "Update booking"
+                : "Schedule job"}
           </button>
         </div>
       </div>

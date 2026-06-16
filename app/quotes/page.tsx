@@ -36,18 +36,22 @@ const primaryAction =
 const secondaryAction =
   "rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-all duration-200 active:scale-[0.97]";
 
-function getStatusHint(status: QuoteStatus): string {
-  switch (status) {
+function getStatusHint(quote: Quote): string {
+  switch (quote.status) {
     case "draft":
       return "Ready to send or schedule.";
     case "sent":
       return "Waiting on client response.";
     case "approved":
-      return "Client approved — book or invoice.";
+      return quote.scheduledDate
+        ? "On your calendar — change the booking below if needed."
+        : "Client approved — book a date on your calendar next.";
     case "follow_up":
       return "Needs another touchpoint.";
     case "booked":
-      return "Job is on the calendar.";
+      return quote.scheduledDate
+        ? "Job booked — see calendar details below."
+        : "Mark as booked once the date is confirmed.";
     case "completed":
       return "Work done — invoice if needed.";
     case "paid":
@@ -55,6 +59,26 @@ function getStatusHint(status: QuoteStatus): string {
     case "lost":
       return "Marked as lost.";
   }
+}
+
+function isReadyToBook(quote: Quote): boolean {
+  return quote.status === "approved" && !quote.scheduledDate;
+}
+
+function getQuoteCardAccentClass(quote: Quote): string {
+  if (quote.scheduledDate) {
+    return "border-emerald-500/25 bg-emerald-500/[0.03]";
+  }
+  if (isReadyToBook(quote)) {
+    return "border-brand-purple/35 bg-brand-purple/[0.04]";
+  }
+  return "";
+}
+
+function getScheduleButtonLabel(quote: Quote): string {
+  if (quote.scheduledDate) return "Change booking";
+  if (isReadyToBook(quote)) return "Book on calendar";
+  return "Schedule job";
 }
 
 export default function SavedQuotesPage() {
@@ -143,10 +167,14 @@ export default function SavedQuotesPage() {
           </Panel>
         ) : (
           <div className="space-y-3">
-            {quotes.map((q) => (
+            {quotes.map((q) => {
+              const readyToBook = isReadyToBook(q);
+              const openSchedule = () => setSchedulingQuote(q);
+
+              return (
               <Panel
                 key={q.id}
-                className="space-y-3 p-4 text-sm"
+                className={`space-y-3 p-4 text-sm ${getQuoteCardAccentClass(q)}`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
@@ -203,14 +231,42 @@ export default function SavedQuotesPage() {
                   </div>
                 )}
 
+                {readyToBook && (
+                  <div className="rounded-xl border border-brand-purple/30 bg-brand-purple/10 px-3 py-3">
+                    <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-purple-light">
+                          Ready to book
+                        </p>
+                        <p className="mt-1 text-xs leading-relaxed text-zinc-300">
+                          Client approved this quote. Pick a date and time to add
+                          it to your calendar.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={openSchedule}
+                        className="shrink-0 rounded-xl border border-brand-purple/40 bg-brand-purple/15 px-4 py-2.5 text-xs font-bold text-brand-purple-light transition-all duration-200 hover:bg-brand-purple/20 active:scale-[0.98] sm:min-w-[9.5rem]"
+                      >
+                        Book on calendar
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {q.scheduledDate && (
-                  <p className="flex items-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-[11px]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    <span className="font-medium text-emerald-400/90">
-                      Scheduled {formatDate(q.scheduledDate)}
+                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-400">
+                      Job booked
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-emerald-300">
+                      {formatDate(q.scheduledDate)}
                       {q.scheduledTime && ` at ${q.scheduledTime}`}
-                    </span>
-                  </p>
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-emerald-400/80">
+                      On your calendar — use Change booking below to update.
+                    </p>
+                  </div>
                 )}
 
                 {q.notes && (
@@ -228,7 +284,7 @@ export default function SavedQuotesPage() {
                         Quote status
                       </p>
                       <p className="mt-0.5 text-[10px] text-zinc-600">
-                        {getStatusHint(q.status)}
+                        {getStatusHint(q)}
                       </p>
                     </div>
                     <select
@@ -250,7 +306,18 @@ export default function SavedQuotesPage() {
                     <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                       Next actions
                     </p>
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <div
+                      className={`grid grid-cols-2 gap-2 ${readyToBook ? "sm:grid-cols-2" : "sm:grid-cols-4"}`}
+                    >
+                      {readyToBook && (
+                        <button
+                          type="button"
+                          onClick={openSchedule}
+                          className={`${primaryAction} col-span-2 border-brand-purple/40 bg-brand-purple/15 text-brand-purple-light hover:bg-brand-purple/20`}
+                        >
+                          Book on calendar
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => {
@@ -264,17 +331,19 @@ export default function SavedQuotesPage() {
                       >
                         Email quote
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => setSchedulingQuote(q)}
-                        className={`${primaryAction} ${
-                          q.scheduledDate
-                            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15"
-                            : "border-sky-500/30 bg-sky-500/10 text-sky-400 hover:bg-sky-500/15"
-                        }`}
-                      >
-                        {q.scheduledDate ? "Reschedule" : "Schedule job"}
-                      </button>
+                      {!readyToBook && (
+                        <button
+                          type="button"
+                          onClick={openSchedule}
+                          className={`${primaryAction} ${
+                            q.scheduledDate
+                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15"
+                              : "border-sky-500/30 bg-sky-500/10 text-sky-400 hover:bg-sky-500/15"
+                          }`}
+                        >
+                          {getScheduleButtonLabel(q)}
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() =>
@@ -358,7 +427,8 @@ export default function SavedQuotesPage() {
                   </div>
                 )}
               </Panel>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
